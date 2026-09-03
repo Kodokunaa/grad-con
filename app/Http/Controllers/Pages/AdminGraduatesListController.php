@@ -4,33 +4,28 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 final class AdminGraduatesListController extends PageController
 {
     public function __invoke(Request $request)
     {
-        return $this->renderPage(function () {
-            $pdo = gc_context()->pdo();
-
+        return $this->renderPage(function () use ($request) {
             \gc_require_role('admin');
-            $batch_year = trim(\gc_context()->query['batch_year'] ?? '');
-            $course = trim(\gc_context()->query['course'] ?? '');
-            $where = "WHERE role='alumni' AND is_active=1";
-            $params = [];
+            $batch_year = trim((string) $request->query('batch_year', ''));
+            $course = trim((string) $request->query('course', ''));
+            $query = DB::table('users')->where('role', 'alumni')->where('is_active', true);
             $title = 'Graduates List';
             if ($batch_year !== '') {
-                $where .= ' AND batch_year = ?';
-                $params[] = $batch_year;
+                $query->where('batch_year', $batch_year);
                 $title = 'Graduates - Batch '.$batch_year;
             }
             if ($course !== '') {
-                $where .= ' AND course = ?';
-                $params[] = $course;
+                $query->where('course', $course);
                 $title = 'Graduates - '.$course;
             }
-            $stmt = $pdo->prepare("\r\n  SELECT id, fullname, username, email, course, batch_year, created_at\r\n  FROM users\r\n  {$where}\r\n  ORDER BY fullname ASC\r\n");
-            $stmt->execute($params);
-            $list = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $list = $query->select('id', 'fullname', 'username', 'email', 'course', 'batch_year', 'created_at')
+                ->orderBy('fullname')->get()->map(fn ($row) => (array) $row)->all();
             echo \gc_partial('header', \get_defined_vars());
             echo \gc_partial('admin_sidebar', \get_defined_vars());
 

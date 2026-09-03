@@ -14,10 +14,11 @@ null;
 */
 $pendingCount = 0;
 try {
-    $stmtPending = $pdo->prepare("\r\n        SELECT COUNT(*) \r\n        FROM users \r\n        WHERE role = 'alumni' AND status = 'pending'\r\n    ");
-    $stmtPending->execute();
-    $pendingCount = (int) $stmtPending->fetchColumn();
-} catch (\PDOException $e) {
+    $pendingCount = \Illuminate\Support\Facades\DB::table('users')
+        ->where('role', 'alumni')
+        ->where('status', 'pending')
+        ->count();
+} catch (\Throwable $e) {
     if ($e instanceof \App\Support\PageResponse) {
         throw $e;
     }

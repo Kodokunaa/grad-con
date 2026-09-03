@@ -4,32 +4,29 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 final class AlumniJobsController extends PageController
 {
     public function __invoke(Request $request)
     {
-        return $this->renderPage(function () {
-            $pdo = gc_context()->pdo();
-
+        return $this->renderPage(function () use ($request) {
             \gc_require_role('alumni');
-            $alumni_id = (int) \gc_context()->session['user']['id'];
-            $userStmt = $pdo->prepare("SELECT fullname, course FROM users WHERE id = ? AND role = 'alumni' LIMIT 1");
-            $userStmt->execute([$alumni_id]);
-            $alumni = $userStmt->fetch(\PDO::FETCH_ASSOC);
+            $alumni_id = (int) $request->user()->id;
+            $alumni = (array) DB::table('users')->select('fullname', 'course')->where('id', $alumni_id)->where('role', 'alumni')->first();
             $alumniCourse = trim($alumni['course'] ?? '');
-            $search = trim(\gc_context()->query['search'] ?? '');
-            $sql = "\r\n    SELECT *\r\n    FROM jobs\r\n    WHERE is_open = 1\r\n      AND (start_date IS NULL OR start_date <= CURDATE())\r\n      AND (end_date IS NULL OR end_date >= CURDATE())\r\n";
-            $params = [];
+            $search = trim((string) $request->query('search', ''));
+            $query = DB::table('jobs')->where('is_open', true)
+                ->where(fn ($query) => $query->whereNull('start_date')->orWhereDate('start_date', '<=', today()))
+                ->where(fn ($query) => $query->whereNull('end_date')->orWhereDate('end_date', '>=', today()));
             if ($search !== '') {
-                $sql .= "\r\n        AND (\r\n            title LIKE ?\r\n            OR company LIKE ?\r\n            OR location LIKE ?\r\n            OR job_type LIKE ?\r\n            OR description LIKE ?\r\n        )\r\n    ";
-                $keyword = "%{$search}%";
-                $params = [$keyword, $keyword, $keyword, $keyword, $keyword];
+                $query->where(function ($query) use ($search) {
+                    foreach (['title', 'company', 'location', 'job_type', 'description'] as $column) {
+                        $query->orWhere($column, 'like', "%{$search}%");
+                    }
+                });
             }
-            $sql .= ' ORDER BY id DESC';
-            $jobsStmt = $pdo->prepare($sql);
-            $jobsStmt->execute($params);
-            $jobs = $jobsStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $jobs = $query->orderByDesc('id')->get()->map(fn ($row) => (array) $row)->all();
             echo \gc_partial('header', \get_defined_vars());
             echo \gc_partial('alumni_sidebar', \get_defined_vars());
 
