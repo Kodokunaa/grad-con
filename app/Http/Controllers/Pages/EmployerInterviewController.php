@@ -25,31 +25,6 @@ final class EmployerInterviewController extends PageController
             $offer_id = (int) (\gc_context()->query['offer_id'] ?? \gc_context()->post['offer_id'] ?? 0);
             $success = '';
             $error = '';
-            /* Create interviews table automatically */
-            try {
-                \gc_context()->schemaChange($pdo, "\r\n        CREATE TABLE IF NOT EXISTS interviews (\r\n            id INT AUTO_INCREMENT PRIMARY KEY,\r\n            application_id INT NULL,\r\n            offer_id INT NULL,\r\n            employer_id INT NOT NULL,\r\n            alumni_id INT NOT NULL,\r\n            job_id INT NULL,\r\n            interview_date DATE NOT NULL,\r\n            interview_time TIME NOT NULL,\r\n            location VARCHAR(255) NOT NULL,\r\n            message TEXT NULL,\r\n            status VARCHAR(50) DEFAULT 'scheduled',\r\n            email_sent TINYINT(1) DEFAULT 0,\r\n            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\r\n        )\r\n    ");
-                try {
-                    \gc_context()->schemaChange($pdo, "ALTER TABLE interviews\r\n            MODIFY application_id INT NULL,\r\n            MODIFY job_id INT NULL\r\n        ");
-                } catch (\PDOException $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    // If the table already uses nullable columns or cannot be altered, ignore.
-                }
-                try {
-                    \gc_context()->schemaChange($pdo, 'ALTER TABLE interviews ADD COLUMN IF NOT EXISTS offer_id INT NULL');
-                } catch (\PDOException $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    // Older MariaDB may not support IF NOT EXISTS; ignore.
-                }
-            } catch (\PDOException $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-                $error = 'Database error creating interviews table: '.\gc_public_error($e);
-            }
             if ($application_id <= 0 && $offer_id <= 0) {
                 \gc_finish('Invalid application or offer.');
             }

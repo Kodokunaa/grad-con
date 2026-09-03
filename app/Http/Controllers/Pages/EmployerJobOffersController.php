@@ -27,14 +27,6 @@ final class EmployerJobOffersController extends PageController
                         $offer = $offerStmt->fetch(\PDO::FETCH_ASSOC);
                         if ($offer) {
                             if ($offerAction === 'done') {
-                                try {
-                                    \gc_context()->schemaChange($pdo, "ALTER TABLE job_offers MODIFY COLUMN status ENUM('sent', 'accepted', 'declined', 'expired', 'done') DEFAULT 'sent'");
-                                } catch (\PDOException $e) {
-                                    if ($e instanceof PageResponse) {
-                                        throw $e;
-                                    }
-                                    // ignore if column already includes done or cannot be altered
-                                }
                                 $updateOffer = $pdo->prepare("UPDATE job_offers SET status = 'done' WHERE id = ? AND employer_id = ?");
                                 $updateOffer->execute([$offerId, $id]);
                                 $msg = 'Offer marked as done.';

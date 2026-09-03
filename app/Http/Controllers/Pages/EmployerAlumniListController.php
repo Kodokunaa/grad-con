@@ -21,16 +21,6 @@ final class EmployerAlumniListController extends PageController
                 \gc_context()->session['send_snapshot_email_token'] = bin2hex(random_bytes(32));
             }
             $sendSnapshotEmailToken = \gc_context()->session['send_snapshot_email_token'];
-            try {
-                if (! \gc_employer_alumni_list_column_exists($pdo, 'users', 'is_active')) {
-                    \gc_context()->schemaChange($pdo, 'ALTER TABLE users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 AFTER role');
-                }
-            } catch (\Throwable $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-                $error = 'Database setup error: '.\gc_public_error($e);
-            }
             $alumni = $pdo->query("\r\n    SELECT * FROM users\r\n    WHERE role='alumni' AND COALESCE(is_active, 0) = 1\r\n    ORDER BY id DESC\r\n")->fetchAll(\PDO::FETCH_ASSOC);
             $alumniIds = array_map(static fn ($row) => (int) $row['id'], $alumni);
             $educationByUser = [];

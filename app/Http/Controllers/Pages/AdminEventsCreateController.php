@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
-use App\Support\PageResponse;
 use Illuminate\Http\Request;
 
 final class AdminEventsCreateController extends PageController
@@ -16,19 +15,6 @@ final class AdminEventsCreateController extends PageController
             \gc_require_role('admin');
             $msg = '';
             $error = '';
-            try {
-                if (! \gc_admin_events_create_column_exists($pdo, 'events', 'post_start_date')) {
-                    \gc_context()->schemaChange($pdo, 'ALTER TABLE events ADD COLUMN post_start_date DATETIME NULL AFTER image');
-                }
-                if (! \gc_admin_events_create_column_exists($pdo, 'events', 'post_end_date')) {
-                    \gc_context()->schemaChange($pdo, 'ALTER TABLE events ADD COLUMN post_end_date DATETIME NULL AFTER post_start_date');
-                }
-            } catch (\Throwable $ex) {
-                if ($ex instanceof PageResponse) {
-                    throw $ex;
-                }
-                $error = 'Database setup error: '.\gc_public_error($ex);
-            }
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST') {
                 $title = trim(\gc_context()->post['title'] ?? '');
                 $content = trim(\gc_context()->post['content'] ?? '');

@@ -16,16 +16,6 @@ final class AdminAlumniListController extends PageController
             \gc_require_role('admin');
             $msg = '';
             $error = '';
-            try {
-                if (! \gc_admin_alumni_list_column_exists($pdo, 'users', 'is_active')) {
-                    \gc_context()->schemaChange($pdo, 'ALTER TABLE users ADD COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 AFTER role');
-                }
-            } catch (\Throwable $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-                $error = 'Database setup error: '.\gc_public_error($e);
-            }
             $alumni = $pdo->query("\n    SELECT * FROM users\n    WHERE role='alumni' AND COALESCE(is_active, 0) = 1\n    ORDER BY id DESC\n")->fetchAll(\PDO::FETCH_ASSOC);
             $alumniIds = array_map(static fn ($row) => (int) $row['id'], $alumni);
             $educationByUser = [];

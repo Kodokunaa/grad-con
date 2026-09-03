@@ -24,14 +24,6 @@ final class AdminInterviewController extends PageController
             $application_id = (int) (\gc_context()->query['application_id'] ?? \gc_context()->post['application_id'] ?? 0);
             $success = '';
             $error = '';
-            try {
-                \gc_context()->schemaChange($pdo, "\r\n        CREATE TABLE IF NOT EXISTS interviews (\r\n            id INT AUTO_INCREMENT PRIMARY KEY,\r\n            application_id INT NOT NULL,\r\n            employer_id INT NOT NULL DEFAULT 0,\r\n            admin_id INT NULL,\r\n            alumni_id INT NOT NULL,\r\n            job_id INT NOT NULL,\r\n            interview_date DATE NOT NULL,\r\n            interview_time TIME NOT NULL,\r\n            location VARCHAR(255) NOT NULL,\r\n            message TEXT NULL,\r\n            status VARCHAR(50) DEFAULT 'scheduled',\r\n            email_sent TINYINT(1) DEFAULT 0,\r\n            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP\r\n        )\r\n    ");
-            } catch (\PDOException $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-                $error = 'Database error creating interviews table: '.\gc_public_error($e);
-            }
             if ($application_id <= 0) {
                 \gc_finish('Invalid application.');
             }
