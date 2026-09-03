@@ -1,4 +1,4 @@
-<?php
+1<?php
 require_once __DIR__ . "/../config/app.php";
 require_once __DIR__ . "/../config/auth.php";
 require_once __DIR__ . "/../config/db.php";
@@ -190,6 +190,14 @@ try {
 
     if (!column_exists($pdo, 'events', 'post_end_date')) {
         $pdo->exec("ALTER TABLE events ADD COLUMN post_end_date DATETIME NULL AFTER post_start_date");
+    }
+
+    if (!column_exists($pdo, 'events', 'is_archived')) {
+        $pdo->exec("ALTER TABLE events ADD COLUMN is_archived TINYINT(1) NOT NULL DEFAULT 0 AFTER post_end_date");
+    }
+
+    if (!column_exists($pdo, 'events', 'archived_at')) {
+        $pdo->exec("ALTER TABLE events ADD COLUMN archived_at DATETIME NULL AFTER is_archived");
     }
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS post_reactions (
@@ -497,34 +505,15 @@ if (isset($_GET["delete"])) {
             $event = $find->fetch(PDO::FETCH_ASSOC);
 
             if ($event) {
-                if (!empty($event["image"])) {
-                    $oldImage = __DIR__ . "/../uploads/events/" . $event["image"];
-                    if (is_file($oldImage)) {
-                        @unlink($oldImage);
-                    }
-                }
+                $archive = $pdo->prepare("UPDATE events SET is_archived = 1, archived_at = NOW() WHERE id = ?");
+                $archive->execute([$delete_id]);
 
-                $pdo->prepare("DELETE FROM post_reactions WHERE post_type='event' AND post_id = ?")->execute([$delete_id]);
-                $pdo->prepare("DELETE FROM post_comments WHERE post_type='event' AND post_id = ?")->execute([$delete_id]);
-                $pdo->prepare("DELETE FROM post_notifications WHERE post_type='event' AND post_id = ?")->execute([$delete_id]);
-
-                if (table_exists($pdo, 'event_reactions')) {
-                    $pdo->prepare("DELETE FROM event_reactions WHERE event_id = ?")->execute([$delete_id]);
-                }
-
-                if (table_exists($pdo, 'event_comments')) {
-                    $pdo->prepare("DELETE FROM event_comments WHERE event_id = ?")->execute([$delete_id]);
-                }
-
-                $del = $pdo->prepare("DELETE FROM events WHERE id = ?");
-                $del->execute([$delete_id]);
-
-                $msg = "Event deleted successfully.";
+                $msg = "Event archived successfully.";
             } else {
                 $error = "Event not found.";
             }
         } catch (Throwable $e) {
-            $error = "Delete error: " . $e->getMessage();
+            $error = "Archive error: " . $e->getMessage();
         }
     }
 }
@@ -543,7 +532,8 @@ $eventsStmt = $pdo->query("
     SELECT e.*, u.fullname AS poster, $profileSelect AS poster_profile
     FROM events e
     LEFT JOIN users u ON u.id = e.posted_by
-    WHERE (e.post_start_date IS NULL OR e.post_start_date = '' OR e.post_start_date <= NOW())
+        WHERE e.is_archived = 0
+            AND (e.post_start_date IS NULL OR e.post_start_date = '' OR e.post_start_date <= NOW())
       AND (e.post_end_date IS NULL OR e.post_end_date = '' OR e.post_end_date >= NOW())
     ORDER BY e.id DESC
 ");
@@ -1461,7 +1451,7 @@ require_once __DIR__ . "/../includes/admin_sidebar.php";
         </section>
 
         <?php if (!empty($_GET['deleted'])): ?>
-            <div class="alert-box alert-success-custom">Event deleted successfully.</div>
+            <div class="alert-box alert-success-custom">Event archived successfully.</div>
         <?php endif; ?>
 
         <?php if ($msg): ?>
@@ -1587,7 +1577,7 @@ require_once __DIR__ . "/../includes/admin_sidebar.php";
 
                         <div class="post-manage-actions" aria-label="Post management actions">
                             <a href="<?php echo BASE_URL; ?>/admin/events_edit.php?id=<?php echo $eventId; ?>" class="btn-action btn-icon-action btn-edit" title="Edit event" aria-label="Edit event">✏️<span class="action-label">Edit</span></a>
-                            <a href="<?php echo BASE_URL; ?>/admin/events_list.php?delete=<?php echo $eventId; ?>" class="btn-action btn-icon-action btn-delete" title="Delete event" aria-label="Delete event" onclick="return confirm('Delete this event post? This cannot be undone.');">🗑<span class="action-label">Delete</span></a>
+                            <a href="<?php echo BASE_URL; ?>/admin/events_list.php?delete=<?php echo $eventId; ?>" class="btn-action btn-icon-action btn-delete" title="Archive event" aria-label="Archive event" onclick="return confirm('Archive this event post? It will be removed from the active event list.');">🗄<span class="action-label">Archive</span></a>
                         </div>
                     </div>
 

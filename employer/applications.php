@@ -46,6 +46,7 @@ if (isset($_GET['view_resume'])) {
     header('Content-Length: ' . filesize($filePath));
     header('X-Content-Type-Options: nosniff');
 
+
     readfile($filePath);
     exit;
 }
@@ -454,6 +455,8 @@ body{
     max-width:100%;
     padding:30px 24px;
 }
+
+
 
 .page-header{
     display:flex;
@@ -1076,6 +1079,8 @@ tbody tr:hover{
 </head>
 
 <body>
+
+
 
 <?php
 if (file_exists(__DIR__ . "/../include/employer_sidebar.php")) {

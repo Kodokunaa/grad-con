@@ -1,9 +1,15 @@
 <?php
 require_once __DIR__ . "/../config/app.php";
 require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../config/auth.php";
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
+
+if (isset($_SESSION["user"]) && is_array($_SESSION["user"])) {
+    header("Location: " . BASE_URL . "/alumni_officer/dashboard.php");
+    exit;
 }
 
 $error = "";
@@ -16,22 +22,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt->execute([$username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$user) {
+    if (!$user || !verify_password($pdo, $user, $password)) {
         $error = "Invalid alumni officer credentials.";
     } else {
-        if ($user["password"] !== $password) {
-            $error = "Invalid alumni officer credentials.";
-        } else {
-            $_SESSION["user"] = [
-                "id" => (int)$user["id"],
-                "fullname" => $user["fullname"] ?? $user["username"],
-                "username" => $user["username"],
-                "role" => $user["role"]
-            ];
+        session_regenerate_id(true);
+        $_SESSION["user"] = [
+            "id" => (int)$user["id"],
+            "fullname" => $user["fullname"] ?? $user["username"],
+            "username" => $user["username"],
+            "role" => $user["role"]
+        ];
 
-            header("Location: " . BASE_URL . "/alumni_officer/dashboard.php");
-            exit;
-        }
+        header("Location: " . BASE_URL . "/alumni_officer/dashboard.php");
+        exit;
     }
 }
 

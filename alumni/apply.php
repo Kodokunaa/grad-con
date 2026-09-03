@@ -104,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (move_uploaded_file($file["tmp_name"], $file_path)) {
                 $resume_file = $filename;
             } else {
-                $error = "Failed to upload resume file. Please try again.";
+                $error = "Failed to upload application letter file. Please try again.";
             }
         }
     } elseif ($error === "" && (!isset($_FILES["resume"]) || $_FILES["resume"]["error"] !== UPLOAD_ERR_OK)) {
@@ -636,7 +636,7 @@ require_once __DIR__ . "/../includes/alumni_sidebar.php";
 
     <div class="form-card">
         <div class="resume-box">
-            <div class="resume-title">Auto-Generated Resume Preview</div>
+            
             <div class="helper-text" style="margin-bottom:14px;">
                 Your application will use the information saved in your alumni profile.
             </div>
@@ -692,7 +692,7 @@ require_once __DIR__ . "/../includes/alumni_sidebar.php";
         <form method="POST" id="applicationForm" enctype="multipart/form-data">
 
             <div class="form-group">
-                <label class="form-label">Upload Resume (PDF only) <span style="color: #f97316;">*</span></label>
+                <label class="form-label">Upload Apllciation letter (PDF only) <span style="color: #f97316;">*</span></label>
                 <div style="position: relative; display: flex; align-items: center; gap: 10px;">
                     <input
                         type="file"

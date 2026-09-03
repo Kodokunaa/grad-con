@@ -6,9 +6,15 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/config/app.php";
+require_once __DIR__ . "/config/auth.php";
 
 if (isset($_SESSION['alumni_user']) && isset($_SESSION['alumni_user']['role']) && $_SESSION['alumni_user']['role'] === 'alumni') {
     header("Location: " . BASE_URL . "/alumni/dashboard.php");
+    exit;
+}
+
+if (isset($_SESSION['user']) && is_array($_SESSION['user'])) {
+    header("Location: " . BASE_URL . "/alumni/feed.php");
     exit;
 }
 
@@ -30,13 +36,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute([$username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && $user["password"] === $password && $user["role"] === "alumni") {
-
+        if ($user && $user["role"] === "alumni" && verify_password($pdo, $user, $password)) {
             if (($user["status"] ?? '') === "pending" || (int)$user["is_active"] === 0) {
                 $error = "Your account is still pending admin approval.";
             } elseif (($user["status"] ?? '') === "rejected") {
                 $error = "Your registration has been rejected by the admin.";
             } else {
+                session_regenerate_id(true);
                 $_SESSION["alumni_user"] = [
                     "id" => (int)$user["id"],
                     "fullname" => $user["fullname"] ?? $user["username"],

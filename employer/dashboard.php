@@ -31,7 +31,12 @@ $interviewCount = 0;
 $acceptedCount = 0;
 $hiredCount = 0;
 $rejectedCount = 0;
+$offersCount = 0;
+$offersAcceptedCount = 0;
+$offersDeclinedCount = 0;
+$offersPendingCount = 0;
 $latest = [];
+$latestOffers = [];
 
 try {
     $statsStmt = $pdo->prepare("
@@ -79,12 +84,21 @@ try {
             (SELECT COUNT(*)
              FROM applications a
              JOIN jobs j ON j.id = a.job_id
-             WHERE j.employer_id = ? AND a.status = 'rejected') AS rejected_count
+             WHERE j.employer_id = ? AND a.status = 'rejected') AS rejected_count,
+
+            (SELECT COUNT(*) FROM job_offers WHERE employer_id = ?) AS offers_count,
+
+            (SELECT COUNT(*) FROM job_offers WHERE employer_id = ? AND status = 'accepted') AS offers_accepted_count,
+
+            (SELECT COUNT(*) FROM job_offers WHERE employer_id = ? AND status = 'declined') AS offers_declined_count,
+
+            (SELECT COUNT(*) FROM job_offers WHERE employer_id = ? AND status = 'sent') AS offers_pending_count
     ");
 
     $statsStmt->execute([
         $eid, $eid, $eid, $eid, $eid,
-        $eid, $eid, $eid, $eid
+        $eid, $eid, $eid, $eid, $eid,
+        $eid, $eid, $eid
     ]);
 
     $stats = $statsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
@@ -98,6 +112,10 @@ try {
     $acceptedCount = (int)($stats['accepted_count'] ?? 0);
     $hiredCount = (int)($stats['hired_count'] ?? 0);
     $rejectedCount = (int)($stats['rejected_count'] ?? 0);
+    $offersCount = (int)($stats['offers_count'] ?? 0);
+    $offersAcceptedCount = (int)($stats['offers_accepted_count'] ?? 0);
+    $offersDeclinedCount = (int)($stats['offers_declined_count'] ?? 0);
+    $offersPendingCount = (int)($stats['offers_pending_count'] ?? 0);
 
     $latestStmt = $pdo->prepare("
         SELECT 
@@ -118,6 +136,22 @@ try {
     $latestStmt->execute([$eid]);
     $latest = $latestStmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $latestOffersStmt = $pdo->prepare("
+        SELECT 
+            jo.id,
+            jo.status,
+            jo.created_at,
+            u.fullname,
+            u.email
+        FROM job_offers jo
+        JOIN users u ON u.id = jo.alumni_id
+        WHERE jo.employer_id = ?
+        ORDER BY jo.id DESC
+        LIMIT 5
+    ");
+    $latestOffersStmt->execute([$eid]);
+    $latestOffers = $latestOffersStmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (Exception $e) {
     $jobsCount = 0;
     $openJobsCount = 0;
@@ -128,7 +162,26 @@ try {
     $acceptedCount = 0;
     $hiredCount = 0;
     $rejectedCount = 0;
+    $offersCount = 0;
+    $offersAcceptedCount = 0;
+    $offersDeclinedCount = 0;
+    $offersPendingCount = 0;
     $latest = [];
+    $latestOffers = [];
+}
+
+function offerStatusBadge($status) {
+    $status = strtolower(trim((string)$status));
+
+    if ($status === 'accepted') {
+        return '<span class="status-badge status-accepted">Accepted</span>';
+    }
+
+    if ($status === 'declined') {
+        return '<span class="status-badge status-rejected">Declined</span>';
+    }
+
+    return '<span class="status-badge status-pending">Pending</span>';
 }
 
 function statusBadge($status) {
@@ -199,6 +252,10 @@ body{margin:0;background:#f5f7fb;overflow-x:hidden;font-family:-apple-system,Bli
             <div class="stats-card"><div class="stats-top"><div><div class="stats-label">Accepted</div><div class="stats-number"><?php echo number_format($acceptedCount); ?></div></div><div class="stats-icon">✅</div></div><div class="stats-note">Accepted for the next step.</div></div>
             <div class="stats-card"><div class="stats-top"><div><div class="stats-label">Hired</div><div class="stats-number"><?php echo number_format($hiredCount); ?></div></div><div class="stats-icon">🎉</div></div><div class="stats-note">Officially hired applicants.</div></div>
             <div class="stats-card"><div class="stats-top"><div><div class="stats-label">Rejected</div><div class="stats-number"><?php echo number_format($rejectedCount); ?></div></div><div class="stats-icon">❌</div></div><div class="stats-note">Applications not selected.</div></div>
+            <div class="stats-card"><div class="stats-top"><div><div class="stats-label">Job Offers</div><div class="stats-number"><?php echo number_format($offersCount); ?></div></div><div class="stats-icon">🎁</div></div><div class="stats-note">Total job offers sent to alumni.</div></div>
+            <div class="stats-card"><div class="stats-top"><div><div class="stats-label">Offers Accepted</div><div class="stats-number"><?php echo number_format($offersAcceptedCount); ?></div></div><div class="stats-icon">✔️</div></div><div class="stats-note">Alumni who accepted offers.</div></div>
+            <div class="stats-card"><div class="stats-top"><div><div class="stats-label">Offers Pending</div><div class="stats-number"><?php echo number_format($offersPendingCount); ?></div></div><div class="stats-icon">⌛</div></div><div class="stats-note">Awaiting alumni response.</div></div>
+            <div class="stats-card"><div class="stats-top"><div><div class="stats-label">Offers Declined</div><div class="stats-number"><?php echo number_format($offersDeclinedCount); ?></div></div><div class="stats-icon">👋</div></div><div class="stats-note">Alumni who declined offers.</div></div>
         </section>
 
         <section class="dashboard-grid">
@@ -264,11 +321,79 @@ body{margin:0;background:#f5f7fb;overflow-x:hidden;font-family:-apple-system,Bli
                     <div class="summary-item"><span class="summary-label">Accepted</span><span class="summary-value"><?php echo number_format($acceptedCount); ?></span></div>
                     <div class="summary-item"><span class="summary-label">Hired</span><span class="summary-value"><?php echo number_format($hiredCount); ?></span></div>
                     <div class="summary-item"><span class="summary-label">Rejected</span><span class="summary-value"><?php echo number_format($rejectedCount); ?></span></div>
+                    <div class="summary-item"><span class="summary-label">Job Offers</span><span class="summary-value"><?php echo number_format($offersCount); ?></span></div>
                 </div>
 
                 <div class="quick-links">
                     <a class="quick-link" href="<?php echo BASE_URL; ?>/employer/post_job.php"><span>Post New Job</span><span>→</span></a>
                     <a class="quick-link" href="<?php echo BASE_URL; ?>/employer/posted_job.php"><span>View My Jobs</span><span>→</span></a>
+                    <a class="quick-link" href="<?php echo BASE_URL; ?>/employer/job_offers.php"><span>Manage Job Offers</span><span>→</span></a>
+                </div>
+            </aside>
+        </section>
+
+        <section class="dashboard-grid" style="margin-top: 24px;">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div>
+                        <h4 class="panel-title">Recent Job Offers</h4>
+                        <div class="panel-text">Latest job offers sent to alumni.</div>
+                    </div>
+                    <a href="<?php echo BASE_URL; ?>/employer/job_offers.php" class="btn-soft">View All Offers</a>
+                </div>
+
+                <?php if (count($latestOffers) === 0): ?>
+                    <div class="empty-state">
+                        <div class="empty-title">No job offers sent yet</div>
+                        Send job offers to alumni who have accepted your job positions.
+                    </div>
+                <?php else: ?>
+                    <div class="table-wrap">
+                        <table class="clean-table">
+                            <thead>
+                                <tr>
+                                    <th>Alumni</th>
+                                    <th>Status</th>
+                                    <th>Date Sent</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach($latestOffers as $offer): ?>
+                                    <tr>
+                                        <td>
+                                            <div class="applicant-cell">
+                                                <div class="mini-avatar"><?php echo initials($offer['fullname'] ?? 'A'); ?></div>
+                                                <div>
+                                                    <div class="alumni-name"><?php echo e($offer['fullname']); ?></div>
+                                                    <div class="alumni-email"><?php echo e($offer['email'] ?? ''); ?></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><?php echo offerStatusBadge($offer['status'] ?? 'sent'); ?></td>
+                                        <td><span class="date-text"><?php echo e(date('M d, Y', strtotime($offer['created_at']))); ?></span></td>
+                                        <td><a class="manage-btn" href="<?php echo BASE_URL; ?>/employer/job_offers.php">Manage</a></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <aside class="panel-card">
+                <h4 class="panel-title">Job Offers Summary</h4>
+                <div class="panel-text">Overview of your job offer status.</div>
+
+                <div class="summary-list">
+                    <div class="summary-item"><span class="summary-label">Total Offers</span><span class="summary-value"><?php echo number_format($offersCount); ?></span></div>
+                    <div class="summary-item"><span class="summary-label">Accepted</span><span class="summary-value"><?php echo number_format($offersAcceptedCount); ?></span></div>
+                    <div class="summary-item"><span class="summary-label">Pending Response</span><span class="summary-value"><?php echo number_format($offersPendingCount); ?></span></div>
+                    <div class="summary-item"><span class="summary-label">Declined</span><span class="summary-value"><?php echo number_format($offersDeclinedCount); ?></span></div>
+                </div>
+
+                <div class="quick-links">
+                    <a class="quick-link" href="<?php echo BASE_URL; ?>/employer/job_offers.php"><span>Manage Offers</span><span>→</span></a>
                 </div>
             </aside>
         </section>

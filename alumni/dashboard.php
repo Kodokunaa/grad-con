@@ -16,6 +16,10 @@ $pendingApplications = 0;
 $rejectedApplications = 0;
 $hiredApplications = 0;
 $upcomingInterviews = 0;
+$totalJobOffers = 0;
+$acceptedJobOffers = 0;
+$declinedJobOffers = 0;
+$pendingJobOffers = 0;
 
 try {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM applications WHERE alumni_id = ?");
@@ -43,12 +47,32 @@ try {
     $stmt->execute([$alumni_id]);
     $upcomingInterviews = (int)$stmt->fetchColumn();
 
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM job_offers WHERE alumni_id = ?");
+    $stmt->execute([$alumni_id]);
+    $totalJobOffers = (int)$stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM job_offers WHERE alumni_id = ? AND status = 'accepted'");
+    $stmt->execute([$alumni_id]);
+    $acceptedJobOffers = (int)$stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM job_offers WHERE alumni_id = ? AND status = 'declined'");
+    $stmt->execute([$alumni_id]);
+    $declinedJobOffers = (int)$stmt->fetchColumn();
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM job_offers WHERE alumni_id = ? AND status = 'sent'");
+    $stmt->execute([$alumni_id]);
+    $pendingJobOffers = (int)$stmt->fetchColumn();
+
 } catch (Exception $e) {
     $totalApplications = 0;
     $pendingApplications = 0;
     $rejectedApplications = 0;
     $hiredApplications = 0;
     $upcomingInterviews = 0;
+    $totalJobOffers = 0;
+    $acceptedJobOffers = 0;
+    $declinedJobOffers = 0;
+    $pendingJobOffers = 0;
 }
 ?>
 
@@ -75,6 +99,20 @@ body{
     padding:25px;
     border-radius:18px;
     margin-bottom:25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.dashboard-header-content h2{
+    margin:0;
+    font-size:26px;
+    font-weight:700;
+}
+
+.dashboard-header-content p{
+    margin:5px 0 0;
+    font-size:14px;
 }
 
 .dashboard-header h2{
@@ -86,6 +124,27 @@ body{
 .dashboard-header p{
     margin:5px 0 0;
     font-size:14px;
+}
+
+.view-offers-btn{
+    padding:10px 16px;
+    background:#fff;
+    color:#f97316;
+    border:none;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.3s ease;
+    white-space:nowrap;
+    text-decoration:none;
+    display:inline-block;
+}
+
+.view-offers-btn:hover{
+    background:#fff7ed;
+    transform:translateY(-2px);
+    box-shadow:0 4px 12px rgba(255,255,255,0.3);
 }
 
 /* CARDS */
@@ -131,7 +190,7 @@ body{
 /* PANELS */
 .dashboard-grid{
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:repeat(3,1fr);
     gap:16px;
 }
 
@@ -190,6 +249,12 @@ body{
 }
 
 /* RESPONSIVE */
+@media(max-width:1200px){
+    .summary-cards{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
 @media(max-width:1000px){
     .summary-cards{
         grid-template-columns:repeat(2,1fr);
@@ -206,14 +271,27 @@ body{
     .dashboard-grid{
         grid-template-columns:1fr;
     }
+
+    .dashboard-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+    .view-offers-btn{
+        align-self:flex-start;
+    }
 }
 </style>
 
 <div class="content">
 
 <div class="dashboard-header">
-    <h2>Welcome, <?php echo htmlspecialchars($fullname); ?></h2>
-    <p>Manage your applications and track your progress.</p>
+    <div class="dashboard-header-content">
+        <h2>Welcome, <?php echo htmlspecialchars($fullname); ?></h2>
+        <p>Manage your applications and track your progress.</p>
+    </div>
+
 </div>
 
 <div class="summary-cards">
@@ -239,6 +317,30 @@ body{
         <div>
             <div class="card-value"><?php echo number_format($upcomingInterviews); ?></div>
             <div class="card-label">Interviews</div>
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="icon orange">🎁</div>
+        <div>
+            <div class="card-value"><?php echo number_format($totalJobOffers); ?></div>
+            <div class="card-label">Job Offers</div>
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="icon orange">✓</div>
+        <div>
+            <div class="card-value"><?php echo number_format($acceptedJobOffers); ?></div>
+            <div class="card-label">Accepted</div>
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <div class="icon orange">⌛</div>
+        <div>
+            <div class="card-value"><?php echo number_format($pendingJobOffers); ?></div>
+            <div class="card-label">Pending Offers</div>
         </div>
     </div>
 
@@ -276,6 +378,29 @@ body{
         <div class="panel-text">Scheduled interviews</div>
 
         <a href="<?php echo BASE_URL; ?>/alumni/my_applications.php" class="view-btn">
+            View all →
+        </a>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">Job Offers</div>
+
+        <div class="status-row">
+            <span>Accepted</span>
+            <strong class="green"><?php echo number_format($acceptedJobOffers); ?></strong>
+        </div>
+
+        <div class="status-row">
+            <span>Pending</span>
+            <strong><?php echo number_format($pendingJobOffers); ?></strong>
+        </div>
+
+        <div class="status-row">
+            <span>Declined</span>
+            <strong class="red"><?php echo number_format($declinedJobOffers); ?></strong>
+        </div>
+
+        <a href="<?php echo BASE_URL; ?>/alumni/job_offers.php" class="view-btn">
             View all →
         </a>
     </div>

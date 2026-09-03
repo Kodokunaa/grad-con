@@ -106,12 +106,69 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         body {
             background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
             min-height: 100vh;
+            overflow-x: hidden;
+            padding-top: 64px;
+        }
+
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            background: #ffffff;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.75);
+            z-index: 1100;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+        }
+
+        .header-brand a {
+            color: #111827;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .mobile-sidebar-toggle {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            color: #111827;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, .12);
+            cursor: pointer;
+            z-index: 1102;
+        }
+
+        .mobile-sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .48);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .2s ease, visibility .2s ease;
+            z-index: 1115;
+        }
+
+        .mobile-sidebar-overlay.visible {
+            opacity: 1;
+            visibility: visible;
         }
 
         .page {
             margin-left: 290px;
             width: calc(100% - 290px);
-            min-height: 100vh;
+            min-height: calc(100vh - 64px);
             padding: 30px;
             display: flex;
             justify-content: center;
@@ -287,7 +344,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 992px) {
             .page {
                 margin-left: 0;
                 width: 100%;
@@ -297,6 +354,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             h2 {
                 font-size: 24px;
+            }
+
+            .mobile-sidebar-toggle {
+                display: inline-flex;
             }
         }
 
@@ -321,6 +382,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </style>
 </head>
 <body>
+
+<div class="app-header">
+    <div class="header-brand"><a href="<?php echo BASE_URL; ?>">GradConn</a></div>
+    <button class="mobile-sidebar-toggle" type="button" onclick="toggleSidebar(true)">☰</button>
+</div>
+<div class="mobile-sidebar-overlay" onclick="toggleSidebar(false)"></div>
 
 <?php if ($sidebar_file): ?>
     <?php include $sidebar_file; ?>
@@ -380,6 +447,45 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </div>
     </div>
 </div>
+
+<script>
+    function toggleSidebar(show) {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.mobile-sidebar-overlay');
+        const toggleBtn = document.querySelector('.mobile-sidebar-toggle');
+        if (!sidebar || !overlay || !toggleBtn) return;
+
+        const open = typeof show === 'boolean' ? show : !sidebar.classList.contains('open');
+        if (open) {
+            sidebar.classList.add('open');
+            overlay.classList.add('visible');
+            document.body.classList.add('sidebar-open');
+            toggleBtn.style.display = 'none';
+        } else {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('visible');
+            document.body.classList.remove('sidebar-open');
+            toggleBtn.style.display = 'inline-flex';
+        }
+    }
+
+    function refreshSidebarToggle() {
+        const toggleBtn = document.querySelector('.mobile-sidebar-toggle');
+        if (!toggleBtn) return;
+
+        if (window.innerWidth <= 992) {
+            toggleBtn.style.display = 'inline-flex';
+        } else {
+            toggleBtn.style.display = 'none';
+            document.querySelector('.sidebar')?.classList.remove('open');
+            document.querySelector('.mobile-sidebar-overlay')?.classList.remove('visible');
+            document.body.classList.remove('sidebar-open');
+        }
+    }
+
+    window.addEventListener('resize', refreshSidebarToggle);
+    window.addEventListener('load', refreshSidebarToggle);
+</script>
 
 </body>
 </html>

@@ -62,12 +62,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'ccctestcap1@gmail.com'; // CHANGE IF NEEDED
-                $mail->Password = 'axek bsko mass xpkk';   // CHANGE IF NEEDED
+                $mail->Username = 'cccgradconn@gmail.com'; // CHANGE IF NEEDED
+                $mail->Password = 'anhfwyyhoqannyll';   // CHANGE IF NEEDED
                 $mail->SMTPSecure = 'tls';
                 $mail->Port = 587;
 
-                $mail->setFrom('ccctestcap1@gmail.com', 'Alumni System');
+                $mail->setFrom('cccgradconn@gmail.com', 'Alumni System');
                 $mail->addAddress($email);
 
                 $mail->isHTML(true);

@@ -18,6 +18,7 @@ function e($value): string {
 
 $employer_id = (int)($_SESSION['user']['id'] ?? 0);
 $application_id = (int)($_GET['application_id'] ?? $_POST['application_id'] ?? 0);
+$offer_id = (int)($_GET['offer_id'] ?? $_POST['offer_id'] ?? 0);
 
 $success = "";
 $error = "";
@@ -27,10 +28,11 @@ try {
     $pdo->exec("
         CREATE TABLE IF NOT EXISTS interviews (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            application_id INT NOT NULL,
+            application_id INT NULL,
+            offer_id INT NULL,
             employer_id INT NOT NULL,
             alumni_id INT NOT NULL,
-            job_id INT NOT NULL,
+            job_id INT NULL,
             interview_date DATE NOT NULL,
             interview_time TIME NOT NULL,
             location VARCHAR(255) NOT NULL,
@@ -41,38 +43,75 @@ try {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )
     ");
+    try {
+        $pdo->exec("ALTER TABLE interviews
+            MODIFY application_id INT NULL,
+            MODIFY job_id INT NULL
+        ");
+    } catch (PDOException $e) {
+        // If the table already uses nullable columns or cannot be altered, ignore.
+    }
+    try {
+        $pdo->exec("ALTER TABLE interviews ADD COLUMN IF NOT EXISTS offer_id INT NULL");
+    } catch (PDOException $e) {
+        // Older MariaDB may not support IF NOT EXISTS; ignore.
+    }
 } catch (PDOException $e) {
     $error = "Database error creating interviews table: " . $e->getMessage();
 }
 
-if ($application_id <= 0) {
-    die("Invalid application.");
+if ($application_id <= 0 && $offer_id <= 0) {
+    die("Invalid application or offer.");
 }
 
-/* Get application details */
-$stmt = $pdo->prepare("
-    SELECT 
-        a.id AS application_id,
-        a.status,
-        a.alumni_id,
-        a.job_id,
-        u.fullname,
-        u.email,
-        j.title AS job_title,
-        j.company,
-        j.employer_company,
-        j.posted_by
-    FROM applications a
-    INNER JOIN users u ON a.alumni_id = u.id
-    INNER JOIN jobs j ON a.job_id = j.id
-    WHERE a.id = ? AND j.posted_by = ?
-    LIMIT 1
-");
-$stmt->execute([$application_id, $employer_id]);
-$application = $stmt->fetch(PDO::FETCH_ASSOC);
+/* Get application or offer details */
+if ($application_id > 0) {
+    $stmt = $pdo->prepare("
+        SELECT 
+            a.id AS application_id,
+            a.status,
+            a.alumni_id,
+            a.job_id,
+            u.fullname,
+            u.email,
+            j.title AS job_title,
+            j.company,
+            j.employer_company,
+            j.posted_by
+        FROM applications a
+        INNER JOIN users u ON a.alumni_id = u.id
+        INNER JOIN jobs j ON a.job_id = j.id
+        WHERE a.id = ? AND j.posted_by = ?
+        LIMIT 1
+    ");
+    $stmt->execute([$application_id, $employer_id]);
+    $application = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$application) {
-    die("Application not found or you are not allowed to manage this application.");
+    if (!$application) {
+        die("Application not found or you are not allowed to manage this application.");
+    }
+} else {
+    // Load offer details and build application-like array
+    $stmt = $pdo->prepare("SELECT jo.*, u.fullname as alumni_fullname, u.email as alumni_email, emp.fullname as employer_fullname, emp.email as employer_email FROM job_offers jo JOIN users u ON jo.alumni_id = u.id JOIN users emp ON jo.employer_id = emp.id WHERE jo.id = ? AND jo.employer_id = ? LIMIT 1");
+    $stmt->execute([$offer_id, $employer_id]);
+    $offer = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$offer) {
+        die("Offer not found or you are not allowed to manage this offer.");
+    }
+
+    $application = [
+        'application_id' => null,
+        'status' => 'accepted',
+        'alumni_id' => $offer['alumni_id'],
+        'job_id' => null,
+        'fullname' => $offer['alumni_fullname'],
+        'email' => $offer['alumni_email'],
+        'job_title' => $offer['subject'] ?? 'Job Offer',
+        'company' => $offer['employer_fullname'] ?? '',
+        'employer_company' => $offer['employer_fullname'] ?? '',
+        'posted_by' => $offer['employer_id']
+    ];
 }
 
 /* Send email function */
@@ -151,42 +190,79 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Please complete interview date, time, and location.";
     } else {
         try {
-            $check = $pdo->prepare("SELECT id FROM interviews WHERE application_id = ? LIMIT 1");
-            $check->execute([$application_id]);
-            $existing = $check->fetch(PDO::FETCH_ASSOC);
+            if ($application_id > 0) {
+                $check = $pdo->prepare("SELECT id FROM interviews WHERE application_id = ? LIMIT 1");
+                $check->execute([$application_id]);
+                $existing = $check->fetch(PDO::FETCH_ASSOC);
 
-            if ($existing) {
-                $update = $pdo->prepare("
-                    UPDATE interviews
-                    SET interview_date = ?, interview_time = ?, location = ?, message = ?, status = 'scheduled'
-                    WHERE application_id = ?
-                ");
-                $update->execute([$interview_date, $interview_time, $location, $message, $application_id]);
+                if ($existing) {
+                    $update = $pdo->prepare(
+                        "UPDATE interviews
+                        SET interview_date = ?, interview_time = ?, location = ?, message = ?, status = 'scheduled'
+                        WHERE application_id = ?"
+                    );
+                    $update->execute([$interview_date, $interview_time, $location, $message, $application_id]);
+                    $interviewId = $existing['id'];
+                } else {
+                    $insert = $pdo->prepare(
+                        "INSERT INTO interviews 
+                        (application_id, employer_id, alumni_id, job_id, interview_date, interview_time, location, message, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'scheduled')"
+                    );
+                    $insert->execute([
+                        $application_id,
+                        $employer_id,
+                        $application['alumni_id'],
+                        $application['job_id'],
+                        $interview_date,
+                        $interview_time,
+                        $location,
+                        $message
+                    ]);
+                    $interviewId = (int)$pdo->lastInsertId();
+                }
+
+                $updateStatus = $pdo->prepare("UPDATE applications SET status = 'interview' WHERE id = ?");
+                $updateStatus->execute([$application_id]);
             } else {
-                $insert = $pdo->prepare("
-                    INSERT INTO interviews 
-                    (application_id, employer_id, alumni_id, job_id, interview_date, interview_time, location, message, status)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'scheduled')
-                ");
-                $insert->execute([
-                    $application_id,
-                    $employer_id,
-                    $application['alumni_id'],
-                    $application['job_id'],
-                    $interview_date,
-                    $interview_time,
-                    $location,
-                    $message
-                ]);
-            }
+                // Scheduling from an offer (no application)
+                $check = $pdo->prepare("SELECT id FROM interviews WHERE offer_id = ? LIMIT 1");
+                $check->execute([$offer_id]);
+                $existing = $check->fetch(PDO::FETCH_ASSOC);
 
-            $updateStatus = $pdo->prepare("UPDATE applications SET status = 'interview' WHERE id = ?");
-            $updateStatus->execute([$application_id]);
+                if ($existing) {
+                    $update = $pdo->prepare(
+                        "UPDATE interviews
+                        SET interview_date = ?, interview_time = ?, location = ?, message = ?, status = 'scheduled'
+                        WHERE id = ?"
+                    );
+                    $update->execute([$interview_date, $interview_time, $location, $message, $existing['id']]);
+                    $interviewId = $existing['id'];
+                } else {
+                    $insert = $pdo->prepare(
+                        "INSERT INTO interviews 
+                        (application_id, offer_id, employer_id, alumni_id, job_id, interview_date, interview_time, location, message, status)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'scheduled')"
+                    );
+                    $insert->execute([
+                        null,
+                        $offer_id,
+                        $employer_id,
+                        $application['alumni_id'],
+                        null,
+                        $interview_date,
+                        $interview_time,
+                        $location,
+                        $message
+                    ]);
+                    $interviewId = (int)$pdo->lastInsertId();
+                }
+            }
 
             $mailResult = sendInterviewEmail($application, $interview_date, $interview_time, $location, $message);
 
             if ($mailResult['success']) {
-                $pdo->prepare("UPDATE interviews SET email_sent = 1 WHERE application_id = ?")->execute([$application_id]);
+                $pdo->prepare("UPDATE interviews SET email_sent = 1 WHERE id = ?")->execute([$interviewId]);
                 $success = "Interview schedule saved and email sent successfully.";
             } else {
                 $success = "Interview schedule saved, but email was not sent.";
@@ -200,9 +276,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 /* Get existing interview */
-$stmt = $pdo->prepare("SELECT * FROM interviews WHERE application_id = ? LIMIT 1");
-$stmt->execute([$application_id]);
-$interview = $stmt->fetch(PDO::FETCH_ASSOC);
+if ($application_id > 0) {
+    $stmt = $pdo->prepare("SELECT * FROM interviews WHERE application_id = ? LIMIT 1");
+    $stmt->execute([$application_id]);
+    $interview = $stmt->fetch(PDO::FETCH_ASSOC);
+} else {
+    $stmt = $pdo->prepare("SELECT * FROM interviews WHERE offer_id = ? LIMIT 1");
+    $stmt->execute([$offer_id]);
+    $interview = $stmt->fetch(PDO::FETCH_ASSOC);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -469,6 +551,9 @@ if (file_exists(__DIR__ . "/../include/employer_sidebar.php")) {
 
         <form method="POST">
             <input type="hidden" name="application_id" value="<?php echo (int)$application_id; ?>">
+            <?php if ($offer_id > 0): ?>
+                <input type="hidden" name="offer_id" value="<?php echo (int)$offer_id; ?>">
+            <?php endif; ?>
 
             <div class="form-group">
                 <label>Interview Date</label>

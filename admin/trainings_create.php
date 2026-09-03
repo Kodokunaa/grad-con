@@ -116,12 +116,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     $mail->isSMTP();
                     $mail->Host       = 'smtp.gmail.com';
                     $mail->SMTPAuth   = true;
-                    $mail->Username   = 'ccctestcap1@gmail.com';
-                    $mail->Password   = 'axek bsko mass xpkk';
+                    $mail->Username   = 'cccgradconn@gmail.com';
+                    $mail->Password   = 'anhfwyyhoqannyll';
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port       = 587;
 
-                    $mail->setFrom('ccctestcap1@gmail.com', 'Training Notification');
+                    $mail->setFrom('cccgradconn@gmail.com', 'Training Notification');
                     $mail->addAddress($r['email'], $r['fullname']);
 
                     $mail->isHTML(true);

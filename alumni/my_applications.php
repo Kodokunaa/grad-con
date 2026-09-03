@@ -98,7 +98,31 @@ function get_progress_step($status)
 | CANCEL APPLICATION WITH REASON
 |--------------------------------------------------------------------------
 */
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["cancel_application"])) {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["remove_application"])) {
+    $application_id = (int)($_POST["application_id"] ?? 0);
+
+    if ($application_id <= 0) {
+        $error = "Invalid application.";
+    } else {
+        try {
+            $checkStmt = $pdo->prepare("SELECT id, status, alumni_id FROM applications WHERE id = ? AND alumni_id = ? LIMIT 1");
+            $checkStmt->execute([$application_id, $alumni_id]);
+            $application = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$application) {
+                $error = "Application not found.";
+            } elseif (normalize_status($application['status'] ?? '') !== 'cancelled') {
+                $error = "Only cancelled applications can be removed.";
+            } else {
+                $deleteStmt = $pdo->prepare("DELETE FROM applications WHERE id = ? AND alumni_id = ?");
+                $deleteStmt->execute([$application_id, $alumni_id]);
+                $msg = "Cancelled application removed successfully.";
+            }
+        } catch (PDOException $e) {
+            $error = "Database error: " . $e->getMessage();
+        }
+    }
+} elseif ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["cancel_application"])) {
     $application_id = (int)($_POST["application_id"] ?? 0);
     $cancel_reason = trim($_POST["cancel_reason"] ?? "");
 
@@ -355,6 +379,26 @@ require_once __DIR__ . "/../includes/alumni_sidebar.php";
 
     .cancel-btn:hover {
         background: #b91c1c;
+        color: #ffffff;
+    }
+
+    .remove-btn {
+        background: #ef4444;
+        color: #ffffff;
+        text-decoration: none;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: 0.3s ease;
+        display: inline-block;
+        cursor: pointer;
+        margin-top: 14px;
+    }
+
+    .remove-btn:hover {
+        background: #c81f1f;
         color: #ffffff;
     }
 
@@ -754,6 +798,11 @@ require_once __DIR__ . "/../includes/alumni_sidebar.php";
                                     <?php endif; ?>
                                 </div>
                             <?php endif; ?>
+
+                            <form method="POST" onsubmit="return confirm('Are you sure you want to remove this cancelled application?');">
+                                <input type="hidden" name="application_id" value="<?php echo (int)$a['id']; ?>">
+                                <button type="submit" name="remove_application" class="remove-btn">Remove Application</button>
+                            </form>
                         <?php endif; ?>
 
                         <?php if ($isFinalAccepted): ?>

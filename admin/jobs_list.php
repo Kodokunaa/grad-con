@@ -5,6 +5,7 @@ require_once __DIR__ . "/../config/db.php";
 require_admin();
 
 // Jobs with poster + assigned employer + poster role
+// Automatically hide expired jobs - only show jobs that haven't expired yet or have no end date
 $jobs = $pdo->query("
   SELECT j.*,
          u.fullname AS poster,
@@ -13,6 +14,7 @@ $jobs = $pdo->query("
   FROM jobs j
   JOIN users u ON u.id = j.posted_by
   LEFT JOIN users e ON e.id = j.employer_id
+  WHERE j.end_date IS NULL OR j.end_date >= CURDATE()
   ORDER BY j.id DESC
 ")->fetchAll(PDO::FETCH_ASSOC);
 

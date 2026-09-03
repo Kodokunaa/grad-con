@@ -26,14 +26,7 @@ try {
     $pendingCount = 0;
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Sidebar</title>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
     * {
@@ -57,7 +50,7 @@ try {
       padding: 25px 18px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.18);
       overflow-y: auto;
-      z-index: 999;
+      z-index: 1045;
     }
 
     .sidebar-logo {
@@ -196,6 +189,10 @@ try {
       margin-bottom: 6px;
     }
 
+    .dropdown-wrapper.active .submenu {
+      display: block;
+    }
+
     .submenu a {
       font-size: 13px;
       padding: 10px 14px;
@@ -267,9 +264,17 @@ try {
       background: transparent;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 992px) {
       .sidebar {
-        width: 220px;
+        width: min(85vw, 280px);
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 1125;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+        z-index: 1125;
       }
 
       .sidebar-title {
@@ -280,10 +285,12 @@ try {
       .dropdown-btn {
         font-size: 13px;
       }
+
+      body.sidebar-open {
+        overflow: hidden;
+      }
     }
   </style>
-</head>
-<body>
 
 <div class="sidebar">
 
@@ -302,6 +309,12 @@ try {
   <a href="<?php echo BASE_URL; ?>/admin/graduates_stats.php">
     <span class="menu-left">
       <i class="fas fa-chart-pie"></i> Graduates Stats
+    </span>
+  </a>
+
+    <a href="<?php echo BASE_URL; ?>/admin/offers_history.php">
+    <span class="menu-left">
+      <i class="fas fa-chart-pie"></i> Offers History
     </span>
   </a>
 
@@ -367,6 +380,20 @@ try {
     </span>
   </a>
 
+  <a href="<?php echo BASE_URL; ?>/admin/admin_archive.php">
+    <span class="menu-left">
+      <i class="fas fa-calendar-plus"></i> archive post
+    </span>
+  </a>
+ 
+   <div class="section">Reports</div>
+
+    <a href="<?php echo BASE_URL; ?>/admin/reports.php">
+    <span class="menu-left">
+      <i class="fas fa-calendar-plus"></i> Reports
+    </span>
+  </a>
+
   <div class="section">Account</div>
 
   <a href="<?php echo BASE_URL; ?>/profile.php">
@@ -387,16 +414,18 @@ try {
   function toggleDropdown(submenuId, wrapperId) {
     const submenu = document.getElementById(submenuId);
     const wrapper = document.getElementById(wrapperId);
-
-    if (submenu.style.display === "block") {
-      submenu.style.display = "none";
-      wrapper.classList.remove("active");
-    } else {
-      submenu.style.display = "block";
-      wrapper.classList.add("active");
-    }
+    if (!submenu || !wrapper) return;
+    wrapper.classList.toggle('active');
   }
-</script>
 
-</body>
-</html>
+  document.addEventListener('DOMContentLoaded', function() {
+    const activePath = window.location.pathname.split('/').pop();
+    const accountsPages = ['alumni_create.php', 'create_employer.php', 'pending_alumni.php'];
+    if (accountsPages.includes(activePath)) {
+      const wrapper = document.getElementById('accountsDropdown');
+      if (wrapper) {
+        wrapper.classList.add('active');
+      }
+    }
+  });
+</script>

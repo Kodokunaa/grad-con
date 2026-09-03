@@ -38,8 +38,8 @@ $applyUrl = BASE_URL . "/alumni/job_details.php?id=" . $job_id;
 $logoUrl = rtrim(BASE_URL, '/') . "/ccc3d.png";
 
 // SMTP account
-$smtpEmail = 'ccctestcap1@gmail.com';
-$smtpPassword = 'axek bsko mass xpkk';
+$smtpEmail = 'cccgradconn@gmail.com';
+$smtpPassword = 'anhfwyyhoqannyll';
 
 $msg = "";
 $error = "";
@@ -51,6 +51,7 @@ if ($target_course !== "") {
         FROM users
         WHERE role = 'alumni'
           AND is_active = 1
+                    AND COALESCE(receive_update_notifications, 1) = 1
           AND email IS NOT NULL
           AND email <> ''
           AND course = ?
@@ -63,6 +64,7 @@ if ($target_course !== "") {
         FROM users
         WHERE role = 'alumni'
           AND is_active = 1
+                    AND COALESCE(receive_update_notifications, 1) = 1
           AND email IS NOT NULL
           AND email <> ''
         ORDER BY fullname ASC

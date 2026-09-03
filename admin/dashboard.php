@@ -134,6 +134,14 @@ require_once __DIR__ . "/../includes/admin_sidebar.php";
         font-weight: 600;
     }
 
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 18px;
+    }
+
     .top-actions {
         display: flex;
         gap: 10px;
@@ -181,6 +189,8 @@ require_once __DIR__ . "/../includes/admin_sidebar.php";
         color: #ea580c;
         background: #fff7ed;
     }
+
+
 
     .hero-card {
         position: relative;
@@ -468,6 +478,19 @@ require_once __DIR__ . "/../includes/admin_sidebar.php";
         .top-actions { width: 100%; justify-content: flex-start; }
         .dashboard-title { font-size: 25px; }
         .hero-title { font-size: 24px; }
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform .25s ease;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            width: min(85vw, 280px);
+            max-width: 280px;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        body.sidebar-open { overflow: hidden; }
     }
 
     @media (max-width: 576px) {
@@ -484,8 +507,8 @@ require_once __DIR__ . "/../includes/admin_sidebar.php";
         <div class="topbar">
             <div>
                 <div class="eyebrow">📊 Admin Analytics</div>
-                <h1 class="dashboard-title">Admin Dashboard</h1>
-                <div class="dashboard-subtitle">Welcome, <?php echo e($adminName); ?></div>
+                <h1 class="dashboard-title">Welcome back, <?php echo e($adminName); ?></h1>
+                <div class="dashboard-subtitle">Here is your latest employment overview.</div>
             </div>
 
             <div class="top-actions">

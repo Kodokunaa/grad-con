@@ -14,7 +14,7 @@
     top:0;
     left:0;
     overflow-y:auto;
-    z-index:1000;
+    z-index:1002;
 }
 
 /* LOGO */
@@ -114,7 +114,7 @@
     background:transparent;
 }
 
-/* RESPONSIVE */
+./* RESPONSIVE */
 @media (max-width:768px){
     .sidebar{
         width:220px;
@@ -133,6 +133,21 @@
     .sidebar a{
         font-size:14px;
         padding:12px;
+    }
+}
+
+@media (max-width:992px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    body.sidebar-open {
+        overflow: hidden;
     }
 }
 
@@ -164,6 +179,11 @@
         <i class="fas fa-calendar-days"></i> Events
     </a>
 
+     <a href="<?php echo BASE_URL; ?>/alumni_officer/archive.php"
+       class="<?php echo basename($_SERVER['PHP_SELF'])=='archive.php' ? 'active' : ''; ?>">
+        <i class="fas fa-calendar-days"></i> Archive Post
+    </a>
+
     <a href="<?php echo BASE_URL; ?>/profile.php"
        class="<?php echo basename($_SERVER['PHP_SELF'])=='profile.php' ? 'active' : ''; ?>">
         <i class="fas fa-user-circle"></i> My Profile
@@ -174,3 +194,6 @@
     </a>
 
 </div>
+
+</body>
+</html>

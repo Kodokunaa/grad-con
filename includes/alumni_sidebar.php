@@ -16,6 +16,7 @@
     top:0;
     left:0;
     overflow-y:auto;
+    z-index:1002;
 }
 
 /* LOGO */
@@ -33,7 +34,7 @@
 /* TITLE */
 .sidebar-title{
     text-align:center;
-    color:#f97316; /* ORANGE TEXT */
+    color:#f97316 !important; /* ORANGE TEXT */
     font-size:24px;
     font-weight:700;
     margin-bottom:30px;
@@ -76,6 +77,50 @@
     color:#fff;
 }
 
+/* PARENT MENU */
+.sidebar .menu-parent {
+    position: relative;
+    cursor: pointer;
+}
+
+.sidebar .menu-parent::after {
+    content: '\f078';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    transition: transform .3s ease;
+    font-size: 12px;
+}
+
+.sidebar .menu-parent.active::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* SUBMENU */
+.sidebar .submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease;
+}
+
+.sidebar .submenu.active {
+    max-height: 200px;
+}
+
+.sidebar .submenu a {
+    padding-left: 40px;
+    font-size: 14px;
+    margin-bottom: 5px;
+    background: rgba(249, 115, 22, 0.1);
+}
+
+.sidebar .submenu a:hover {
+    background: #f97316;
+}
+
 /* LOGOUT */
 .sidebar .logout{
     margin-top:20px;
@@ -101,42 +146,32 @@
     background:transparent;
 }
 
-/* RESPONSIVE */
-@media (max-width:768px){
+@media (max-width: 992px) {
+    .sidebar {
+        left: -100% !important;
+        transition: left .25s ease !important;
+        width: min(85vw, 280px) !important;
+        z-index: 1125 !important;
+    }
 
-.sidebar{
-    width:220px;
-    padding:20px 14px;
+    .sidebar.open {
+        left: 0 !important;
+    }
+
+    body.sidebar-open {
+        overflow: hidden;
+    }
 }
-
-.sidebar-logo img{
-    width:80px;
-    height:80px;
-}
-
-.sidebar-title{
-    font-size:20px;
-}
-
-.sidebar a{
-    font-size:14px;
-    padding:12px;
-}
-
-}
-
 </style>
 
 <div class="sidebar">
+    <div class="sidebar-logo">
+        <img src="<?php echo BASE_URL; ?>/ccc3d.png" alt="Logo">
+    </div>
 
-<!-- LOGO -->
-<div class="sidebar-logo">
-    <img src="<?php echo BASE_URL; ?>/ccc3d.png" alt="Logo">
-</div>
-
-<div class="sidebar-title">
-Alumni Panel
-</div>
+    <div class="sidebar-title">
+    Alumni Panel
+    </div>
 
 <a href="<?php echo BASE_URL; ?>/alumni/feed.php">
     <i class="fas fa-calendar-days"></i> Events Feed
@@ -150,9 +185,18 @@ Alumni Panel
     <i class="fas fa-graduation-cap"></i> Educational Background
 </a>
 
-<a href="<?php echo BASE_URL; ?>/alumni/jobs.php">
+<a href="#" class="menu-parent" id="jobsMenuBtn">
     <i class="fas fa-briefcase"></i> Browse Jobs
 </a>
+
+<div class="submenu" id="jobsSubmenu">
+    <a href="<?php echo BASE_URL; ?>/alumni/jobs.php">
+        <i class="fas fa-list"></i> View All Jobs
+    </a>
+    <a href="<?php echo BASE_URL; ?>/alumni/job_offers.php">
+        <i class="fas fa-gift"></i> View Job Offers
+    </a>
+</div>
 
 <a href="<?php echo BASE_URL; ?>/alumni/my_applications.php">
     <i class="fas fa-file-signature"></i> My Applications
@@ -171,3 +215,23 @@ Alumni Panel
 </a>
 
 </div>
+
+<script>
+document.getElementById('jobsMenuBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    const submenu = document.getElementById('jobsSubmenu');
+    const menuBtn = document.getElementById('jobsMenuBtn');
+    
+    submenu.classList.toggle('active');
+    menuBtn.classList.toggle('active');
+});
+
+// Keep menu open if on jobs pages
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPage = window.location.pathname;
+    if (currentPage.includes('/alumni/jobs.php') || currentPage.includes('/alumni/job_offers.php')) {
+        document.getElementById('jobsSubmenu').classList.add('active');
+        document.getElementById('jobsMenuBtn').classList.add('active');
+    }
+});
+</script>

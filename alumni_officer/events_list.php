@@ -43,6 +43,15 @@ function column_exists(PDO $pdo, string $table, string $column): bool {
     return (bool)$stmt->fetch(PDO::FETCH_ASSOC);
 }
 
+function ensure_column(PDO $pdo, string $table, string $column, string $definition): void {
+    if (!column_exists($pdo, $table, $column)) {
+        try {
+            $pdo->exec("ALTER TABLE `$table` ADD COLUMN `$column` $definition");
+        } catch (Throwable $e) {
+        }
+    }
+}
+
 function table_exists(PDO $pdo, string $table): bool {
     $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
     $stmt->execute([$table]);
@@ -186,6 +195,9 @@ if ($profileColumn && $currentUserId > 0) {
 }
 
 try {
+    ensure_column($pdo, 'events', 'is_archived', 'TINYINT(1) NOT NULL DEFAULT 0');
+    ensure_column($pdo, 'events', 'archived_at', 'DATETIME NULL');
+
     $pdo->exec("CREATE TABLE IF NOT EXISTS post_reactions (
         id INT AUTO_INCREMENT PRIMARY KEY,
         post_type VARCHAR(30) NOT NULL DEFAULT 'event',
@@ -495,38 +507,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_comment'])) {
     }
 }
 
-// Delete event and shared engagement data
+// Archive event instead of permanently deleting it
 if (isset($_GET["delete"])) {
     $delete_id = (int)($_GET["delete"] ?? 0);
 
     if ($delete_id > 0) {
-        $find = $pdo->prepare("SELECT * FROM events WHERE id = ? LIMIT 1");
+        $find = $pdo->prepare("SELECT id FROM events WHERE id = ? LIMIT 1");
         $find->execute([$delete_id]);
         $event = $find->fetch(PDO::FETCH_ASSOC);
 
         if ($event) {
-            if (!empty($event["image"])) {
-                $oldImage = __DIR__ . "/../uploads/events/" . $event["image"];
-                if (is_file($oldImage)) {
-                    @unlink($oldImage);
-                }
-            }
-
-            $pdo->prepare("DELETE FROM post_reactions WHERE post_type='event' AND post_id = ?")->execute([$delete_id]);
-            $pdo->prepare("DELETE FROM post_comments WHERE post_type='event' AND post_id = ?")->execute([$delete_id]);
-            $pdo->prepare("DELETE FROM post_notifications WHERE post_type='event' AND post_id = ?")->execute([$delete_id]);
-
-            if (table_exists($pdo, 'event_reactions')) {
-                $pdo->prepare("DELETE FROM event_reactions WHERE event_id = ?")->execute([$delete_id]);
-            }
-            if (table_exists($pdo, 'event_comments')) {
-                $pdo->prepare("DELETE FROM event_comments WHERE event_id = ?")->execute([$delete_id]);
-            }
-
-            $del = $pdo->prepare("DELETE FROM events WHERE id = ?");
-            $del->execute([$delete_id]);
-
-            $msg = "Event deleted successfully.";
+            $archiveStmt = $pdo->prepare("UPDATE events SET is_archived = 1, archived_at = NOW() WHERE id = ?");
+            $archiveStmt->execute([$delete_id]);
+            $msg = "Event archived successfully.";
         } else {
             $error = "Event not found.";
         }
@@ -537,7 +530,8 @@ $eventProfileSelect = $profileColumn ? ", u.`$profileColumn` AS profile_photo" :
 $stmt = $pdo->query("SELECT e.*, u.fullname $eventProfileSelect
                      FROM events e
                      LEFT JOIN users u ON u.id = e.posted_by
-                     WHERE (e.post_start_date IS NULL OR e.post_start_date <= NOW())
+                     WHERE e.is_archived = 0
+                       AND (e.post_start_date IS NULL OR e.post_start_date <= NOW())
                        AND (e.post_end_date IS NULL OR e.post_end_date >= NOW())
                      ORDER BY e.id DESC");
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -571,16 +565,16 @@ require_once __DIR__ . "/../includes/alumni_officer_sidebar.php";
     body { background: #f0f2f5; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #1f2937; }
     .content { margin-left: 290px; width: calc(100% - 290px); min-height: 100vh; padding: 26px 18px 45px; }
     .wall-wrapper { max-width: 820px; margin: 0 auto; }
-    .cover-card { background: #ffffff; border-radius: 18px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 4px 18px rgba(15, 23, 42, 0.08); margin-bottom: 18px; }
-    .cover-bg { height: 190px; background: radial-gradient(circle at top left, rgba(255,255,255,0.35), transparent 26%), linear-gradient(135deg, #f97316 0%, #fb923c 45%, #16a34a 100%); position: relative; }
+    .cover-card { background: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid #e5e7eb; box-shadow: 0 10px 28px rgba(15, 23, 42, 0.10); margin-bottom: 22px; }
+    .cover-bg { height: 190px; background: radial-gradient(circle at top left, rgba(255,255,255,0.38), transparent 26%), linear-gradient(135deg, #f97316 0%, #fb923c 45%, #16a34a 100%); position: relative; }
     .cover-bg::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(45deg, rgba(255,255,255,0.10) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.10) 75%, transparent 75%, transparent); background-size: 42px 42px; opacity: .28; }
-    .profile-section { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 0 24px 22px; margin-top: -54px; position: relative; z-index: 2; }
-    .profile-left { display: flex; align-items: flex-end; gap: 16px; }
-    .page-avatar { width: 112px; height: 112px; border-radius: 50%; background: #ffffff; border: 5px solid #ffffff; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18); display: flex; align-items: center; justify-content: center; font-size: 44px; }
-    .page-info { padding-bottom: 9px; }
-    .page-title { font-size: 31px; font-weight: 900; color: #111827; line-height: 1.1; margin: 0; letter-spacing: -0.02em; }
-    .page-subtitle { color: #6b7280; font-size: 14px; font-weight: 600; margin-top: 6px; }
-    .btn-post { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #f97316; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 10px; font-size: 14px; font-weight: 800; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.22); transition: .2s ease; white-space: nowrap; margin-bottom: 8px; }
+    .profile-section { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 0 24px 24px; margin-top: -54px; position: relative; z-index: 2; }
+    .profile-left { display: flex; align-items: flex-end; gap: 18px; min-width: 0; flex: 1 1 auto; }
+    .page-avatar { width: 112px; height: 112px; border-radius: 50%; background: #ffffff; border: 5px solid #ffffff; box-shadow: 0 10px 26px rgba(15, 23, 42, 0.20); display: flex; align-items: center; justify-content: center; font-size: 44px; flex: 0 0 auto; }
+    .page-info { min-width: 0; padding: 0 0 8px; }
+    .page-title { font-size: 31px; font-weight: 900; color: #111827; line-height: 1.08; margin: 0; letter-spacing: -0.02em; }
+    .page-subtitle { max-width: 520px; color: #64748b; font-size: 14px; font-weight: 600; line-height: 1.5; margin: 8px 0 0; }
+    .btn-post { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #f97316; color: #ffffff; text-decoration: none; padding: 13px 18px; border-radius: 12px; font-size: 14px; font-weight: 800; box-shadow: 0 8px 18px rgba(249, 115, 22, 0.24); transition: .2s ease; white-space: nowrap; margin-bottom: 8px; flex: 0 0 auto; }
     .btn-post:hover { background: #ea580c; color: #ffffff; transform: translateY(-1px); }
     .feed-area { width: 100%; }
     .composer-card, .event-post, .alert-box, .search-card, .schedule-notice-card { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 3px 12px rgba(15, 23, 42, 0.06); }
@@ -619,7 +613,12 @@ require_once __DIR__ . "/../includes/alumni_officer_sidebar.php";
     .event-title { font-size: 20px; font-weight: 900; color: #111827; margin: 4px 0 8px; line-height: 1.25; }
     .event-text { color: #374151; font-size: 14px; line-height: 1.55; white-space: pre-line; }
     .event-image-wrap { border-top: 1px solid #eef2f7; border-bottom: 1px solid #eef2f7; background: #f9fafb; }
-    .event-image { width: 100%; max-height: 460px; object-fit: cover; display: block; }
+    .event-image { width: 100%; max-height: 460px; object-fit: cover; display: block; cursor: zoom-in; }
+    .image-lightbox { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.78); display: none; align-items: center; justify-content: center; padding: 24px; z-index: 99999; }
+    .image-lightbox.open { display: flex; }
+    .image-lightbox-inner { position: relative; max-width: min(92vw, 860px); max-height: 90vh; width: 100%; display: flex; align-items: center; justify-content: center; }
+    .image-lightbox img { max-width: 100%; max-height: 90vh; width: auto; height: auto; object-fit: contain; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.35); background: #ffffff; }
+    .image-lightbox-close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border: none; border-radius: 50%; background: rgba(255,255,255,0.95); color: #111827; font-size: 20px; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.18); }
     .no-image-banner { height: 190px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #9ca3af; background: linear-gradient(135deg, #f9fafb, #eef2f7); font-weight: 800; }
     .no-image-banner span { font-size: 38px; }
     .engagement-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 16px; color: #6b7280; font-size: 13px; font-weight: 700; }
@@ -702,7 +701,7 @@ require_once __DIR__ . "/../includes/alumni_officer_sidebar.php";
     .empty-state-text { font-size: 18px; color: #111827; font-weight: 900; margin-bottom: 6px; }
     .empty-state-subtext { font-size: 14px; color: #6b7280; font-weight: 600; }
     #noSearchResults { display: none; margin-bottom: 14px; }
-    @media (max-width: 991.98px) { .content { margin-left: 0; width: 100%; padding: 18px 12px 36px; } .profile-section { flex-direction: column; align-items: flex-start; } .profile-left { align-items: center; } .btn-post { width: 100%; margin-bottom: 0; } .page-title { font-size: 26px; } }
+    @media (max-width: 991.98px) { .content { margin-left: 0; width: 100%; padding: 18px 12px 36px; } .profile-section { flex-direction: column; align-items: stretch; } .profile-left { align-items: center; } .btn-post { width: 100%; margin-bottom: 0; } .page-title { font-size: 26px; } }
     @media (max-width: 575.98px) { .cover-bg { height: 145px; } .profile-section { padding: 0 16px 18px; margin-top: -42px; } .profile-left { flex-direction: column; align-items: flex-start; gap: 8px; } .page-avatar { width: 88px; height: 88px; font-size: 35px; } .post-actions { flex-wrap: wrap; } .reaction-form, .btn-comment { flex: 1 1 calc(50% - 8px); } .post-manage-actions { width: 100%; justify-content: flex-end; margin-left: 0; padding-left: 0; border-left: none; border-top: 1px solid #f1f5f9; padding-top: 8px; } .event-title { font-size: 18px; } .comment-form, .comment-input-wrap { flex-direction: column; } .comment-submit { width: 100%; } }
 
 
@@ -879,7 +878,7 @@ require_once __DIR__ . "/../includes/alumni_officer_sidebar.php";
 
                         <div class="event-image-wrap">
                             <?php if (!empty($event["image"])): ?>
-                                <img src="<?php echo BASE_URL; ?>/uploads/events/<?php echo e($event["image"]); ?>" class="event-image" alt="Event Image">
+                                <img src="<?php echo BASE_URL; ?>/uploads/events/<?php echo e($event["image"]); ?>" class="event-image" alt="Event Image" onclick="openImageLightbox(this.src)">
                             <?php else: ?>
                                 <div class="no-image-banner"><span>🖼️</span>No event image uploaded</div>
                             <?php endif; ?>
@@ -927,7 +926,7 @@ require_once __DIR__ . "/../includes/alumni_officer_sidebar.php";
 
                             <div class="post-manage-actions" aria-label="Post management actions">
                                 <a href="<?php echo BASE_URL; ?>/alumni_officer/events_edit.php?id=<?php echo $eventId; ?>" class="btn-action btn-icon-action btn-edit" title="Edit event" aria-label="Edit event">✏️<span class="action-label">Edit</span></a>
-                                <a href="<?php echo BASE_URL; ?>/alumni_officer/events_list.php?delete=<?php echo $eventId; ?>" class="btn-action btn-icon-action btn-delete" title="Delete event" aria-label="Delete event" onclick="return confirm('Are you sure you want to delete this event?');">🗑<span class="action-label">Delete</span></a>
+                                <a href="<?php echo BASE_URL; ?>/alumni_officer/events_list.php?delete=<?php echo $eventId; ?>" class="btn-action btn-icon-action btn-delete" title="Archive event" aria-label="Archive event">🗑<span class="action-label">Archive</span></a>
                             </div>
                         </div>
 
@@ -1060,9 +1059,44 @@ require_once __DIR__ . "/../includes/alumni_officer_sidebar.php";
     </div>
 </div>
 
+<div class="image-lightbox" id="imageLightbox" onclick="closeImageLightbox(event)">
+    <div class="image-lightbox-inner">
+        <button type="button" class="image-lightbox-close" onclick="closeImageLightbox(event)" aria-label="Close image preview">×</button>
+        <img id="imageLightboxImg" src="" alt="Event preview">
+    </div>
+</div>
+
 <div class="mention-box" id="mentionBox"></div>
 
 <script>
+function openImageLightbox(src) {
+    const lightbox = document.getElementById('imageLightbox');
+    const img = document.getElementById('imageLightboxImg');
+    if (!lightbox || !img) return;
+    img.src = src;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageLightbox(event) {
+    const lightbox = document.getElementById('imageLightbox');
+    if (!lightbox) return;
+    const target = event && event.target ? event.target : null;
+    if (target && (target.classList.contains('image-lightbox') || target.classList.contains('image-lightbox-close'))) {
+        lightbox.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+}
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        const lightbox = document.getElementById('imageLightbox');
+        if (lightbox && lightbox.classList.contains('open')) {
+            lightbox.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    }
+});
 
 const mentionUsers = <?php echo json_encode($mentionUsers, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 const mentionBox = document.getElementById('mentionBox');

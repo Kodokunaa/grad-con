@@ -10,6 +10,7 @@ require_once __DIR__ . "/../PHPMailer/src/SMTP.php";
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
 $msg = "";
 $error = "";
@@ -66,39 +67,79 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 SELECT fullname, email
                 FROM users
                 WHERE role = 'alumni'
-                  AND is_active = 1
+                  AND COALESCE(is_active, 0) = 1
+                                    AND COALESCE(receive_update_notifications, 1) = 1
                   AND email IS NOT NULL
-                  AND email <> ''
+                  AND TRIM(email) <> ''
+                ORDER BY fullname ASC
             ");
             $alumniStmt->execute();
             $recipients = $alumniStmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if (!empty($recipients)) {
+            $validRecipients = [];
+            foreach ($recipients as $recipient) {
+                $recipientEmail = trim((string)($recipient['email'] ?? ''));
+                if ($recipientEmail !== '' && filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+                    $validRecipients[$recipientEmail] = trim((string)($recipient['fullname'] ?? 'Alumni'));
+                }
+            }
+
+            if (!empty($validRecipients)) {
                 $mail = new PHPMailer(true);
 
                 try {
+                    // ==========================
+                    // GMAIL SMTP CONFIGURATION
+                    // ==========================
+                    $smtpEmail = 'cccgradconn@gmail.com';
+
+                    // Paste your CURRENT Google App Password below.
+                    $smtpPassword = 'anhf wyyh oqan nyll';
+
+                    // Remove spaces Google may display between password groups.
+                    $smtpPassword = preg_replace('/\s+/', '', trim($smtpPassword));
+
+                    if (
+                        $smtpPassword === '' ||
+                        $smtpPassword === 'PASTE_NEW_APP_PASSWORD_HERE'
+                    ) {
+                        throw new Exception(
+                            'SMTP App Password is not configured in this PHP file.'
+                        );
+                    }
+
+                    if (strlen($smtpPassword) !== 16) {
+                        throw new Exception(
+                            'Invalid Google App Password length. After removing spaces, ' .
+                            'the password has ' . strlen($smtpPassword) .
+                            ' characters; expected 16.'
+                        );
+                    }
+
                     $mail->isSMTP();
                     $mail->Host       = 'smtp.gmail.com';
                     $mail->SMTPAuth   = true;
-                    $mail->Username   = 'ccctestcap1@gmail.com';
-                    $mail->Password   = 'axek bsko mass xpkk';
+                    $mail->AuthType   = 'LOGIN';
+                    $mail->Username   = $smtpEmail;
+                    $mail->Password   = $smtpPassword;
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                     $mail->Port       = 587;
                     $mail->CharSet    = 'UTF-8';
+                    $mail->Timeout    = 60;
+                    $mail->SMTPKeepAlive = false;
+                    $mail->SMTPDebug  = SMTP::DEBUG_OFF;
 
-                    $mail->setFrom('ccctestcap1@gmail.com', 'GradConn');
-                    $mail->addReplyTo('ccctestcap1@gmail.com', 'GradConn');
-                    $mail->addAddress('ccctestcap1@gmail.com', 'GradConn');
+                    $mail->setFrom($smtpEmail, 'GradConn');
+                    $mail->Sender = $smtpEmail;
+                    $mail->addReplyTo($smtpEmail, 'GradConn');
+
+                    // One visible recipient; alumni remain hidden in BCC.
+                    $mail->addAddress($smtpEmail, 'GradConn');
 
                     $bccCount = 0;
-                    foreach ($recipients as $recipient) {
-                        $recipientEmail = trim($recipient['email'] ?? '');
-                        $recipientName  = trim($recipient['fullname'] ?? 'Alumni');
-
-                        if ($recipientEmail !== '') {
-                            $mail->addBCC($recipientEmail, $recipientName);
-                            $bccCount++;
-                        }
+                    foreach ($validRecipients as $recipientEmail => $recipientName) {
+                        $mail->addBCC($recipientEmail, $recipientName);
+                        $bccCount++;
                     }
 
                     if ($bccCount > 0) {
@@ -321,7 +362,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         $mail_notice = " Job posted, but no alumni email recipients were found.";
                     }
                 } catch (Exception $e) {
-                    $mail_notice = " Job posted, but email sending failed: " . $mail->ErrorInfo;
+                    $smtpError = trim((string)$mail->ErrorInfo);
+                    $exceptionMessage = trim((string)$e->getMessage());
+                    $detail = $smtpError !== '' ? $smtpError : $exceptionMessage;
+
+                    error_log('GradConn PHPMailer error: ' . $detail);
+
+                    if (
+                        stripos($detail, 'Daily user sending limit exceeded') !== false ||
+                        stripos($detail, '5.4.5') !== false
+                    ) {
+                        $mail_notice =
+                            " Job posted, but Gmail's daily sending limit has been reached. " .
+                            "Please try again after the Gmail quota resets.";
+                    } elseif (
+                        stripos($detail, 'authenticate') !== false ||
+                        stripos($detail, '535') !== false ||
+                        stripos($detail, 'username and password') !== false
+                    ) {
+                        $mail_notice =
+                            " Job posted, but Gmail rejected the SMTP login. " .
+                            "Check that the App Password belongs to " . $smtpEmail .
+                            " and that it is still active.";
+                    } elseif (
+                        stripos($detail, 'connect') !== false ||
+                        stripos($detail, 'timed out') !== false ||
+                        stripos($detail, 'connection') !== false
+                    ) {
+                        $mail_notice =
+                            " Job posted, but the system could not connect to Gmail SMTP. " .
+                            "Check your internet connection and whether port 587 is available.";
+                    } else {
+                        $mail_notice =
+                            " Job posted, but email sending failed: " .
+                            ($detail !== '' ? $detail : 'Unknown PHPMailer error.');
+                    }
                 }
             } else {
                 $mail_notice = " Job posted, but no alumni were found.";

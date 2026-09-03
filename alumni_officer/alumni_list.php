@@ -119,9 +119,10 @@ body{
 
 .content{
     margin-left:290px;
-    width:calc(100% - 290px);
+    width:min(1180px, calc(100% - 310px));
     min-height:100vh;
     padding:32px 28px;
+    margin-right:auto;
 }
 
 .alumni-hero{
@@ -981,7 +982,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
 </div>
 
 <div class="modal fade" id="alumniSnapshotModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Alumni Profile Snapshot</h5>

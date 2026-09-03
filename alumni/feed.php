@@ -15,6 +15,15 @@ function format_post_date($date) {
     return date('F d, Y \\a\\t h:i A', $time);
 }
 
+function shorten_text($text, $limit = 120): string {
+    $text = trim(strip_tags((string)($text ?? '')));
+    if ($text === '') return 'No description provided.';
+    if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+        return mb_strlen($text) > $limit ? mb_substr($text, 0, $limit) . '...' : $text;
+    }
+    return strlen($text) > $limit ? substr($text, 0, $limit) . '...' : $text;
+}
+
 function initials($name) {
     $name = trim((string)$name);
     if ($name === '') return 'U';
@@ -493,6 +502,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_action'])) {
 
 $feedProfileSelect = $profileColumn ? ", u.`$profileColumn` AS poster_photo" : ", NULL AS poster_photo";
 
+$jobStmt = $pdo->prepare("SELECT id, title, employer_company, location, description FROM jobs WHERE is_open = 1 ORDER BY id DESC LIMIT 5");
+$jobStmt->execute();
+$sidebarJobs = $jobStmt->fetchAll(PDO::FETCH_ASSOC);
+
 $feedStmt = $pdo->prepare("
     SELECT
         e.id,
@@ -511,7 +524,8 @@ $feedStmt = $pdo->prepare("
         e.post_end_date
     FROM events e
     JOIN users u ON u.id = e.posted_by
-    WHERE (e.post_start_date IS NULL OR e.post_start_date <= NOW())
+    WHERE e.is_archived = 0
+      AND (e.post_start_date IS NULL OR e.post_start_date <= NOW())
       AND (e.post_end_date IS NULL OR e.post_end_date >= NOW())
 
     UNION ALL
@@ -569,7 +583,39 @@ require_once __DIR__ . "/../includes/alumni_sidebar.php";
 <style>
     body { background: #f0f2f5; overflow-x: hidden; }
     .content { margin-left: 290px; width: calc(100% - 290px); max-width: 100%; padding: 25px 20px 40px; }
+    .feed-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) 320px; gap: 20px; align-items: start; }
+    .feed-main { min-width: 0; }
     .feed-wrapper { max-width: 760px; margin: 0 auto; }
+    .feed-sidebar { min-width: 0; }
+    .sidebar-card { background: #fff; border-radius: 18px; border: 1px solid #e5e7eb; box-shadow: 0 2px 10px rgba(0,0,0,0.06); padding: 16px; position: sticky; top: 20px; }
+    .sidebar-title { font-size: 16px; font-weight: 900; color: #111827; margin-bottom: 12px; }
+    .job-ad-card { padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+    .job-ad-card:last-child { border-bottom: 0; padding-bottom: 0; }
+    .job-ad-title { font-size: 15px; font-weight: 800; color: #111827; margin-bottom: 4px; }
+    .job-ad-meta { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+    .job-ad-desc { font-size: 13px; color: #374151; line-height: 1.5; margin-bottom: 10px; }
+    .job-ad-btn { display: inline-block; text-decoration: none; background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; padding: 8px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+    .job-ad-btn:hover { background: #f97316; color: #fff; }
+    .job-toggle-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+    .job-toggle-btn { border: none; background: transparent; color: #f97316; font-size: 12px; font-weight: 800; cursor: pointer; padding: 0; }
+    .job-toggle-btn:hover { text-decoration: underline; }
+    .job-ad-list-collapsed .job-ad-card:nth-child(n+3) { display: none; }
+    .social-card { margin-top: 14px; padding: 12px; border: 1px solid #e5e7eb; border-radius: 14px; background: linear-gradient(135deg, #f8fafc, #fff7ed); }
+    .social-card-title { font-size: 14px; font-weight: 900; color: #111827; margin-bottom: 10px; }
+    .social-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; text-decoration: none; color: #111827; background: #fff; border: 1px solid #e5e7eb; margin-bottom: 8px; transition: .2s ease; }
+    .social-link:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+    .social-icon { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #fff; font-size: 16px; }
+    .social-facebook { background: linear-gradient(135deg, #1877f2, #0b5ed7); }
+    .social-youtube { background: linear-gradient(135deg, #ff0000, #cc0000); }
+    .social-name { font-size: 13px; font-weight: 800; }
+    .social-desc { font-size: 12px; color: #6b7280; }
+
+    @media (max-width: 992px) {
+        .content { margin-left: 0; width: 100%; padding: 20px 14px 30px; }
+        .feed-layout { grid-template-columns: 1fr; }
+        .feed-sidebar { order: -1; }
+        .sidebar-card { position: static; }
+    }
     .feed-topbar { background: #fff; border-radius: 18px; padding: 18px 22px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); border: 1px solid #e5e7eb; }
     .feed-title { font-size: 28px; font-weight: 800; color: #111827; margin: 0; }
     .feed-subtitle { color: #6b7280; font-size: 14px; margin-top: 4px; }
@@ -668,19 +714,21 @@ require_once __DIR__ . "/../includes/alumni_sidebar.php";
 </style>
 
 <div class="content">
-    <div class="feed-wrapper">
-        <div class="feed-topbar">
-            <h3 class="feed-title">Feed</h3>
-            <div class="feed-subtitle">Latest events and trainings from admin</div>
-        </div>
+    <div class="feed-layout">
+        <div class="feed-main">
+            <div class="feed-wrapper">
+                <div class="feed-topbar">
+                    <h3 class="feed-title">Feed</h3>
+                    <div class="feed-subtitle">Latest events and trainings from admin</div>
+                </div>
 
-        <?php if (count($feed) === 0): ?>
-            <div class="empty-feed">
-                <h4>No posts yet</h4>
-                <p>Please check again later for new events and trainings.</p>
-            </div>
-        <?php else: ?>
-            <?php foreach ($feed as $item): ?>
+                <?php if (count($feed) === 0): ?>
+                    <div class="empty-feed">
+                        <h4>No posts yet</h4>
+                        <p>Please check again later for new events and trainings.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($feed as $item): ?>
                 <?php
                     $postId = (int)$item['id'];
                     $postType = $item['post_type'];
@@ -783,9 +831,55 @@ require_once __DIR__ . "/../includes/alumni_sidebar.php";
                             </div>
                         </div>
                     </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            </div>
+        </div>
+
+        <aside class="feed-sidebar">
+            <div class="sidebar-card">
+                <div class="sidebar-title">Job Opportunities</div>
+                <div class="job-ad-list-collapsed" id="jobAdList">
+                    <?php if (!empty($sidebarJobs)): ?>
+                        <?php foreach ($sidebarJobs as $index => $job): ?>
+                            <div class="job-ad-card">
+                                <div class="job-ad-title"><?php echo e($job['title'] ?? 'Job opening'); ?></div>
+                                <div class="job-ad-meta"><?php echo e(($job['employer_company'] ?? 'Company') . (!empty($job['location']) ? ' • ' . $job['location'] : '')); ?></div>
+                                <div class="job-ad-desc"><?php echo e(shorten_text($job['description'] ?? '', 110)); ?></div>
+                                <a class="job-ad-btn" href="<?php echo BASE_URL; ?>/alumni/apply.php?id=<?php echo (int)$job['id']; ?>">Apply now</a>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="job-ad-desc">No job openings right now.</div>
+                    <?php endif; ?>
                 </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+
+                <?php if (!empty($sidebarJobs) && count($sidebarJobs) > 2): ?>
+                    <div class="job-toggle-row">
+                        <button class="job-toggle-btn" type="button" onclick="toggleJobList()" id="jobToggleBtn">See all</button>
+                    </div>
+                <?php endif; ?>
+
+                <div class="social-card">
+                    <div class="social-card-title">Follow Our School</div>
+                    <a class="social-link" href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
+                        <div class="social-icon social-facebook">f</div>
+                        <div>
+                            <div class="social-name">Facebook</div>
+                            <div class="social-desc">Visit our school page</div>
+                        </div>
+                    </a>
+                    <a class="social-link" href="https://www.youtube.com" target="_blank" rel="noopener noreferrer">
+                        <div class="social-icon social-youtube">▶</div>
+                        <div>
+                            <div class="social-name">YouTube</div>
+                            <div class="social-desc">Watch updates and events</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </aside>
     </div>
 </div>
 
@@ -809,6 +903,14 @@ let activeMentionStart = -1;
 
 function getInitials(name) {
     return String(name || 'U').trim().split(/\s+/).slice(0, 2).map(p => p.charAt(0).toUpperCase()).join('') || 'U';
+}
+
+function toggleJobList() {
+    const list = document.getElementById('jobAdList');
+    const btn = document.getElementById('jobToggleBtn');
+    if (!list || !btn) return;
+    const collapsed = list.classList.toggle('job-ad-list-collapsed');
+    btn.textContent = collapsed ? 'See all' : 'Hide';
 }
 
 function getMentionInfo(input) {

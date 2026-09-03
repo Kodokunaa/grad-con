@@ -2,7 +2,12 @@
 require_once __DIR__ . "/../config/app.php";
 require_once __DIR__ . "/../config/auth.php";
 require_once __DIR__ . "/../config/db.php";
-require_admin();
+
+require_once __DIR__ . "/../PHPMailer/src/Exception.php";
+require_once __DIR__ . "/../PHPMailer/src/PHPMailer.php";
+require_once __DIR__ . "/../PHPMailer/src/SMTP.php";
+
+require_employer();
 
 function e($value): string {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
@@ -26,6 +31,48 @@ function table_exists(PDO $pdo, string $table): bool {
     } catch (Throwable $e) {
         return false;
     }
+}
+
+function create_employer_activity_logs_table(PDO $pdo): void {
+    if (!table_exists($pdo, 'employer_activity_logs')) {
+        $pdo->exec(
+            "CREATE TABLE IF NOT EXISTS employer_activity_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                employer_id INT NOT NULL,
+                alumni_id INT NULL,
+                offer_id INT NULL,
+                action VARCHAR(100) NOT NULL,
+                details TEXT NULL,
+                course_filter VARCHAR(100) NULL,
+                batch_filter VARCHAR(100) NULL,
+                skill_search VARCHAR(255) NULL,
+                result_count INT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_employer_id (employer_id),
+                INDEX idx_alumni_id (alumni_id),
+                INDEX idx_offer_id (offer_id)
+            )"
+        );
+    }
+}
+
+function log_employer_activity(PDO $pdo, int $employerId, string $action, ?string $details = null, ?int $alumniId = null, ?int $offerId = null, ?string $courseFilter = null, ?string $batchFilter = null, ?string $skillSearch = null, ?int $resultCount = null): void {
+    create_employer_activity_logs_table($pdo);
+    $stmt = $pdo->prepare(
+        "INSERT INTO employer_activity_logs (employer_id, alumni_id, offer_id, action, details, course_filter, batch_filter, skill_search, result_count)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    );
+    $stmt->execute([
+        $employerId,
+        $alumniId,
+        $offerId,
+        $action,
+        $details,
+        $courseFilter,
+        $batchFilter,
+        $skillSearch,
+        $resultCount
+    ]);
 }
 
 function format_year_range($start, $end): string {
@@ -87,8 +134,6 @@ function detect_alumni_course_key(string $course): string {
     if (preg_match('/\bbstm\b/i', $course) || strpos($compactCourse, 'bstm') !== false) return 'bstm';
     if (preg_match('/\bblis\b/i', $course) || strpos($compactCourse, 'blis') !== false) return 'blis';
     if (preg_match('/\bbshm\b/i', $course) || strpos($compactCourse, 'bshm') !== false) return 'bshm';
-    if (preg_match('/\bbsscience\b/i', $course) || strpos($compactCourse, 'bsscience') !== false) return 'bsscience';
-    if (preg_match('/\bbsmath\b/i', $course) || strpos($compactCourse, 'bsmath') !== false) return 'bsmath';
     if (preg_match('/\bbsned\b/i', $course) || strpos($compactCourse, 'bsned') !== false) return 'bsned';
     if (preg_match('/\bbpa\b/i', $course) || strpos($compactCourse, 'bpa') !== false) return 'bpa';
 
@@ -230,8 +275,282 @@ function summarize_job_alignment(string $course, array $jobs): array {
     ];
 }
 
+function build_email_value($value): string {
+    $value = trim((string)($value ?? ''));
+    return $value !== '' ? e($value) : 'N/A';
+}
+
+/**
+ * Returns an inline base64 <img> tag for the profile picture, or a fallback initials avatar.
+ * Used inside emails so the image is embedded and not dependent on a URL.
+ */
+function build_profile_picture_email_html(?string $profilePicturePath, string $alumniName): string {
+    $initials = strtoupper(substr(trim($alumniName), 0, 1) ?: 'A');
+
+    if (!empty($profilePicturePath) && file_exists($profilePicturePath)) {
+        $mime = mime_content_type($profilePicturePath) ?: 'image/jpeg';
+        $b64  = base64_encode(file_get_contents($profilePicturePath));
+        return '<img src="data:' . $mime . ';base64,' . $b64 . '" alt="Profile Picture"
+                     style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #f97316;display:block;">';
+    }
+
+    // Fallback: orange circle with initial
+    return '<div style="width:90px;height:90px;border-radius:50%;background:#f97316;color:#fff;
+                         font-size:36px;font-weight:800;display:flex;align-items:center;
+                         justify-content:center;border:3px solid #ea580c;line-height:90px;
+                         text-align:center;">' . htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') . '</div>';
+}
+
+function build_alumni_snapshot_email_html(array $alumni, array $educations, array $jobs, array $degrees, array $certs, array $summaryAlignment, string $employmentHistoryError = ''): string {
+    $profilePicturePath = '';
+    if (!empty($alumni['profile_picture'])) {
+        // Adjust this path to match your actual uploads directory
+        $profilePicturePath = __DIR__ . '/../uploads/profiles/' . $alumni['profile_picture'];
+    }
+    $profilePicHtml = build_profile_picture_email_html(
+        $profilePicturePath ?: null,
+        $alumni['fullname'] ?? 'Alumni'
+    );
+
+    $html = '
+    <div style="font-family:Arial, Helvetica, sans-serif; color:#111827; background:#f8fafc; padding:20px;">
+        <div style="max-width:900px; margin:0 auto; background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden;">
+            <div style="background:#f97316; color:#ffffff; padding:18px 22px;">
+                <h2 style="margin:0; font-size:22px;">Alumni Profile Snapshot</h2>
+                <p style="margin:6px 0 0; font-size:13px;">This profile information was sent through the GradConn Employer Panel.</p>
+            </div>
+
+            <div style="padding:20px;">
+
+                <!-- Profile Picture -->
+                <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px;padding:16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;">
+                    <div style="flex-shrink:0;">' . $profilePicHtml . '</div>
+                    <div>
+                        <div style="font-size:20px;font-weight:800;color:#111827;">' . build_email_value($alumni['fullname'] ?? '') . '</div>
+                        <div style="font-size:14px;color:#6b7280;margin-top:4px;">' . build_email_value($alumni['course'] ?? '') . ' &bull; Batch ' . build_email_value($alumni['batch_year'] ?? '') . '</div>
+                        <div style="font-size:13px;color:#9a3412;margin-top:2px;">' . build_email_value($alumni['employment_status'] ?? '') . '</div>
+                    </div>
+                </div>
+
+                <h3 style="margin:0 0 12px; color:#9a3412;">Basic Information</h3>
+                <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
+                    <tr>
+                        <td style="border:1px solid #e5e7eb;"><strong>Full Name</strong><br>' . build_email_value($alumni['fullname'] ?? '') . '</td>
+                        <td style="border:1px solid #e5e7eb;"><strong>Email</strong><br>' . build_email_value($alumni['email'] ?? '') . '</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #e5e7eb;"><strong>Course</strong><br>' . build_email_value($alumni['course'] ?? '') . '</td>
+                        <td style="border:1px solid #e5e7eb;"><strong>Batch Year</strong><br>' . build_email_value($alumni['batch_year'] ?? '') . '</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #e5e7eb;"><strong>Contact Number</strong><br>' . build_email_value($alumni['contact_number'] ?? '') . '</td>
+                        <td style="border:1px solid #e5e7eb;"><strong>Employment Status</strong><br>' . build_email_value($alumni['employment_status'] ?? '') . '</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="border:1px solid #e5e7eb;"><strong>Address</strong><br>' . nl2br(build_email_value($alumni['address'] ?? '')) . '</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="border:1px solid #e5e7eb;"><strong>Skills</strong><br>' . nl2br(build_email_value($alumni['skills'] ?? '')) . '</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="border:1px solid #e5e7eb;"><strong>Career Objective</strong><br>' . nl2br(build_email_value($alumni['career_objective'] ?? '')) . '</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="border:1px solid #e5e7eb;"><strong>Job Alignment</strong><br>' . build_email_value($summaryAlignment['status'] ?? '') . '<br><span style="color:#6b7280;">' . build_email_value($summaryAlignment['reason'] ?? '') . '</span></td>
+                    </tr>
+                </table>';
+
+    $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Educational Background</h3>';
+    if (empty($educations)) {
+        $html .= '<p style="color:#6b7280;">No educational background found.</p>';
+    } else {
+        $html .= '<table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
+            <tr style="background:#fff7ed;">
+                <th align="left" style="border:1px solid #e5e7eb;">School</th>
+                <th align="left" style="border:1px solid #e5e7eb;">Degree</th>
+                <th align="left" style="border:1px solid #e5e7eb;">Years</th>
+            </tr>';
+        foreach ($educations as $edu) {
+            $html .= '<tr>
+                <td style="border:1px solid #e5e7eb;">' . build_email_value($edu['school_name'] ?? '') . '</td>
+                <td style="border:1px solid #e5e7eb;">' . build_email_value($edu['degree'] ?? '') . '</td>
+                <td style="border:1px solid #e5e7eb;">' . format_year_range($edu['start_year'] ?? '', $edu['end_year'] ?? '') . '</td>
+            </tr>';
+        }
+        $html .= '</table>';
+    }
+
+    $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Employment History</h3>';
+    if ($employmentHistoryError !== '') {
+        $html .= '<p style="color:#6b7280;">' . e($employmentHistoryError) . '</p>';
+    } elseif (empty($jobs)) {
+        $html .= '<p style="color:#6b7280;">No employment history found.</p>';
+    } else {
+        $html .= '<table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
+            <tr style="background:#fff7ed;">
+                <th align="left" style="border:1px solid #e5e7eb;">Company</th>
+                <th align="left" style="border:1px solid #e5e7eb;">Job Title</th>
+                <th align="left" style="border:1px solid #e5e7eb;">Type</th>
+                <th align="left" style="border:1px solid #e5e7eb;">Duration</th>
+            </tr>';
+        foreach ($jobs as $job) {
+            $html .= '<tr>
+                <td style="border:1px solid #e5e7eb;">' . build_email_value($job['company_name'] ?? '') . '</td>
+                <td style="border:1px solid #e5e7eb;">' . build_email_value($job['job_title'] ?? '') . '</td>
+                <td style="border:1px solid #e5e7eb;">' . build_email_value($job['employment_type'] ?? '') . '</td>
+                <td style="border:1px solid #e5e7eb;">' . format_date_range($job['start_date'] ?? '', $job['end_date'] ?? '') . '</td>
+            </tr>';
+            if (!empty($job['job_description'])) {
+                $html .= '<tr><td colspan="4" style="border:1px solid #e5e7eb; color:#374151;"><strong>Description:</strong><br>' . nl2br(e($job['job_description'])) . '</td></tr>';
+            }
+        }
+        $html .= '</table>';
+    }
+
+    $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Degrees</h3>';
+    if (empty($degrees)) {
+        $html .= '<p style="color:#6b7280;">No degrees found.</p>';
+    } else {
+        $html .= '<ul style="font-size:14px;">';
+        foreach ($degrees as $deg) {
+            $html .= '<li><strong>' . build_email_value($deg['degree_name'] ?? '') . '</strong> - ' . build_email_value($deg['school_name'] ?? '') . ' (' . build_email_value($deg['year_graduated'] ?? '') . ')</li>';
+        }
+        $html .= '</ul>';
+    }
+
+    $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Certificates</h3>';
+    if (empty($certs)) {
+        $html .= '<p style="color:#6b7280;">No certificates found.</p>';
+    } else {
+        $html .= '<ul style="font-size:14px;">';
+        foreach ($certs as $cert) {
+            $html .= '<li><strong>' . build_email_value($cert['certificate_name'] ?? '') . '</strong> - Issue Date: ' . build_email_value($cert['issue_date'] ?? '') . '</li>';
+        }
+        $html .= '</ul>';
+    }
+
+    $html .= '
+                <p style="margin-top:24px; font-size:12px; color:#6b7280;">
+                    This email contains alumni information for employment review purposes only. Please handle it according to data privacy and confidentiality requirements.
+                </p>
+            </div>
+        </div>
+    </div>';
+
+    return $html;
+}
+
+
+function build_professional_email_html(string $alumniName, string $employerName, string $subject, string $message): string {
+    $safeAlumniName = e($alumniName ?: 'Alumni');
+    $safeEmployerName = e($employerName ?: 'Employer');
+    $safeSubject = e($subject ?: 'Message from Employer');
+    $safeMessage = nl2br(e($message));
+
+    return '
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0; padding:0; background:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f6f8; padding:30px 0;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:680px; background:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+<tr><td style="background:linear-gradient(135deg,#f97316 0%,#ea580c 100%); padding:24px 32px;">
+<div style="font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#ffedd5; font-weight:700; margin-bottom:8px;">GradConn Employer Message</div>
+<div style="font-size:26px; line-height:1.3; color:#ffffff; font-weight:800;">' . $safeSubject . '</div>
+</td></tr>
+<tr><td style="padding:30px 32px 12px 32px;">
+<div style="font-size:15px; line-height:1.8; color:#374151;">Dear <strong>' . $safeAlumniName . '</strong>,</div>
+</td></tr>
+<tr><td style="padding:0 32px 20px 32px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fff7ed; border:1px solid #fdba74; border-radius:14px;">
+<tr><td style="padding:20px 22px;">
+<div style="font-size:13px; font-weight:700; text-transform:uppercase; color:#c2410c; margin-bottom:10px;">Message</div>
+<div style="font-size:15px; line-height:1.8; color:#374151;">' . $safeMessage . '</div>
+</td></tr></table>
+</td></tr>
+<tr><td style="padding:8px 32px 26px 32px;">
+<div style="font-size:15px; line-height:1.8; color:#374151;">Best regards,<br><strong>' . $safeEmployerName . '</strong></div>
+</td></tr>
+<tr><td style="padding:22px 32px; background:#f9fafb; border-top:1px solid #e5e7eb;">
+<div style="font-size:12px; line-height:1.7; color:#6b7280;">
+This email was sent through the GradConn Employer Panel. Please reply directly to the sender if you wish to respond.
+</div>
+</td></tr>
+</table></td></tr></table></body></html>';
+}
+
+function build_professional_email_text(string $alumniName, string $employerName, string $subject, string $message): string {
+    return ($subject ?: 'Message from Employer') . "\n\n"
+        . "Dear " . ($alumniName ?: 'Alumni') . ",\n\n"
+        . $message . "\n\n"
+        . "Best regards,\n"
+        . ($employerName ?: 'Employer') . "\n\n"
+        . "This email was sent through the GradConn Employer Panel.";
+}
+
+function build_job_offer_email_html(string $alumniName, string $employerName, string $subject, string $message, string $acceptLink, string $declineLink): string {
+    $safeAlumniName = e($alumniName ?: 'Alumni');
+    $safeEmployerName = e($employerName ?: 'Employer');
+    $safeSubject = e($subject ?: 'Job Offer');
+    $safeMessage = nl2br(e($message));
+
+    return '
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0; padding:0; background:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f6f8; padding:30px 0;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:680px; background:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+<tr><td style="background:linear-gradient(135deg,#10b981 0%,#059669 100%); padding:24px 32px;">
+<div style="font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#d1fae5; font-weight:700; margin-bottom:8px;">Job Offer</div>
+<div style="font-size:26px; line-height:1.3; color:#ffffff; font-weight:800;">' . $safeSubject . '</div>
+</td></tr>
+<tr><td style="padding:30px 32px 12px 32px;">
+<div style="font-size:15px; line-height:1.8; color:#374151;">Dear <strong>' . $safeAlumniName . '</strong>,</div>
+</td></tr>
+<tr><td style="padding:0 32px 20px 32px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px;">
+<tr><td style="padding:20px 22px;">
+<div style="font-size:13px; font-weight:700; text-transform:uppercase; color:#166534; margin-bottom:10px;">Job Offer Details</div>
+<div style="font-size:15px; line-height:1.8; color:#374151;">' . $safeMessage . '</div>
+</td></tr></table>
+</td></tr>
+<tr><td style="padding:22px 32px;">
+<div style="font-size:14px; color:#374151; margin-bottom:16px;">Please login to your account to see the job offer.</div>
+</td></tr>
+<tr><td style="padding:8px 32px 26px 32px;">
+<div style="font-size:15px; line-height:1.8; color:#374151;">Best regards,<br><strong>' . $safeEmployerName . '</strong></div>
+</td></tr>
+<tr><td style="padding:22px 32px; background:#f9fafb; border-top:1px solid #e5e7eb;">
+<div style="font-size:12px; line-height:1.7; color:#6b7280;">
+This email contains a job offer sent through the GradConn Job Portal. The offer will expire in 30 days.
+</div>
+</td></tr>
+</table></td></tr></table></body></html>';
+}
+
+function build_alumni_snapshot_email_text(array $alumni, array $summaryAlignment): string {
+    return "Alumni Profile Snapshot\n\n"
+        . "Full Name: " . ($alumni['fullname'] ?? 'N/A') . "\n"
+        . "Email: " . ($alumni['email'] ?? 'N/A') . "\n"
+        . "Course: " . ($alumni['course'] ?? 'N/A') . "\n"
+        . "Batch Year: " . ($alumni['batch_year'] ?? 'N/A') . "\n"
+        . "Contact Number: " . ($alumni['contact_number'] ?? 'N/A') . "\n"
+        . "Employment Status: " . ($alumni['employment_status'] ?? 'N/A') . "\n"
+        . "Skills: " . ($alumni['skills'] ?? 'N/A') . "\n"
+        . "Career Objective: " . ($alumni['career_objective'] ?? 'N/A') . "\n"
+        . "Job Alignment: " . ($summaryAlignment['status'] ?? 'N/A') . " - " . ($summaryAlignment['reason'] ?? '') . "\n";
+}
+
 $msg = "";
 $error = "";
+
+if (empty($_SESSION['send_snapshot_email_token'])) {
+    $_SESSION['send_snapshot_email_token'] = bin2hex(random_bytes(32));
+}
+$sendSnapshotEmailToken = $_SESSION['send_snapshot_email_token'];
 
 try {
     if (!column_exists($pdo, 'users', 'is_active')) {
@@ -243,7 +562,11 @@ try {
 
 
 
-$alumni = $pdo->query("\n    SELECT * FROM users\n    WHERE role='alumni' AND COALESCE(is_active, 0) = 1\n    ORDER BY id DESC\n")->fetchAll(PDO::FETCH_ASSOC);
+$alumni = $pdo->query("
+    SELECT * FROM users
+    WHERE role='alumni' AND COALESCE(is_active, 0) = 1
+    ORDER BY id DESC
+")->fetchAll(PDO::FETCH_ASSOC);
 
 $alumniIds = array_map(static fn($row) => (int)$row['id'], $alumni);
 
@@ -298,33 +621,231 @@ if (!empty($alumniIds)) {
     }
 }
 
-$courseOptions = [
-    "BSIS",
-    "BSTM",
-    "BSHM",
-    "BSED Math",
-    "BSED Science",
-    "BSNED",
-    "BPA"
-];
+// ========================
+// LOG EMPLOYER SEARCH ACTIONS
+// ========================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['log_action']) && $_POST['log_action'] === 'search') {
+    try {
+        $employerId = (int)($_SESSION['user']['id'] ?? 0);
+        $courseFilter = trim((string)($_POST['course_filter'] ?? ''));
+        $batchFilter = trim((string)($_POST['batch_filter'] ?? ''));
+        $skillsSearch = trim((string)($_POST['skills_search'] ?? ''));
+        $resultCount = max(0, (int)($_POST['result_count'] ?? 0));
+
+        log_employer_activity(
+            $pdo,
+            $employerId,
+            'SEARCH_ALUMNI',
+            "Search performed with course='{$courseFilter}', batch='{$batchFilter}', skills='{$skillsSearch}', result_count={$resultCount}",
+            null,
+            null,
+            $courseFilter,
+            $batchFilter,
+            $skillsSearch,
+            $resultCount
+        );
+
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'ok']);
+    } catch (Throwable $e) {
+        header('Content-Type: application/json', true, 500);
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// ========================
+// SEND ALUMNI SNAPSHOT EMAIL
+// ========================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_snapshot_email'])) {
+    $postedToken = (string)($_POST['send_snapshot_email_token'] ?? '');
+    $selectedAlumniId = (int)($_POST['email_alumni_id'] ?? 0);
+    $customSubject = trim((string)($_POST['email_subject'] ?? ''));
+    $customMessage = trim((string)($_POST['email_message'] ?? ''));
+
+    if (!hash_equals($sendSnapshotEmailToken, $postedToken)) {
+        $error = "Invalid email request. Please refresh the page and try again.";
+    } elseif ($selectedAlumniId <= 0) {
+        $error = "Please select a valid alumni profile.";
+    } elseif ($customMessage === '') {
+        $error = "Please enter your message before sending the email.";
+    } else {
+        $selectedAlumni = null;
+        foreach ($alumni as $item) {
+            if ((int)$item['id'] === $selectedAlumniId) {
+                $selectedAlumni = $item;
+                break;
+            }
+        }
+
+        if (!$selectedAlumni) {
+            $error = "Selected alumni was not found.";
+        } elseif (empty($selectedAlumni['email']) || !filter_var($selectedAlumni['email'], FILTER_VALIDATE_EMAIL)) {
+            $error = "This alumni does not have a valid email address.";
+        } else {
+            try {
+                // Generate unique token for this job offer
+$offerToken = bin2hex(random_bytes(32));
+$expiresAt = date('Y-m-d H:i:s', strtotime('+30 days'));
+
+// Fix 1: Define $mailSubject BEFORE using it
+$employerName = $_SESSION['user']['fullname'] ?? 'Employer';
+$employerEmail = $_SESSION['user']['email'] ?? '';
+
+$mailSubject = $customSubject !== ''
+    ? $customSubject
+    : 'Job Offer - ' . ($employerName ?: 'GradConn Employer');
+
+// Fix 2: Re-fetch employer id from session to ensure it's not null
+$employerId = (int)($_SESSION['user']['id'] ?? 0);
+
+                // Build action links
+                $baseUrl = BASE_URL ?: 'http://localhost/CAPSTONE';
+                $acceptLink = $baseUrl . '/alumni/job_offers.php?accept=' . urlencode($offerToken);
+                $declineLink = $baseUrl . '/alumni/job_offers.php?decline=' . urlencode($offerToken);
+
+                $selectedJobs = $employmentByUser[$selectedAlumniId] ?? [];
+                $selectedEducations = $educationByUser[$selectedAlumniId] ?? [];
+                $selectedDegrees = $degreesByUser[$selectedAlumniId] ?? [];
+                $selectedCerts = $certificatesByUser[$selectedAlumniId] ?? [];
+                $selectedSummaryAlignment = summarize_job_alignment($selectedAlumni['course'] ?? '', $selectedJobs);
+
+                $smtpEmail = 'cccgradconn@gmail.com';
+                $smtpPassword = 'anhf wyyh oqan nyll';
+
+                $smtpPassword = preg_replace('/\\s+/', '', trim($smtpPassword));
+
+                if (
+                    $smtpPassword === '' ||
+                    $smtpPassword === 'PASTE_NEW_APP_PASSWORD_HERE'
+                ) {
+                    throw new Exception('SMTP App Password is not configured.');
+                }
+
+                if (strlen($smtpPassword) !== 16) {
+                    throw new Exception(
+                        'Invalid Google App Password length. After removing spaces, ' .
+                        'the password has ' . strlen($smtpPassword) .
+                        ' characters; expected 16.'
+                    );
+                }
+
+                $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->AuthType   = 'LOGIN';
+                $mail->Username   = $smtpEmail;
+                $mail->Password   = $smtpPassword;
+                $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+                $mail->CharSet    = 'UTF-8';
+                $mail->Timeout    = 60;
+                $mail->SMTPKeepAlive = false;
+                $mail->SMTPDebug  = 0;
+
+                $mail->setFrom($smtpEmail, 'Job Portal Admin');
+                $mail->Sender = $smtpEmail;
+                $mail->addReplyTo($smtpEmail, 'Job Portal Admin');
+
+                $mail->addAddress($selectedAlumni['email'], $selectedAlumni['fullname'] ?? 'Alumni');
+                $mail->isHTML(true);
+
+                $mail->Subject = $mailSubject;
+                $mail->Body = build_job_offer_email_html($selectedAlumni['fullname'] ?? 'Alumni', $employerName, $mailSubject, $customMessage, $acceptLink, $declineLink);
+                $mail->AltBody = "Job Offer from $employerName\n\n$customMessage\n\nPlease login to your account to see the job offer.";
+
+                $mail->send();
+
+                // Save job offer to database after successful email send
+                $insertOfferStmt = $pdo->prepare("
+                    INSERT INTO job_offers (employer_id, alumni_id, offer_token, subject, message, status, expires_at)
+                    VALUES (?, ?, ?, ?, ?, 'sent', ?)
+                ");
+                $insertOfferStmt->execute([
+                    $employerId,
+                    $selectedAlumniId,
+                    $offerToken,
+                    $mailSubject,
+                    $customMessage,
+                    $expiresAt
+                ]);
+                $offerId = (int)$pdo->lastInsertId();
+
+                log_employer_activity(
+                    $pdo,
+                    $employerId,
+                    'JOB_OFFER_SENT',
+                    "Subject: {$mailSubject}\nMessage: {$customMessage}\nAlignment: {$selectedSummaryAlignment['status']} - {$selectedSummaryAlignment['reason']}",
+                    $selectedAlumniId,
+                    $offerId
+                );
+
+                $msg = "Job offer sent successfully to " . e($selectedAlumni['email']) . ". They will receive an email with options to accept or decline.";
+
+                $_SESSION['send_snapshot_email_token'] = bin2hex(random_bytes(32));
+                $sendSnapshotEmailToken = $_SESSION['send_snapshot_email_token'];
+            } catch (Throwable $e) {
+                $detail = trim((string)$e->getMessage());
+
+                if (isset($mail) && $mail instanceof PHPMailer\PHPMailer\PHPMailer) {
+                    $mailError = trim((string)$mail->ErrorInfo);
+                    if ($mailError !== '') {
+                        $detail = $mailError;
+                    }
+                }
+
+                error_log('Employer alumni email error: ' . $detail);
+
+                if (
+                    stripos($detail, 'Daily user sending limit exceeded') !== false ||
+                    stripos($detail, '5.4.5') !== false
+                ) {
+                    $error =
+                        "Unable to send email because Gmail's daily sending limit has been reached. " .
+                        "The SMTP connection is working; try again after the Gmail quota resets.";
+                } elseif (
+                    stripos($detail, 'authenticate') !== false ||
+                    stripos($detail, '535') !== false ||
+                    stripos($detail, 'username and password') !== false
+                ) {
+                    $error =
+                        "Unable to send email because Gmail rejected the SMTP login. " .
+                        "Check the Gmail account and current App Password.";
+                } elseif (stripos($detail, 'data not accepted') !== false) {
+                    $error =
+                        "Unable to send email: Gmail accepted the SMTP connection but rejected the message data. " .
+                        "Details: " . $detail;
+                } else {
+                    $error = "Unable to send email: " . ($detail !== '' ? $detail : 'Unknown PHPMailer error.');
+                }
+            }
+        }
+    }
+}
+
+$courseOptions = [];
 $batchOptions = [];
 
 foreach ($alumni as $a) {
     $course = trim((string)($a['course'] ?? ''));
     $batch  = trim((string)($a['batch_year'] ?? ''));
 
+    if ($course !== '') $courseOptions[] = $course;
     if ($batch !== '') $batchOptions[] = $batch;
 }
 
+$courseOptions = array_values(array_unique($courseOptions));
 $batchOptions = array_values(array_unique($batchOptions));
 
 sort($courseOptions, SORT_NATURAL | SORT_FLAG_CASE);
 sort($batchOptions, SORT_NATURAL | SORT_FLAG_CASE);
 
 require_once __DIR__ . "/../includes/header.php";
-require_once __DIR__ . "/../includes/admin_sidebar.php";
+require_once __DIR__ . "/../includes/employer_sidebar.php";
 ?>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
 
@@ -338,6 +859,23 @@ body{
     width:calc(100% - 290px);
     max-width:100%;
     padding:30px 24px;
+}
+.modal-backdrop.show{
+    z-index:1140 !important;
+}
+.modal{
+    z-index:1150 !important;
+}
+#alumniSnapshotModal .modal-dialog{
+    max-width:980px !important;
+    width:min(100%, 980px) !important;
+    margin:20px auto !important;
+}
+#alumniSnapshotModal .modal-content{
+    overflow-x:visible !important;
+}
+#alumniSnapshotModal .modal-body{
+    overflow-x:auto !important;
 }
 .page-header{
     display:flex;
@@ -525,6 +1063,95 @@ body{
     transition:.3s ease;
 }
 .name-link:hover{ color:#16a34a; text-decoration:underline; }
+
+/* ── Profile picture in table ── */
+.alumni-avatar{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid #f97316;
+    vertical-align:middle;
+    margin-right:8px;
+}
+.alumni-avatar-initials{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#f97316;
+    color:#fff;
+    font-size:15px;
+    font-weight:800;
+    border:2px solid #ea580c;
+    vertical-align:middle;
+    margin-right:8px;
+    flex-shrink:0;
+}
+.alumni-name-cell{
+    display:flex;
+    align-items:center;
+    gap:0;
+}
+
+/* ── Profile picture in snapshot modal ── */
+.snapshot-profile-wrap{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    width:100%;
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    border-radius:16px;
+    padding:16px 18px;
+    margin-bottom:18px;
+}
+.snapshot-profile-wrap > div{
+    flex:1;
+    min-width:0;
+}
+.snapshot-profile-pic{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #f97316;
+    flex-shrink:0;
+}
+.snapshot-profile-initials{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#f97316;
+    color:#fff;
+    font-size:36px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:3px solid #ea580c;
+    flex-shrink:0;
+}
+.snapshot-profile-info-name{
+    font-size:20px;
+    font-weight:800;
+    color:#111827;
+    margin:0 0 4px;
+}
+.snapshot-profile-info-sub{
+    font-size:13px;
+    color:#6b7280;
+    margin:0 0 2px;
+}
+.snapshot-profile-info-status{
+    font-size:13px;
+    color:#9a3412;
+    font-weight:600;
+    margin:0;
+}
+
 .edit-btn{
     background:#f97316;
     color:#fff;
@@ -652,7 +1279,6 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
     font-weight:600;
     word-break:break-word;
     white-space:pre-line;
-    line-height:1.5;
 }
 .modal-header{ border-bottom:1px solid #e5e7eb; }
 .modal-title{ font-weight:700; color:#1f2937; }
@@ -739,6 +1365,9 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
 
 .print-sheet{
     background:#fff;
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 12px;
 }
 .print-header-card{
     display:flex;
@@ -750,72 +1379,6 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
     border:1px solid #e5e7eb;
     border-radius:14px;
     background:linear-gradient(135deg,#fff7ed 0%,#ffffff 100%);
-}
-.alumni-profile-card{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    background:#fff;
-    border:1px solid #e5e7eb;
-    border-radius:16px;
-    padding:16px;
-    margin-bottom:18px;
-}
-.alumni-profile-avatar{
-    width:84px;
-    height:84px;
-    border-radius:18px;
-    overflow:hidden;
-    background:#f8fafc;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
-}
-.alumni-profile-avatar img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-.alumni-profile-initials{
-    width:100%;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:28px;
-    font-weight:900;
-    color:#1f2937;
-    background:linear-gradient(135deg,#f97316,#eab308);
-}
-.alumni-profile-details{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-.alumni-profile-name{
-    font-size:18px;
-    font-weight:800;
-    color:#111827;
-}
-.alumni-profile-subtitle{
-    font-size:13px;
-    color:#6b7280;
-    text-transform:uppercase;
-    letter-spacing:.08em;
-}
-.alumni-profile-meta{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:8px;
-    font-size:13px;
-    color:#374151;
-}
-.alumni-profile-meta span{
-    background:#f8fafc;
-    padding:8px 10px;
-    border-radius:10px;
-    border:1px solid #e5e7eb;
 }
 .print-header-title{
     font-size:22px;
@@ -875,19 +1438,149 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
 .print-snapshot-btn:hover{
     background:#1d4ed8;
 }
-.snapshot-back-btn{
-    background:#f3f4f6;
-    color:#1f2937;
-    border:1px solid #d1d5db;
-    padding:8px 14px;
+
+.send-email-btn{
+    background:#16a34a;
+    color:#fff;
+    border:none;
+    padding:9px 14px;
     border-radius:10px;
     font-size:13px;
     font-weight:700;
     cursor:pointer;
     transition:.25s ease;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
 }
-.snapshot-back-btn:hover{
-    background:#e5e7eb;
+.send-email-btn:hover{
+    background:#15803d;
+}
+.send-email-btn i{
+    font-size:12px;
+}
+
+.email-message-modal-content{
+    border:none;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 24px 70px rgba(15,23,42,0.22);
+}
+.email-message-header{
+    background:linear-gradient(135deg,#fff7ed 0%,#ffffff 100%);
+    border-bottom:1px solid #fed7aa;
+    align-items:flex-start;
+}
+.email-message-subtitle{
+    color:#6b7280;
+    font-size:13px;
+    margin-top:4px;
+}
+.email-message-body{
+    background:#ffffff;
+    padding:20px;
+}
+.selected-alumni-picture-container{
+    margin-bottom:16px;
+}
+.selected-alumni-picture-container .snapshot-profile-wrap{
+    margin-bottom:0;
+    background:#f5f3ff;
+    border:1px solid #ddd6fe;
+}
+.selected-alumni-box{
+    background:#fff7ed;
+    border:1px solid #fdba74;
+    border-radius:14px;
+    padding:13px 14px;
+    margin-bottom:16px;
+}
+.selected-alumni-label{
+    color:#9a3412;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-bottom:4px;
+}
+.selected-alumni-name{
+    color:#111827;
+    font-size:16px;
+    font-weight:800;
+}
+.email-form-label{
+    display:block;
+    color:#374151;
+    font-size:13px;
+    font-weight:800;
+    margin-bottom:7px;
+}
+.required-text{
+    color:#dc2626;
+}
+.email-form-control,
+.email-form-textarea{
+    width:100%;
+    border:1px solid #d1d5db;
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:14px;
+    outline:none;
+    background:#fff;
+    color:#111827;
+    transition:.25s ease;
+}
+.email-form-control:focus,
+.email-form-textarea:focus{
+    border-color:#f97316;
+    box-shadow:0 0 0 3px rgba(249,115,22,.14);
+}
+.email-form-textarea{
+    min-height:160px;
+    resize:vertical;
+}
+.email-note{
+    background:#f8fafc;
+    border:1px dashed #cbd5e1;
+    border-radius:12px;
+    padding:11px 12px;
+    font-size:12px;
+    color:#64748b;
+}
+.email-message-footer{
+    background:#f8fafc;
+    border-top:1px solid #e5e7eb;
+}
+.cancel-email-btn{
+    background:#ffffff;
+    color:#374151;
+    border:1px solid #d1d5db;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:800;
+    cursor:pointer;
+    transition:.25s ease;
+}
+.cancel-email-btn:hover{
+    background:#f3f4f6;
+}
+.send-email-confirm-btn{
+    background:#16a34a;
+    color:#fff;
+    border:none;
+    padding:10px 16px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:800;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:.25s ease;
+}
+.send-email-confirm-btn:hover{
+    background:#15803d;
 }
 .certificates-section{
     border:1px solid #e5e7eb;
@@ -944,6 +1637,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
         overflow:visible !important;
         height:auto !important;
         transform:none !important;
+        z-index:1160 !important;
     }
 
     #alumniSnapshotModal .modal-content{
@@ -1097,6 +1791,14 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
         color:#111827 !important;
         text-decoration:none !important;
     }
+
+    .snapshot-profile-wrap{
+        background:#fff7ed !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        break-inside:avoid;
+        page-break-inside:avoid;
+    }
 }
 
 @media (max-width:991px){
@@ -1109,13 +1811,9 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
 </style>
 
 <div class="content">
-    <div class="page-header">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
         <h3 class="page-title">Alumni List</h3>
-
-        <div class="header-actions">
-            <a class="report-btn" href="<?php echo BASE_URL; ?>/admin/alumni_report.php">Report</a>
-            <a class="create-btn" href="<?php echo BASE_URL; ?>/admin/alumni_create.php">Create Alumni</a>
-        </div>
+       
     </div>
 
     <?php if ($msg): ?>
@@ -1127,7 +1825,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
     <?php endif; ?>
 
     <div class="filter-card">
-        
+        <h4 class="filter-title">Filter Alumni</h4>
         <div class="filter-row">
             <div class="filter-group">
                 <label for="courseFilter">Course</label>
@@ -1154,7 +1852,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
     <div class="skills-search-card">
         <div class="skills-search-header">
             <div>
-                <h4 class="skills-search-title">Search Alumni by Competencies</h4>
+                <h4 class="skills-search-title">Search Alumni by Skills</h4>
                 <p class="skills-search-subtitle">Type a skill keyword to find alumni with matching skills. Example: PHP, MySQL, communication, leadership.</p>
             </div>
         </div>
@@ -1181,16 +1879,35 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
             </thead>
             <tbody>
                 <?php foreach($alumni as $a): ?>
+                    <?php
+                        $profilePicFile = trim((string)($a['profile_picture'] ?? ''));
+                        $profilePicUrl  = '';
+                        if ($profilePicFile !== '') {
+                            $profilePicUrl = e(BASE_URL . '/uploads/profiles/' . rawurlencode($profilePicFile));
+                        }
+                        $initials = strtoupper(substr(trim($a['fullname'] ?? 'A'), 0, 1) ?: 'A');
+                    ?>
                     <tr>
                         <td></td>
                         <td class="name">
-                            <a href="javascript:void(0);"
-                               class="name-link view-alumni-btn"
-                               data-bs-toggle="modal"
-                               data-bs-target="#alumniSnapshotModal"
-                               data-modal-target="snapshot-<?php echo (int)$a['id']; ?>">
-                                <?php echo e($a['fullname']); ?>
-                            </a>
+                            <div class="alumni-name-cell">
+                                <?php if ($profilePicUrl !== ''): ?>
+                                    <img src="<?php echo $profilePicUrl; ?>"
+                                         alt="<?php echo e($a['fullname']); ?>"
+                                         class="alumni-avatar"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">
+                                    <span class="alumni-avatar-initials" style="display:none;"><?php echo $initials; ?></span>
+                                <?php else: ?>
+                                    <span class="alumni-avatar-initials"><?php echo $initials; ?></span>
+                                <?php endif; ?>
+                                <a href="javascript:void(0);"
+                                   class="name-link view-alumni-btn"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#alumniSnapshotModal"
+                                   data-modal-target="snapshot-<?php echo (int)$a['id']; ?>">
+                                    <?php echo e($a['fullname']); ?>
+                                </a>
+                            </div>
                         </td>
                         <td><?php echo e($a['username']); ?></td>
                         <td><?php echo e($a['email'] ?? ''); ?></td>
@@ -1198,7 +1915,14 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
                         <td><?php echo e($a['batch_year'] ?? ''); ?></td>
                         <td><?php echo e($a['skills'] ?? ''); ?></td>
                         <td>
-                            <a class="edit-btn" href="<?php echo BASE_URL; ?>/admin/alumni_edit.php?id=<?php echo (int)$a['id']; ?>">Edit</a>
+                            <button
+                                type="button"
+                                class="edit-btn view-alumni-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#alumniSnapshotModal"
+                                data-modal-target="snapshot-<?php echo (int)$a['id']; ?>">
+                                View Profile
+                            </button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -1213,26 +1937,35 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
             $certs = $certificatesByUser[$uid] ?? [];
             $jobs = $employmentByUser[$uid] ?? [];
             $degrees = $degreesByUser[$uid] ?? [];
+
+            // Profile picture for snapshot
+            $snapPicFile = trim((string)($a['profile_picture'] ?? ''));
+            $snapPicUrl  = '';
+            if ($snapPicFile !== '') {
+                $snapPicUrl = e(BASE_URL . '/uploads/profiles/' . rawurlencode($snapPicFile));
+            }
+            $snapInitials = strtoupper(substr(trim($a['fullname'] ?? 'A'), 0, 1) ?: 'A');
         ?>
         <div id="snapshot-<?php echo $uid; ?>" class="d-none">
-            <div class="alumni-profile-card">
-                <div class="alumni-profile-avatar">
-                    <?php if (!empty($a['profile_picture'])): ?>
-                        <img src="<?php echo e(BASE_URL . '/uploads/profiles/' . rawurlencode($a['profile_picture'])); ?>" alt="Profile Photo">
-                    <?php else: ?>
-                        <div class="alumni-profile-initials"><?php echo e(strtoupper(substr($a['fullname'] ?? 'A', 0, 1))); ?></div>
-                    <?php endif; ?>
-                </div>
-                <div class="alumni-profile-details">
-                    <div class="alumni-profile-name"><?php echo e($a['fullname']); ?></div>
-                    <div class="alumni-profile-subtitle">Alumni Profile Snapshot</div>
-                    <div class="alumni-profile-meta">
-                        <span>Username: <?php echo e($a['username']); ?></span>
-                        <span>Course: <?php echo e($a['course'] ?? ''); ?></span>
-                        <span>Batch: <?php echo e($a['batch_year'] ?? ''); ?></span>
-                    </div>
+
+            <!-- ── Profile picture banner ── -->
+            <div class="snapshot-profile-wrap">
+                <?php if ($snapPicUrl !== ''): ?>
+                    <img src="<?php echo $snapPicUrl; ?>"
+                         alt="<?php echo e($a['fullname']); ?>"
+                         class="snapshot-profile-pic"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div class="snapshot-profile-initials" style="display:none;"><?php echo $snapInitials; ?></div>
+                <?php else: ?>
+                    <div class="snapshot-profile-initials"><?php echo $snapInitials; ?></div>
+                <?php endif; ?>
+                <div>
+                    <p class="snapshot-profile-info-name"><?php echo e($a['fullname']); ?></p>
+                    <p class="snapshot-profile-info-sub"><?php echo e($a['course'] ?? ''); ?> &bull; Batch <?php echo e($a['batch_year'] ?? ''); ?></p>
+                    <p class="snapshot-profile-info-status"><?php echo e($a['employment_status'] ?? ''); ?></p>
                 </div>
             </div>
+
             <div class="snapshot-grid">
                 <div class="snapshot-item"><div class="snapshot-label">Fullname</div><div class="snapshot-value"><?php echo e($a['fullname']); ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Username</div><div class="snapshot-value"><?php echo e($a['username']); ?></div></div>
@@ -1419,29 +2152,85 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
     <?php endforeach; ?>
 </div>
 
-<style>
-/* Center the snapshot modal in the available viewport */
-@media (min-width: 992px) {
-    #alumniSnapshotModal .modal-dialog {
-        max-width: min(900px, calc(100% - 2rem));
-        margin: calc(78px + 2rem) auto 1.75rem;
-    }
-}
-
-/* Keep the modal header visible when the modal body scrolls so Back/Print stay accessible */
-#alumniSnapshotModal .modal-header{
-    position: sticky;
-    top: calc(78px + 0.75rem);
-    z-index: 1060;
-    background: #ffffff;
-}
-</style>
-
 <div class="modal fade" id="alumniSnapshotModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
-            
+            <div class="modal-header">
+                <h5 class="modal-title">Alumni Profile Snapshot</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="send-email-btn" id="openEmailMessageModalBtn" data-bs-toggle="modal" data-bs-target="#emailMessageModal">
+                        <i class="fas fa-envelope"></i>
+                        Send Email
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
             <div class="modal-body" id="snapshotModalBody"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="emailMessageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content email-message-modal-content">
+            <form method="POST" id="sendSnapshotEmailForm">
+                <input type="hidden" name="send_snapshot_email" value="1">
+                <input type="hidden" name="send_snapshot_email_token" value="<?php echo e($sendSnapshotEmailToken); ?>">
+                <input type="hidden" name="email_alumni_id" id="emailAlumniId" value="">
+
+                <div class="modal-header email-message-header">
+                    <div>
+                        <h5 class="modal-title">Send Email to Alumni</h5>
+                        <div class="email-message-subtitle">
+                            Write your message first. The alumni snapshot will be included in the email.
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body email-message-body">
+                    <div class="selected-alumni-box">
+                        <div class="selected-alumni-label">Selected Alumni</div>
+                        <div class="selected-alumni-name" id="selectedAlumniEmailName">No alumni selected</div>
+                    </div>
+                    <div id="selectedAlumniPictureContainer" class="selected-alumni-picture-container"></div>
+
+                    <div class="mb-3">
+                        <label for="emailSubject" class="email-form-label">Subject</label>
+                        <input
+                            type="text"
+                            class="email-form-control"
+                            id="emailSubject"
+                            name="email_subject"
+                            placeholder="Example: Job Opportunity Invitation"
+                            value="<?php echo e($_POST['email_subject'] ?? ''); ?>"
+                        >
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="emailMessage" class="email-form-label">Message <span class="required-text">*</span></label>
+                        <textarea
+                            class="email-form-textarea"
+                            id="emailMessage"
+                            name="email_message"
+                            placeholder="Type your custom message here..."
+                            required
+                        ><?php echo e($_POST['email_message'] ?? ''); ?></textarea>
+                    </div>
+
+                    <div class="email-note">
+                        The message will be sent using PHPMailer together with the selected alumni profile snapshot.
+                    </div>
+                </div>
+
+                <div class="modal-footer email-message-footer">
+                    <button type="button" class="cancel-email-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="send-email-confirm-btn" id="sendEmailConfirmBtn">
+                        <i class="fas fa-paper-plane"></i>
+                        Send
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -1514,30 +2303,113 @@ $(function () {
         }
     }
 
+    let searchLogTimeout = null;
+    let lastLoggedSearch = {
+        course: '',
+        batch: '',
+        skill: '',
+        resultCount: 0
+    };
+
+    function scheduleSearchLog() {
+        if (searchLogTimeout) {
+            clearTimeout(searchLogTimeout);
+        }
+        searchLogTimeout = setTimeout(logEmployerSearch, 700);
+    }
+
+    function logEmployerSearch() {
+        const courseFilter = ($('#courseFilter').val() || '').toString().trim();
+        const batchFilter = ($('#batchFilter').val() || '').toString().trim();
+        const skillsSearch = ($('#skillsSearch').val() || '').toString().trim();
+        const resultCount = table.rows({ search: 'applied' }).count();
+
+        if (courseFilter === lastLoggedSearch.course &&
+            batchFilter === lastLoggedSearch.batch &&
+            skillsSearch === lastLoggedSearch.skill &&
+            resultCount === lastLoggedSearch.resultCount) {
+            return;
+        }
+
+        lastLoggedSearch = {
+            course: courseFilter,
+            batch: batchFilter,
+            skill: skillsSearch,
+            resultCount: resultCount
+        };
+
+        const payload = new URLSearchParams({
+            log_action: 'search',
+            course_filter: courseFilter,
+            batch_filter: batchFilter,
+            skills_search: skillsSearch,
+            result_count: resultCount.toString()
+        });
+
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: payload.toString(),
+            credentials: 'same-origin'
+        }).catch(() => {});
+    }
+
     $('#courseFilter, #batchFilter').on('change', function () {
         table.draw();
         updateSkillsSearchResult();
+        scheduleSearchLog();
     });
 
     $('#skillsSearch').on('keyup change', function () {
         table.draw();
         updateSkillsSearchResult();
+        scheduleSearchLog();
     });
 
     $('#clearSkillsSearch').on('click', function () {
         $('#skillsSearch').val('');
         table.draw();
         updateSkillsSearchResult();
+        scheduleSearchLog();
     });
 
     updateSkillsSearchResult();
+
+    let currentAlumniProfilePicture = '';
 
     $(document).on('click', '.view-alumni-btn', function () {
         const targetId = $(this).data('modal-target');
         const source = document.getElementById(targetId);
         const body = document.getElementById('snapshotModalBody');
-        const alumniName = $(this).text().trim();
-        const printedAt = new Date().toLocaleString();
+
+        // Get the alumni name: from the name-link text if this is the "View Profile" button,
+        // or from the link sibling if this is the name link itself
+        let alumniName = '';
+        const $row = $(this).closest('tr');
+        if ($row.length) {
+            alumniName = $row.find('.name-link').text().trim();
+        }
+        if (!alumniName) {
+            alumniName = $(this).text().trim();
+        }
+
+        const viewedAt = new Date().toLocaleString();
+        const alumniId = String(targetId || '').replace('snapshot-', '');
+
+        $('#emailAlumniId').val(alumniId);
+        $('#selectedAlumniEmailName').text(alumniName);
+
+        // Extract and display profile picture in email modal
+        const pictureContainer = document.getElementById('selectedAlumniPictureContainer');
+        if (pictureContainer) {
+            pictureContainer.innerHTML = '';
+            if (source) {
+                const profileWrap = source.querySelector('.snapshot-profile-wrap');
+                if (profileWrap) {
+                    pictureContainer.innerHTML = profileWrap.outerHTML;
+                }
+            }
+        }
 
         if (!source) {
             body.innerHTML = '<div class="details-empty">No alumni details found.</div>';
@@ -1549,27 +2421,50 @@ $(function () {
                 <div class="print-header-card">
                     <div>
                         <h2 class="print-header-title">Alumni Profile Snapshot</h2>
-                        <p class="print-header-subtitle">Complete alumni information for admin review and printing.</p>
+                        <p class="print-header-subtitle">Complete alumni information for employer review and email sending.</p>
                     </div>
                     <div class="print-header-badge">${alumniName}</div>
-                </div>
-                <div class="print-meta">
-                    <div class="print-meta-item">
-                        <div class="print-meta-label">Printed Alumni</div>
-                        <div class="print-meta-value">${alumniName}</div>
-                    </div>
-                    <div class="print-meta-item">
-                        <div class="print-meta-label">Printed On</div>
-                        <div class="print-meta-value">${printedAt}</div>
-                    </div>
                 </div>
                 <div class="mt-3">${source.innerHTML}</div>
             </div>
         `;
     });
 
-    $(document).on('click', '#printSnapshotBtn', function () {
-        window.print();
+    $('#openEmailMessageModalBtn').on('click', function (event) {
+        const alumniId = ($('#emailAlumniId').val() || '').trim();
+
+        if (alumniId === '') {
+            event.preventDefault();
+            alert('Please open an alumni profile first.');
+            return false;
+        }
+
+        // Make sure picture is displayed when email modal opens
+        const pictureContainer = document.getElementById('selectedAlumniPictureContainer');
+        if (pictureContainer && currentAlumniProfilePicture) {
+            pictureContainer.innerHTML = currentAlumniProfilePicture;
+        }
+
+        return true;
+    });
+
+    $('#sendSnapshotEmailForm').on('submit', function () {
+        const alumniId = ($('#emailAlumniId').val() || '').trim();
+        const message = ($('#emailMessage').val() || '').trim();
+
+        if (alumniId === '') {
+            alert('Please open an alumni profile first.');
+            return false;
+        }
+
+        if (message === '') {
+            alert('Please type your message before sending.');
+            $('#emailMessage').focus();
+            return false;
+        }
+
+        $('#sendEmailConfirmBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Sending...');
+        return true;
     });
 });
 </script>

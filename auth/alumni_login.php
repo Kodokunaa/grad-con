@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../config/auth.php";
 if (session_status() === PHP_SESSION_NONE) session_start();
+
+if (isset($_SESSION["user"]) && is_array($_SESSION["user"])) {
+    header("Location: " . BASE_URL . "/alumni/feed.php");
+    exit;
+}
 
 $error = "";
 
@@ -8,13 +14,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $username = trim($_POST["username"] ?? "");
   $password = trim($_POST["password"] ?? "");
 
-  $stmt = $pdo->prepare("SELECT * FROM users WHERE username=? AND password=? AND role='alumni' AND is_active=1 LIMIT 1");
-  $stmt->execute([$username, $password]);
+  $stmt = $pdo->prepare("SELECT * FROM users WHERE username=? AND role='alumni' AND is_active=1 LIMIT 1");
+  $stmt->execute([$username]);
   $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-  if ($user) {
+  if ($user && verify_password($pdo, $user, $password)) {
+    session_regenerate_id(true);
     $_SESSION["user"] = $user;
-    header("Location: /capstone/alumni/feed.php");
+    header("Location: " . BASE_URL . "/alumni/feed.php");
     exit;
   } else {
     $error = "Invalid alumni credentials.";

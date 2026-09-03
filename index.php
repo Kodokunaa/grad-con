@@ -6,6 +6,23 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . "/config/app.php";
 require_once __DIR__ . "/config/db.php";
 
+if (isset($_SESSION["user"]) && is_array($_SESSION["user"])) {
+    $role = $_SESSION["user"]["role"] ?? '';
+    if ($role === 'admin') {
+        header("Location: " . BASE_URL . "/admin/dashboard.php");
+        exit;
+    } elseif ($role === 'employer') {
+        header("Location: " . BASE_URL . "/employer/dashboard.php");
+        exit;
+    } elseif ($role === 'alumni_officer') {
+        header("Location: " . BASE_URL . "/alumni_officer/dashboard.php");
+        exit;
+    } elseif ($role === 'alumni') {
+        header("Location: " . BASE_URL . "/alumni/feed.php");
+        exit;
+    }
+}
+
 $force_login = isset($_GET['force_login']) && $_GET['force_login'] == '1';
 $error = "";
 
@@ -17,6 +34,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "Please enter Student ID and password.";
     } else {
         try {
+            require_once __DIR__ . "/config/auth.php";
+
             $stmt = $pdo->prepare("
                 SELECT id, fullname, username, role, is_active, status, password
                 FROM users
@@ -26,9 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->execute([$student_id]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$user) {
-                $error = "Invalid Student ID or password.";
-            } elseif ((string)$user["password"] !== (string)$password) {
+            if (!$user || !verify_password($pdo, $user, $password)) {
                 $error = "Invalid Student ID or password.";
             } else {
                 if ((int)($user["is_active"] ?? 0) !== 1) {

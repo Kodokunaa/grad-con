@@ -22,7 +22,7 @@ if (!$user) {
 }
 
 // Helper: Add security log
-function add_log(PDO $pdo, int $user_id, string $action, string $details = null): void {
+function add_log(PDO $pdo, int $user_id, string $action, ?string $details = null): void {
     $ip = $_SERVER['REMOTE_ADDR'] ?? null;
     $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
 
