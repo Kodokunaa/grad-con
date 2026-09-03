@@ -281,13 +281,7 @@
 </head>
 <body>
 
-<?php 
-if (file_exists(\storage_path('app/private/files/employer') . "/../includes/employer_sidebar.php")) {
-    echo \gc_partial('employer_sidebar', \get_defined_vars());
-} else {
-    echo "<div style='padding:15px; background:#fee2e2; color:#991b1b; margin:20px; border-radius:10px;'>\r\n            ERROR: employer_sidebar.php not found. Check your includes folder.\r\n          </div>";
-}
-?>
+<?php echo \gc_partial('employer_sidebar', \get_defined_vars()); ?>
 
 <div class="content">
 

@@ -111,7 +111,8 @@ final class MigrationTest extends TestCase
         $this->actingAs($employer)
             ->get('/employer/my_jobs.php')
             ->assertRedirect('/employer/posted_job.php');
-        $this->get('/employer/job_list.php')->assertRedirect('/employer/jobl_list.php');
+        $this->get('/employer/job_list.php')->assertRedirect('/employer/posted_job.php');
+        $this->get('/employer/jobl_list.php')->assertRedirect('/employer/posted_job.php');
     }
 
     public function test_all_login_aliases_use_the_same_guard_and_block_inactive_accounts(): void

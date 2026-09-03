@@ -50,7 +50,6 @@ use App\Http\Controllers\Pages\EmployerAlumniListController;
 use App\Http\Controllers\Pages\EmployerApplicationsController;
 use App\Http\Controllers\Pages\EmployerDashboardController;
 use App\Http\Controllers\Pages\EmployerInterviewController;
-use App\Http\Controllers\Pages\EmployerJoblListController;
 use App\Http\Controllers\Pages\EmployerJobOffersController;
 use App\Http\Controllers\Pages\EmployerPostedJobController;
 use App\Http\Controllers\Pages\EmployerPostJobController;
@@ -107,7 +106,6 @@ Route::match(['GET', 'POST'], '/employer/applications.php', EmployerApplications
 Route::match(['GET', 'POST'], '/employer/dashboard.php', EmployerDashboardController::class)->middleware('account:employer')->name('employer.dashboard');
 Route::match(['GET', 'POST'], '/employer/interview.php', EmployerInterviewController::class)->middleware('account:employer')->name('employer.interview');
 Route::match(['GET', 'POST'], '/employer/job_offers.php', EmployerJobOffersController::class)->middleware('account:employer')->name('employer.job_offers');
-Route::match(['GET', 'POST'], '/employer/jobl_list.php', EmployerJoblListController::class)->middleware('account:employer')->name('employer.jobl_list');
 Route::match(['GET', 'POST'], '/employer/post_job.php', EmployerPostJobController::class)->middleware('account:employer')->name('employer.post_job');
 Route::match(['GET', 'POST'], '/employer/posted_job.php', EmployerPostedJobController::class)->middleware('account:employer')->name('employer.posted_job');
 Route::match(['GET', 'POST'], '/profile.php', ProfileController::class)->middleware('account')->name('profile');

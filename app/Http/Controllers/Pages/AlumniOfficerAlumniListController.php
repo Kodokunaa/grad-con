@@ -86,11 +86,7 @@ final class AlumniOfficerAlumniListController extends PageController
             sort($courseOptions, SORT_NATURAL | SORT_FLAG_CASE);
             sort($batchOptions, SORT_NATURAL | SORT_FLAG_CASE);
             echo \gc_partial('header', \get_defined_vars());
-            if (file_exists(\storage_path('app/private/files/alumni_officer').'/../includes/alumni_officer_sidebar.php')) {
-                echo \gc_partial('alumni_officer_sidebar', \get_defined_vars());
-            } else {
-                echo \gc_partial('admin_sidebar', \get_defined_vars());
-            }
+            echo \gc_partial('alumni_officer_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.alumni_officer.alumni_list', get_defined_vars());
         });

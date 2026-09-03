@@ -22,5 +22,6 @@ Route::get('/admin/view_resume.php', [FileController::class, 'resume'])->middlew
 Route::get('/uploads/{path}', [FileController::class, 'upload'])->where('path', '.*')->middleware('account');
 Route::redirect('/admin/employer_list.php', '/admin/create_employer.php')->middleware('account:admin');
 Route::redirect('/employer/my_jobs.php', '/employer/posted_job.php')->middleware('account:employer');
-Route::redirect('/employer/job_list.php', '/employer/jobl_list.php')->middleware('account:employer');
+Route::redirect('/employer/job_list.php', '/employer/posted_job.php')->middleware('account:employer');
+Route::redirect('/employer/jobl_list.php', '/employer/posted_job.php')->middleware('account:employer');
 require __DIR__.'/pages.php';

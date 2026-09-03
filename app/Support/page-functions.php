@@ -287,14 +287,6 @@ function gc_admin_applications_appColExists(array $columns, string $name): bool
 function gc_admin_applications_sendAdminApplicantEmail(array $application, string $action, string $customMessage): array
 {
     try {
-        $mailerPath = \storage_path('app/private/files/admin').'/../config/mailer.php';
-        if (! file_exists($mailerPath)) {
-            return ['success' => false, 'message' => 'Mailer file not found.'];
-        }
-
-        if (! function_exists('make_mailer')) {
-            return ['success' => false, 'message' => 'make_mailer() not found.'];
-        }
         $mail = \gc_make_mailer();
         $alumni_email = $application['email'] ?? '';
         $alumni_name = $application['fullname'] ?? 'Applicant';

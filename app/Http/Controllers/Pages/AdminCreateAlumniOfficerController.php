@@ -22,14 +22,6 @@ final class AdminCreateAlumniOfficerController extends PageController
             }
             $success = '';
             $error = '';
-            $sidebar_file = null;
-            $possible_sidebars = [\storage_path('app/private/files/admin').'/sidebar.php', \storage_path('app/private/files/admin').'/admin_sidebar.php', \storage_path('app/private/files/admin').'/includes/admin_sidebar.php', \storage_path('app/private/files/admin').'/../includes/admin_sidebar.php'];
-            foreach ($possible_sidebars as $file) {
-                if (file_exists($file)) {
-                    $sidebar_file = $file;
-                    break;
-                }
-            }
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST') {
                 $fullname = trim(\gc_context()->post['fullname'] ?? '');
                 $email = trim(\gc_context()->post['email'] ?? '');

@@ -22,20 +22,6 @@ final class AdminCreateEmployerController extends PageController
             }
             $success = '';
             $error = '';
-            /*
-            |--------------------------------------------------------------------------
-            | SIDEBAR FILE FIX
-            |--------------------------------------------------------------------------
-            | This checks possible sidebar file names so page won't crash
-            */
-            $sidebar_file = null;
-            $possible_sidebars = [\storage_path('app/private/files/admin').'/sidebar.php', \storage_path('app/private/files/admin').'/admin_sidebar.php', \storage_path('app/private/files/admin').'/includes/admin_sidebar.php', \storage_path('app/private/files/admin').'/../includes/admin_sidebar.php'];
-            foreach ($possible_sidebars as $file) {
-                if (file_exists($file)) {
-                    $sidebar_file = $file;
-                    break;
-                }
-            }
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST') {
                 $fullname = trim(\gc_context()->post['fullname'] ?? '');
                 $company = trim(\gc_context()->post['company'] ?? '');

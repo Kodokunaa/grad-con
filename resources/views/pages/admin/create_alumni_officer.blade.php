@@ -178,20 +178,6 @@
 </head>
 <body>
 
-<?php 
-if ($sidebar_file) {
-    ?>
-    <?php 
-    null;
-} else {
-    ?>
-    <div style="padding:15px; background:#fef3c7; color:#92400e; border-bottom:1px solid #fcd34d;">
-        Sidebar file not found. Page is still working, but please make sure your sidebar file exists.
-    </div>
-<?php 
-}
-?>
-
 <div class="page">
     <div class="container">
         <div class="card">

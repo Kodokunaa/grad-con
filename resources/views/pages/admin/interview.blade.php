@@ -217,13 +217,7 @@ td {
 
 <body>
 
-<?php 
-if (file_exists(\storage_path('app/private/files/admin') . "/../include/admin_sidebar.php")) {
-    null;
-} elseif (file_exists(\storage_path('app/private/files/admin') . "/../includes/admin_sidebar.php")) {
-    echo \gc_partial('admin_sidebar', \get_defined_vars());
-}
-?>
+<?php echo \gc_partial('admin_sidebar', \get_defined_vars()); ?>
 
 <div class="content">
 
