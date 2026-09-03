@@ -300,12 +300,6 @@
         "role": "employer"
     },
     {
-        "source": "employer/jobl_list.php",
-        "controller": "EmployerJoblListController",
-        "view": "pages.employer.jobl_list",
-        "role": "employer"
-    },
-    {
         "source": "employer/post_job.php",
         "controller": "EmployerPostJobController",
         "view": "pages.employer.post_job",

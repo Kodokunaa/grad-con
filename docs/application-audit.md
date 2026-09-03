@@ -4,7 +4,7 @@ Audit date: 2026-09-04
 
 ## Scope
 
-The review covered all 79 application routes, 55 migrated page controllers and Blade pages, authentication and password reset, four role boundaries, CSRF behavior, application and offer ownership, private uploads, queued mail, migrations, seeders, current database relationships, deployment caches, dependency advisories, and PHP syntax/style.
+The review covered every application route, 54 migrated page controllers and Blade pages, authentication and password reset, four role boundaries, CSRF behavior, application and offer ownership, private uploads, queued mail, migrations, seeders, current database relationships, deployment caches, dependency advisories, and PHP syntax/style.
 
 ## Corrected defects
 
@@ -23,9 +23,9 @@ The review covered all 79 application routes, 55 migrated page controllers and B
 
 ## Verification
 
-- 23 automated tests pass with 106 assertions.
+- 25 automated tests pass with 133 assertions.
 - Every migrated page renders for its authorized role.
-- PHP lint passes for 102 application, route, configuration, migration, seeder, test, and tool files.
+- PHP lint passes for 104 application, route, configuration, migration, seeder, and test files.
 - Laravel Pint passes.
 - Route caching and Blade compilation pass.
 - Composer validation passes and Composer reports no known dependency advisories.

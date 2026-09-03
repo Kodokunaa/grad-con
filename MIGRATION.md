@@ -4,7 +4,7 @@ Migration complete. Target: Laravel 13 on PHP 8.3, preserving the existing scree
 
 The original application is preserved locally in `.migration-backup/source/` and in Git. This directory contains sensitive source and uploads: it is ignored by Git and denied by Apache. Do not publish it.
 
-An isolated copy of the original MySQL data is in `.migration-runtime/data/`, served on 127.0.0.1:3307 for migration verification. The original XAMPP database remains untouched.
+Migration verification now uses the dedicated `gradconn_test` database configured through `.env.testing`. The original XAMPP application database remains untouched by automated tests.
 
 The Laravel application now occupies the repository root. Its production web root must be `public/`; for local development, run `php artisan serve` from this directory. Historic `.php` URLs are retained as Laravel routes.
 
