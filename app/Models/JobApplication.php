@@ -12,6 +12,11 @@ class JobApplication extends Model
 
     protected $guarded = ['id', 'alumni_id', 'status'];
 
+    protected function casts(): array
+    {
+        return ['applicant_birthdate' => 'date', 'applicant_age' => 'integer', 'cancelled_at' => 'datetime', 'created_at' => 'datetime'];
+    }
+
     public function job()
     {
         return $this->belongsTo(Job::class);
@@ -21,4 +26,6 @@ class JobApplication extends Model
     {
         return $this->belongsTo(User::class, 'alumni_id');
     }
+
+    public function interviews() { return $this->hasMany(Interview::class, 'application_id'); }
 }
