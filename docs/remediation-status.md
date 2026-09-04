@@ -16,7 +16,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Views and frontend | In progress | Shared public-authentication document layout and logout modal regression coverage | Auth asset extraction; authenticated layouts/components/assets; remove response rewriting and duplicated inline CSS/JavaScript |
 | Middleware and responses | In progress | Idempotent CSRF/asset/modal augmentation, native auth CSRF, non-fatal audit records, upload validation, security headers | Remove HTML regex rewriting and query-action interception after native forms/routes are complete |
 | Duplicate helpers | In progress | Consolidated 20 identical role-prefixed HTML escaping helpers into `gc_e()` | Consolidate formatting, alignment, schema, activity-log, social-feed, and email helpers |
-| Configuration and portability | In progress | Laravel root, environment templates, MySQL migration path | Set application timezone, verify clean-device install, document extensions and queue/mail requirements |
+| Configuration and portability | In progress | Laravel root, environment templates, environment-driven timezone, declared PHP extensions, installation checker, MySQL migration path | Complete isolated clean-device install and production queue/mail verification |
 | Redundant files | In progress | Obsolete conversion tools, route dump, starter welcome view, and two blank views removed | Remove starter tests, empty directories, build cache, and migration runtime after final verification |
 | Tests | In progress | Authentication, roles, routing, policy, upload, and primary workflow coverage | Remaining mutation, validation, mail-worker, migration-upgrade, browser, and clean-device coverage |
 | Documentation | In progress | README, audit, route inventory, and this status tracker | Refresh final installation/deployment/backup/troubleshooting instructions after architecture stabilizes |
@@ -91,3 +91,21 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - Consolidate duplicate activity/security logging functions.
 - Consolidate the admin, alumni, and officer social-feed functions.
 - Replace repeated application, interview, job-offer, and snapshot email helpers with dedicated Mailables or Notifications.
+
+## Current configuration and portability checkpoint
+
+### Done
+
+- Made the application name and timezone environment-driven with GradConn and `Asia/Manila` defaults.
+- Declared the PHP extensions required by the application in Composer metadata.
+- Updated the example environment for a standard XAMPP MySQL installation and explicit session/queue settings.
+- Added `php artisan gradconn:check --database` for device-readiness diagnostics.
+- Documented database-port selection and the portable installation sequence.
+
+### Still needs fixing
+
+- Perform an isolated installation from a clean checkout without reusing the current `vendor`, `.env`, caches, or database.
+- Verify queue-worker recovery and durable attachment behavior under a production process manager.
+- Verify real SMTP delivery with deployment-owned credentials.
+- Document web-server examples for Apache and Nginx with `public` as the document root.
+- Verify Linux filesystem permissions and case-sensitive paths.

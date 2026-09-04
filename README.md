@@ -10,14 +10,15 @@ GradConn is a Laravel 13 application migrated from the original procedural PHP p
 
 ## Installation
 
-1. Copy `.env.example` to `.env`, set `APP_URL` and `DB_*`, then run `php artisan key:generate`.
-2. Back up the database and uploads. Run `composer install --no-dev --optimize-autoloader` and `php artisan migrate --force`.
+1. Copy `.env.example` to `.env`. Set `APP_URL`, `APP_TIMEZONE`, and the actual `DB_*` values for the device. XAMPP normally uses port `3306`; use `3307` only when MySQL is configured to listen there.
+2. Back up the database and uploads. Run `composer install --no-dev --optimize-autoloader`, `php artisan key:generate`, and `php artisan migrate --force`.
 3. Run `php artisan gradconn:hash-passwords --dry-run`, then `php artisan gradconn:hash-passwords`. Values are never printed and existing hashes are skipped.
 4. Copy old uploads to `storage/app/private/files/uploads`. Never put resumes in the public directory.
 5. Run `php artisan config:cache` and `php artisan view:cache`.
 6. Run `php artisan queue:work --tries=3` under a process manager when `QUEUE_CONNECTION=database`.
+7. Run `php artisan gradconn:check --database` to verify PHP extensions, the application key, timezone, writable directories, and database access.
 
-For local development, start MySQL and use `php artisan serve`.
+For local development, create the configured database first, start MySQL, run `composer install`, and use `php artisan serve`. The application timezone defaults to `Asia/Manila` and can be changed through `APP_TIMEZONE` without editing source files.
 
 ## Email
 

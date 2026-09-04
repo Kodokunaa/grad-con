@@ -26,6 +26,13 @@ final class MigrationTest extends TestCase
         $this->assertSame('', gc_e(null));
     }
 
+    public function test_portable_installation_defaults_and_readiness_check(): void
+    {
+        $this->assertSame('GradConn', config('app.name'));
+        $this->assertSame('Asia/Manila', config('app.timezone'));
+        $this->artisan('gradconn:check')->assertSuccessful();
+    }
+
     protected function tearDown(): void
     {
         foreach ($this->createdFiles as $path) {
