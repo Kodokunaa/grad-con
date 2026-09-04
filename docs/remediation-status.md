@@ -11,7 +11,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Authentication and account security | In progress | Hashing, centralized password policy, rehash-on-login, reset flow, security logging, other-session invalidation, and removal of automatic PDO password rewriting | Review production cookie settings and complete native account-management controllers |
 | Authorization | In progress | Policies for jobs, applications, offers, interviews, events, training, private files, and policy-enforced administrative alumni editing | Enforce policies in every retained mutation controller and add record-level tests for each workflow |
 | Validation | In progress | Auth validation plus Form Requests for administrative employer, officer, alumni creation, and alumni editing | Add Form Requests for jobs, applications, offers, interviews, events, training, profiles, education, employment, and social actions |
-| Uploads and files | In progress | Normalized private paths, Laravel disk writes, recognized categories, resume/certificate policies, portal-image scope tests | Convert deletion and reads fully to `Storage`; collision-resistant names; orphan reconciliation; MIME boundary tests |
+| Uploads and files | In progress | Centralized private upload storage; Laravel disk writes, reads, existence checks, and deletion; UUID image names; recognized categories; resume/certificate policies; portal-image scope tests | Add transaction-aware orphan reconciliation and broader MIME boundary tests |
 | Mail and queues | In progress | Laravel queued delivery, reset notification, configured sender addresses, and removal of PHPMailer transport setup | Consolidate mail templates, harden queued attachments, document/verify worker and SMTP deployment |
 | Views and frontend | In progress | Shared public-authentication document layout; native authenticated header security assets and logout component; native CSRF in every Blade POST form; logout modal regression coverage | Auth asset extraction; full authenticated layouts/components/assets; remove duplicated inline CSS/JavaScript |
 | Middleware and responses | In progress | Native form CSRF, native page assets/modal, no response-body HTML rewriting, non-fatal audit records, upload validation, security headers | Remove query-action interception after native mutation routes are complete; move audit recording to a service or listener |
@@ -158,7 +158,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 ### Still needs fixing
 
 - Complete policy and Form Request adoption in the remaining multi-action compatibility controllers.
-- Convert remaining direct upload deletion and filesystem inspection to Laravel `Storage`.
+- Direct upload filesystem operations now use Laravel `Storage`; add orphan reconciliation around failed database writes.
 - Replace `PageMailer` and repeated message builders with dedicated Mailables or Notifications.
 - Add shared authenticated layouts and remove the remaining head/logout response augmentation.
 - Consolidate formatting, alignment, schema, logging, social-feed, and email helper families.

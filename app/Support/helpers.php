@@ -5,7 +5,6 @@ use App\Support\PageContext;
 use App\Support\PageResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 function gc_context(): PageContext
 {
@@ -80,23 +79,4 @@ function gc_files(): array
     }
 
     return $files;
-}
-function gc_move_upload(string $temporary, string $destination): bool
-{
-    $root = realpath(storage_path('app/private/files/uploads'));
-    $normalizedDestination = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $destination);
-    if (! $root || ! str_starts_with($normalizedDestination, $root.DIRECTORY_SEPARATOR)) {
-        throw new RuntimeException('Invalid upload destination.');
-    }
-    $relative = str_replace(DIRECTORY_SEPARATOR, '/', substr($normalizedDestination, strlen($root) + 1));
-    if ($relative === '' || str_contains($relative, '../')) {
-        throw new RuntimeException('Invalid upload destination.');
-    }
-    foreach (request()->allFiles() as $file) {
-        if ($file instanceof UploadedFile && $file->getPathname() === $temporary) {
-            return Storage::disk('local')->putFileAs('files/uploads/'.dirname($relative), $file, basename($relative)) !== false;
-        }
-    }
-
-    return false;
 }

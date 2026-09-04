@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
 use App\Support\PageResponse;
+use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
 
 final class AdminForwardToCompanyController extends PageController
@@ -21,12 +22,15 @@ final class AdminForwardToCompanyController extends PageController
             if (! $app) {
                 \gc_finish('Not found.');
             }
-            $resumePath = \storage_path('app/private/files/uploads/resumes/'.$app['resume_file']);
             $msg = '';
             $error = '';
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST') {
                 $companyEmail = \gc_context()->post['company_email'];
                 try {
+                    if (empty($app['resume_file']) || ! PrivateUploads::exists('resumes', $app['resume_file'])) {
+                        throw new \RuntimeException('Resume is unavailable.');
+                    }
+                    $resumePath = PrivateUploads::absolutePath('resumes', $app['resume_file']);
                     $mail = \gc_make_mailer();
                     $mail->addAddress($companyEmail);
                     $mail->Subject = 'Applicant Resume - '.$app['fullname'];

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
+use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
 
 final class AdminTrainingsListController extends PageController
@@ -20,10 +21,7 @@ final class AdminTrainingsListController extends PageController
                 $getImg->execute([$id]);
                 $old = $getImg->fetch(\PDO::FETCH_ASSOC);
                 if ($old && ! empty($old['image'])) {
-                    $imgPath = \storage_path('app/private/files/uploads/trainings/'.$old['image']);
-                    if (file_exists($imgPath)) {
-                        @unlink($imgPath);
-                    }
+                    PrivateUploads::delete('trainings', $old['image']);
                 }
                 $del = $pdo->prepare('DELETE FROM trainings WHERE id=?');
                 $del->execute([$id]);

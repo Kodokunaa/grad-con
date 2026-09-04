@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
 use App\Support\PageResponse;
+use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
 
 final class AlumniApplyController extends PageController
@@ -88,16 +89,9 @@ final class AlumniApplyController extends PageController
                     } elseif ($file['size'] > $max_size) {
                         $error = 'File size exceeds 5MB limit.';
                     } else {
-                        // Create resume upload directory if it doesn't exist
-                        $upload_dir = \storage_path('app/private/files/uploads/resumes/');
-                        if (! is_dir($upload_dir)) {
-                            mkdir($upload_dir, 0755, true);
-                        }
                         // Generate unique filename
                         $filename = 'resume_job'.$job_id.'_u'.$alumni_id.'_'.time().'_'.bin2hex(random_bytes(4)).'.pdf';
-                        $file_path = $upload_dir.$filename;
-                        // Move uploaded file
-                        if (\gc_move_upload($file['tmp_name'], $file_path)) {
+                        if (PrivateUploads::store(request()->file('resume'), 'resumes', $filename)) {
                             $resume_file = $filename;
                         } else {
                             $error = 'Failed to upload application letter file. Please try again.';
@@ -123,10 +117,7 @@ final class AlumniApplyController extends PageController
                             $error = 'Unable to submit the application. Please try again.';
                         }
                         if ($resume_file) {
-                            $uploadedPath = $upload_dir.$resume_file;
-                            if (is_file($uploadedPath)) {
-                                unlink($uploadedPath);
-                            }
+                            PrivateUploads::delete('resumes', $resume_file);
                         }
                     }
                 }

@@ -6,8 +6,10 @@ use App\Http\Controllers\PageController;
 use App\Models\User;
 use App\Services\UpdatePassword;
 use App\Support\PageResponse;
+use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 final class ProfileController extends PageController
 {
@@ -73,13 +75,8 @@ final class ProfileController extends PageController
                         } elseif ((\gc_files()['certificate_image']['size'] ?? 0) > 3 * 1024 * 1024) {
                             $cert_error = 'Certificate image too large. Max 3MB.';
                         } else {
-                            $upload_dir = \storage_path('app/private/files/uploads/certificates/');
-                            if (! is_dir($upload_dir)) {
-                                mkdir($upload_dir, 0777, true);
-                            }
-                            $certificate_image_name = "cert_{$id}_".time().'_'.rand(1000, 9999).'.'.$ext;
-                            $target = $upload_dir.$certificate_image_name;
-                            if (! \gc_move_upload(\gc_files()['certificate_image']['tmp_name'], $target)) {
+                            $certificate_image_name = "cert_{$id}_".Str::uuid().'.'.$ext;
+                            if (! PrivateUploads::store(request()->file('certificate_image'), 'certificates', $certificate_image_name)) {
                                 $cert_error = 'Certificate image upload failed. Try again.';
                             }
                         }
@@ -96,10 +93,7 @@ final class ProfileController extends PageController
                             throw $e;
                         }
                         if ($certificate_image_name) {
-                            $fullPath = \storage_path('app/private/files/uploads/certificates/'.$certificate_image_name);
-                            if (is_file($fullPath)) {
-                                @unlink($fullPath);
-                            }
+                            PrivateUploads::delete('certificates', $certificate_image_name);
                         }
                         $cert_error = 'Certificates table is missing the certificate_image column. Run the SQL fix first.';
                     }
@@ -114,10 +108,7 @@ final class ProfileController extends PageController
                         $findCert->execute([$deleteCertificateId, $id]);
                         $certRow = $findCert->fetch(\PDO::FETCH_ASSOC);
                         if ($certRow && ! empty($certRow['certificate_image'])) {
-                            $fullPath = \storage_path('app/private/files/uploads/certificates/'.$certRow['certificate_image']);
-                            if (is_file($fullPath)) {
-                                @unlink($fullPath);
-                            }
+                            PrivateUploads::delete('certificates', $certRow['certificate_image']);
                         }
                         $del = $pdo->prepare('DELETE FROM alumni_certificates WHERE id=? AND user_id=?');
                         $del->execute([$deleteCertificateId, $id]);
@@ -235,8 +226,7 @@ final class ProfileController extends PageController
                 \gc_header('Content-Type: text/html; charset=UTF-8');
                 $profilePhotoPath = '';
                 if (! empty($user['profile_picture'])) {
-                    $candidate = \storage_path('app/private/files/uploads/profiles/'.$user['profile_picture']);
-                    if (is_file($candidate)) {
+                    if (PrivateUploads::exists('profiles', $user['profile_picture'])) {
                         $profilePhotoPath = \url('').'/uploads/profiles/'.rawurlencode($user['profile_picture']);
                     }
                 }
@@ -975,7 +965,8 @@ final class ProfileController extends PageController
                     $trainings = null;
                 }
                 if ($profile_error === '') {
-                    $new_pic_name = $user['profile_picture'] ?? null;
+                    $old_pic_name = $user['profile_picture'] ?? null;
+                    $new_pic_name = $old_pic_name;
                     if (! empty(\gc_files()['profile_picture']['name'])) {
                         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
                         $ext = strtolower(pathinfo(\gc_files()['profile_picture']['name'], PATHINFO_EXTENSION));
@@ -984,13 +975,8 @@ final class ProfileController extends PageController
                         } elseif (\gc_files()['profile_picture']['size'] > 2 * 1024 * 1024) {
                             $profile_error = 'Image too large. Max 2MB.';
                         } else {
-                            $upload_dir = \storage_path('app/private/files/uploads/profiles/');
-                            if (! is_dir($upload_dir)) {
-                                mkdir($upload_dir, 0777, true);
-                            }
-                            $new_pic_name = "u{$id}_".time().'_'.rand(1000, 9999).'.'.$ext;
-                            $target = $upload_dir.$new_pic_name;
-                            if (! \gc_move_upload(\gc_files()['profile_picture']['tmp_name'], $target)) {
+                            $new_pic_name = "u{$id}_".Str::uuid().'.'.$ext;
+                            if (! PrivateUploads::store(request()->file('profile_picture'), 'profiles', $new_pic_name)) {
                                 $profile_error = 'Upload failed. Try again.';
                             }
                         }
@@ -998,6 +984,9 @@ final class ProfileController extends PageController
                     if ($profile_error === '') {
                         $upd = $pdo->prepare("\r\n                UPDATE users\r\n                SET fullname = ?, email = ?, course = ?, batch_year = ?, birthdate = ?, age = ?, gender = ?, civil_status = ?, contact_number = ?, address = ?, has_multiple_branches = ?, branch_location = ?, indigenous_tribe = ?, special_needs = ?, employment_status = ?, job_aligned = ?, career_objective = ?, skills = ?, trainings = ?, profile_picture = ?\r\n                WHERE id = ?\r\n            ");
                         $upd->execute([$fullname, $email, $course, $batch_year, $birthdate ?: null, $age === '' ? null : (int) $age, $gender ?: null, $civil_status ?: null, $contact_number ?: null, $address ?: null, (int) $has_multiple_branches, $branch_location ?: null, $indigenous_tribe ?: null, $special_needs ?: null, $employment_status ?: null, $job_aligned, $career_objective ?: null, $skills ?: null, $trainings ?: null, $new_pic_name, $id]);
+                        if ($new_pic_name !== $old_pic_name) {
+                            PrivateUploads::delete('profiles', $old_pic_name);
+                        }
                         \gc_context()->session['user']['fullname'] = $fullname;
                         \gc_profile_add_log($pdo, $id, 'PROFILE_UPDATED', 'Profile info updated');
                         $profile_msg = 'Profile updated successfully!';

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
+use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 final class AlumniOfficerEventsCreateController extends PageController
 {
@@ -38,13 +40,8 @@ final class AlumniOfficerEventsCreateController extends PageController
                         } elseif ((\gc_files()['image']['size'] ?? 0) > 3 * 1024 * 1024) {
                             $error = 'Image too large. Max 3MB.';
                         } else {
-                            $upload_dir = \storage_path('app/private/files/uploads/events/');
-                            if (! is_dir($upload_dir)) {
-                                mkdir($upload_dir, 0777, true);
-                            }
-                            $image_name = 'event_'.time().'_'.rand(1000, 9999).'.'.$ext;
-                            $target = $upload_dir.$image_name;
-                            if (! \gc_move_upload(\gc_files()['image']['tmp_name'], $target)) {
+                            $image_name = 'event_'.Str::uuid().'.'.$ext;
+                            if (! PrivateUploads::store(request()->file('image'), 'events', $image_name)) {
                                 $error = 'Image upload failed.';
                             }
                         }

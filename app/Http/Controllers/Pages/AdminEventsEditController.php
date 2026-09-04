@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
+use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 final class AdminEventsEditController extends PageController
 {
@@ -38,10 +40,7 @@ final class AdminEventsEditController extends PageController
                     // Remove current image
                     if ($remove_image === 1) {
                         if (! empty($newImageName)) {
-                            $oldPath = \storage_path('app/private/files/uploads/events/'.$newImageName);
-                            if (file_exists($oldPath)) {
-                                @unlink($oldPath);
-                            }
+                            PrivateUploads::delete('events', $newImageName);
                         }
                         $newImageName = null;
                     }
@@ -54,22 +53,11 @@ final class AdminEventsEditController extends PageController
                         } elseif (\gc_files()['image']['size'] > 3 * 1024 * 1024) {
                             $error = 'Image too large. Max 3MB.';
                         } else {
-                            $dir = \storage_path('app/private/files/uploads/events/');
-                            if (! is_dir($dir)) {
-                                mkdir($dir, 0777, true);
-                            }
-                            $newFile = 'event_'.$id.'_'.time().'.'.$ext;
-                            $target = $dir.$newFile;
-                            if (! \gc_move_upload(\gc_files()['image']['tmp_name'], $target)) {
+                            $newFile = 'event_'.$id.'_'.Str::uuid().'.'.$ext;
+                            if (! PrivateUploads::store(request()->file('image'), 'events', $newFile)) {
                                 $error = 'Image upload failed.';
                             } else {
-                                // Delete old image if exists
-                                if (! empty($newImageName)) {
-                                    $oldPath = $dir.$newImageName;
-                                    if (file_exists($oldPath)) {
-                                        @unlink($oldPath);
-                                    }
-                                }
+                                PrivateUploads::delete('events', $newImageName);
                                 $newImageName = $newFile;
                             }
                         }

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 final class FileController extends Controller
 {
@@ -47,9 +48,9 @@ final class FileController extends Controller
 
     private function serve(string $relative, bool $resume)
     {
-        $root = realpath(storage_path('app/private/files/uploads'));
-        $path = realpath(storage_path('app/private/files/uploads/'.$relative));
-        abort_unless($root && $path && str_starts_with($path, $root.DIRECTORY_SEPARATOR) && is_file($path), 404);
+        $relative = 'files/uploads/'.trim($relative, '/');
+        abort_unless(Storage::disk('local')->exists($relative), 404);
+        $path = Storage::disk('local')->path($relative);
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
         $resumeTypes = [
             'application/pdf',
