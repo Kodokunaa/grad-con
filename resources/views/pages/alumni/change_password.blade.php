@@ -143,6 +143,7 @@ if ($error) {
 <div class="card-box">
 
 <form method="POST">
+@csrf
 
 <div class="mb-3">
 <label class="form-label">Old Password</label>

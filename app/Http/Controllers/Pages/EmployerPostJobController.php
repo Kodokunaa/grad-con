@@ -242,26 +242,13 @@ final class EmployerPostJobController extends PageController
                                 // ==========================
                                 // GMAIL SMTP CONFIGURATION
                                 // ==========================
-                                $smtpEmail = 'cccgradconn@gmail.com';
+                                $smtpEmail = (string) \config('mail.from.address');
                                 // Paste your CURRENT Google App Password below.
                                 // Do not use your normal Gmail password.
-                                $smtpPassword = \config('mail.mailers.smtp.password', '');
                                 // Google may display App Passwords with spaces.
                                 // Remove whitespace only.
-                                $smtpPassword = \config('mail.mailers.smtp.password', '');
-                                $mail->isSMTP();
-
-                                $mail->SMTPAuth = true;
-                                $mail->AuthType = 'LOGIN';
-
-                                $mail->SMTPSecure = PageMailer::ENCRYPTION_STARTTLS;
-                                $mail->Port = 587;
-                                $mail->CharSet = 'UTF-8';
-                                $mail->Timeout = 60;
-                                $mail->SMTPKeepAlive = false;
 
                                 $mail->setFrom($smtpEmail, 'Job Portal Admin');
-                                $mail->Sender = $smtpEmail;
                                 $mail->addReplyTo($smtpEmail, 'Job Portal Admin');
                                 // Keep one visible recipient; alumni stay hidden in BCC.
                                 $mail->addAddress($smtpEmail, 'Job Portal Admin');
@@ -271,7 +258,6 @@ final class EmployerPostJobController extends PageController
                                     $bccCount++;
                                 }
                                 if ($bccCount > 0) {
-                                    $mail->isHTML(true);
                                     $mail->Subject = 'New Job Opportunity: '.$title;
                                     $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
                                     $safeEmployerCompany = htmlspecialchars($employer_company, ENT_QUOTES, 'UTF-8');

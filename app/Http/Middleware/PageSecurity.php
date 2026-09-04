@@ -60,11 +60,6 @@ final class PageSecurity
             && str_contains($response->headers->get('Content-Type', 'text/html'), 'text/html')) {
             $html = $response->getContent();
             if (is_string($html) && str_contains($html, '<')) {
-                $html = preg_replace(
-                    '/(<form\b(?=[^>]*\bmethod\s*=\s*[\x22\x27]?post\b)[^>]*>)(?!\s*<input\b[^>]*\bname\s*=\s*[\x22\x27]_token[\x22\x27])/i',
-                    '$1'.csrf_field(),
-                    $html,
-                );
                 if (! preg_match('/<meta\b[^>]*\bname\s*=\s*[\x22\x27]csrf-token[\x22\x27]/i', $html)) {
                     $meta = '<meta name="csrf-token" content="'.e(csrf_token()).'">';
                     $html = preg_replace('/<head\b[^>]*>/i', '$0'.$meta, $html, 1);

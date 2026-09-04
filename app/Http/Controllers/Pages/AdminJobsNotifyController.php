@@ -36,8 +36,7 @@ final class AdminJobsNotifyController extends PageController
             // Public logo URL
             $logoUrl = rtrim(\url(''), '/').'/ccc3d.png';
             // SMTP account
-            $smtpEmail = 'cccgradconn@gmail.com';
-            $smtpPassword = \config('mail.mailers.smtp.password', '');
+            $smtpEmail = (string) \config('mail.from.address');
             $msg = '';
             $error = '';
             // Get all alumni with the same course as the job target_course
@@ -59,17 +58,8 @@ final class AdminJobsNotifyController extends PageController
                 } else {
                     try {
                         $mail = new PageMailer(true);
-                        $mail->isSMTP();
-
-                        $mail->SMTPAuth = true;
-
-                        $mail->SMTPSecure = PageMailer::ENCRYPTION_STARTTLS;
-                        $mail->Port = 587;
-                        $mail->CharSet = 'UTF-8';
-                        $mail->Timeout = 60;
 
                         $mail->setFrom($smtpEmail, 'Job Portal Admin');
-                        $mail->Sender = $smtpEmail;
                         $mail->addReplyTo($smtpEmail, 'Job Portal Admin');
                         $mail->addAddress($smtpEmail, 'Job Portal Admin');
                         $bccCount = 0;
@@ -99,7 +89,6 @@ final class AdminJobsNotifyController extends PageController
                         // ==========================
                         // EMAIL CONTENT
                         // ==========================
-                        $mail->isHTML(true);
                         $mail->Subject = $subject;
                         $mail->Body = '
 <!DOCTYPE html>

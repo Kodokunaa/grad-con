@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Mail\PreservedNotification;
 use App\Mail\PageMailer;
+use App\Mail\PreservedNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
@@ -104,6 +104,36 @@ final class WorkflowTest extends TestCase
             'course' => 'Unknown Course', 'batch_year' => date('Y'), 'password' => 'valid-password',
         ])->assertSessionHasErrors('course');
         $this->assertDatabaseMissing('users', ['username' => 'invalid-course-user']);
+    }
+
+    public function test_admin_alumni_edit_validates_input_and_hashes_replacement_password(): void
+    {
+        $admin = $this->user('admin');
+        $alumni = $this->user('alumni');
+        $path = '/admin/alumni_edit.php?id='.$alumni->id;
+
+        $this->actingAs($admin)->post($path, [
+            'fullname' => 'Updated Graduate',
+            'email' => 'invalid-email',
+            'course' => 'BSIS',
+            'batch_year' => '2025',
+            'is_active' => '1',
+            'password' => 'replacement-password',
+        ])->assertSessionHasErrors('email');
+        $this->assertNotSame('Updated Graduate', $alumni->fresh()->fullname);
+
+        $this->post($path, [
+            'fullname' => 'Updated Graduate',
+            'email' => 'updated-graduate@example.test',
+            'course' => 'BSIS',
+            'batch_year' => '2025',
+            'is_active' => '1',
+            'password' => 'replacement-password',
+        ])->assertOk();
+
+        $alumni->refresh();
+        $this->assertSame('Updated Graduate', $alumni->fullname);
+        $this->assertTrue(Hash::check('replacement-password', $alumni->password));
     }
 
     public function test_admin_and_employer_can_post_jobs(): void

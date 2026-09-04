@@ -1307,7 +1307,8 @@ if (!$events) {
                     <div class="post-actions">
                         <form method="POST" action="" class="reaction-form" data-reaction-form data-event-id="<?php 
         echo $eventId;
-        ?>">
+        ?>
+@csrf">
                             <input type="hidden" name="event_id" value="<?php 
         echo $eventId;
         ?>">
@@ -1371,6 +1372,7 @@ if (!$events) {
 
                     <div class="comment-section">
                         <form method="POST" action="" class="comment-form">
+@csrf
                             <?php 
         echo \gc_admin_events_list_render_avatar($currentFullname, $currentUserPhoto, 'comment-avatar');
         ?>
@@ -1467,6 +1469,7 @@ if (!$events) {
                 echo \gc_e($replyBoxId);
                 ?>')">Reply</button>
                                                         <form method="POST" action="" class="comment-delete-form" onsubmit="return confirm('Delete this comment and its replies?');">
+@csrf
                                                             <input type="hidden" name="comment_id" value="<?php 
                 echo $commentId;
                 ?>">
@@ -1476,7 +1479,8 @@ if (!$events) {
 
                                                     <form method="POST" action="" class="reply-form" id="<?php 
                 echo \gc_e($replyBoxId);
-                ?>">
+                ?>
+@csrf">
                                                         <input type="hidden" name="event_id" value="<?php 
                 echo $eventId;
                 ?>">
@@ -1534,6 +1538,7 @@ if (!$events) {
                         echo \gc_e($replyName);
                         ?> ')">Reply</button>
                                                                             <form method="POST" action="" class="comment-delete-form" onsubmit="return confirm('Delete this reply?');">
+@csrf
                                                                                 <input type="hidden" name="comment_id" value="<?php 
                         echo (int) $reply['id'];
                         ?>">
@@ -1543,7 +1548,8 @@ if (!$events) {
 
                                                                         <form method="POST" action="" class="reply-form" id="<?php 
                         echo \gc_e($replyReplyBoxId);
-                        ?>">
+                        ?>
+@csrf">
                                                                             <input type="hidden" name="event_id" value="<?php 
                         echo $eventId;
                         ?>">

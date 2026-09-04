@@ -328,6 +328,7 @@ if ($error) {
 ?>
 
             <form method="POST">
+@csrf
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Full Name</label>

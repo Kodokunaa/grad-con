@@ -429,6 +429,7 @@ if (!$events) {
 
                         <div class="post-actions">
                             <form method="POST" action="" class="reaction-form" data-reaction-form>
+@csrf
                                 <input type="hidden" name="event_id" value="<?php 
         echo $eventId;
         ?>">
@@ -493,6 +494,7 @@ if (!$events) {
 
                         <div class="comment-section">
                             <form method="POST" action="" class="comment-form">
+@csrf
                                 <?php 
         echo \gc_alumni_officer_events_list_avatar_html($currentFullname, $currentUserPhoto, 'user-avatar comment-avatar');
         ?>
@@ -604,6 +606,7 @@ if (!$events) {
                 echo $commentId;
                 ?>)">Reply</button>
                                                             <form method="POST" action="" class="comment-delete-form" onsubmit="return confirm('Delete this comment and its replies?');">
+@csrf
                                                                 <input type="hidden" name="comment_id" value="<?php 
                 echo $commentId;
                 ?>">
@@ -613,7 +616,8 @@ if (!$events) {
 
                                                         <form method="POST" action="" class="reply-form" id="reply-box-<?php 
                 echo $commentId;
-                ?>" style="display:none;">
+                ?>
+@csrf" style="display:none;">
                                                             <?php 
                 echo \gc_alumni_officer_events_list_avatar_html($currentFullname, $currentUserPhoto, 'user-avatar reply-avatar');
                 ?>
@@ -667,6 +671,7 @@ if (!$events) {
                         echo \gc_e($reply['fullname'] ?? 'User');
                         ?> ')">Reply</button>
                                                                                 <form method="POST" action="" class="comment-delete-form" onsubmit="return confirm('Delete this reply?');">
+@csrf
                                                                                     <input type="hidden" name="comment_id" value="<?php 
                         echo $replyId;
                         ?>">
@@ -676,7 +681,8 @@ if (!$events) {
 
                                                                             <form method="POST" action="" class="reply-form" id="<?php 
                         echo \gc_e($replyReplyBoxId);
-                        ?>" style="display:none;">
+                        ?>
+@csrf" style="display:none;">
                                                                                 <?php 
                         echo \gc_alumni_officer_events_list_avatar_html($currentFullname, $currentUserPhoto, 'user-avatar reply-avatar');
                         ?>

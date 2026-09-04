@@ -315,6 +315,7 @@ if ($error) {
 
     <div class="form-card">
         <form method="POST">
+@csrf
             <div class="form-grid">
 
                 <div class="form-group">

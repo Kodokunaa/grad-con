@@ -33,7 +33,6 @@ final class PageContext
         $pdo = DB::connection()->getPdo();
         // MariaDB does not support native placeholders in legacy SHOW ... LIKE queries.
         $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
-        $pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [PasswordStatement::class]);
 
         return $pdo;
     }

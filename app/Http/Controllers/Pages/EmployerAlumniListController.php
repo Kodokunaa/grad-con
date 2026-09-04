@@ -148,26 +148,12 @@ final class EmployerAlumniListController extends PageController
                             $selectedDegrees = $degreesByUser[$selectedAlumniId] ?? [];
                             $selectedCerts = $certificatesByUser[$selectedAlumniId] ?? [];
                             $selectedSummaryAlignment = \gc_employer_alumni_list_summarize_job_alignment($selectedAlumni['course'] ?? '', $selectedJobs);
-                            $smtpEmail = 'cccgradconn@gmail.com';
-                            $smtpPassword = \config('mail.mailers.smtp.password', '');
-                            $smtpPassword = \config('mail.mailers.smtp.password', '');
+                            $smtpEmail = (string) \config('mail.from.address');
                             $mail = new PageMailer(true);
-                            $mail->isSMTP();
-
-                            $mail->SMTPAuth = true;
-                            $mail->AuthType = 'LOGIN';
-
-                            $mail->SMTPSecure = PageMailer::ENCRYPTION_STARTTLS;
-                            $mail->Port = 587;
-                            $mail->CharSet = 'UTF-8';
-                            $mail->Timeout = 60;
-                            $mail->SMTPKeepAlive = false;
 
                             $mail->setFrom($smtpEmail, 'Job Portal Admin');
-                            $mail->Sender = $smtpEmail;
                             $mail->addReplyTo($smtpEmail, 'Job Portal Admin');
                             $mail->addAddress($selectedAlumni['email'], $selectedAlumni['fullname'] ?? 'Alumni');
-                            $mail->isHTML(true);
                             $mail->Subject = $mailSubject;
                             $mail->Body = \gc_employer_alumni_list_build_job_offer_email_html($selectedAlumni['fullname'] ?? 'Alumni', $employerName, $mailSubject, $customMessage, $acceptLink, $declineLink);
                             $mail->AltBody = "Job Offer from {$employerName}\n\n{$customMessage}\n\nPlease login to your account to see the job offer.";

@@ -200,6 +200,7 @@ if ($error) {
 ?>
 
         <form method="POST" id="educationForm">
+@csrf
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">School Name</label>

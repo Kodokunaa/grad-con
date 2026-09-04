@@ -26,6 +26,7 @@ if ($error) {
 ?>
 
                 <form method="POST" class="row g-3">
+@csrf
                     <div class="col-md-6">
                         <label class="form-label">Fullname</label>
                         <input class="form-control" name="fullname"

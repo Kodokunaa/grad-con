@@ -240,6 +240,7 @@ if (empty($offers)) {
         if ($offer['status'] === 'sent') {
             ?>
                         <form method="POST" style="margin-top: 16px;">
+@csrf
                             <input type="hidden" name="offer_id" value="<?php 
             echo (int) $offer['id'];
             ?>">

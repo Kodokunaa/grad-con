@@ -872,6 +872,7 @@ if (!empty($applications)) {
                                             </a>
 
                                             <form method="POST" style="display:inline;">
+@csrf
                                                 <input type="hidden" name="application_id" value="<?php 
             echo (int) $row['application_id'];
             ?>">
@@ -910,6 +911,7 @@ if (!empty($applications)) {
                                             </a>
 
                                             <form method="POST" style="display:inline;">
+@csrf
                                                 <input type="hidden" name="application_id" value="<?php 
             echo (int) $row['application_id'];
             ?>">
@@ -1184,6 +1186,7 @@ foreach ($applications as $row) {
 
         <div class="action-modal-body">
             <form method="POST" id="actionForm">
+@csrf
                 <input type="hidden" name="application_id" id="actionApplicationId" value="">
                 <input type="hidden" name="action" id="actionType" value="">
 

@@ -205,6 +205,7 @@ if ($error) {
 ?>
 
             <form method="POST">
+@csrf
                 <div class="form-grid">
                     <div class="form-group full">
                         <label>Account Role</label>

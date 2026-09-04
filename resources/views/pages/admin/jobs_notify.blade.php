@@ -211,6 +211,7 @@ if ($error) {
         <div class="section-title">Send Notification</div>
 
         <form method="POST">
+@csrf
             <div class="form-group">
                 <label class="form-label">Subject</label>
                 <input

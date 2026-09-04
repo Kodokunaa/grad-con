@@ -206,6 +206,7 @@ if ($error) {
 
     <div class="form-card">
         <form method="POST" enctype="multipart/form-data">
+@csrf
 
             <div class="form-group">
                 <label class="form-label">Training Title</label>

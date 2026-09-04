@@ -351,6 +351,7 @@ if (empty($offers)) {
         if ($offer['status'] !== 'done') {
             ?>
                                         <form method="POST" style="display:inline-block; margin:0;">
+@csrf
                                             <input type="hidden" name="offer_id" value="<?php 
             echo (int) $offer['id'];
             ?>">
@@ -361,6 +362,7 @@ if (empty($offers)) {
         ?>
 
                                     <form method="POST" style="display:inline-block; margin:0;">
+@csrf
                                         <input type="hidden" name="offer_id" value="<?php 
         echo (int) $offer['id'];
         ?>">

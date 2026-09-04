@@ -16,6 +16,7 @@ if ($error) {
 ?>
 
 <form method="POST">
+@csrf
   <div class="mb-3">
     <label>Company Email</label>
     <input class="form-control" type="email" name="company_email" required>

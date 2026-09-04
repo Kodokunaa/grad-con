@@ -319,6 +319,7 @@ if (!empty($pendingUsers)) {
                             </td>
                             <td>
                                 <form method="POST" class="inline-form">
+@csrf
                                     <input type="hidden" name="user_id" value="<?php 
         echo (int) $user['id'];
         ?>">
@@ -327,6 +328,7 @@ if (!empty($pendingUsers)) {
                                 </form>
 
                                 <form method="POST" class="inline-form">
+@csrf
                                     <input type="hidden" name="user_id" value="<?php 
         echo (int) $user['id'];
         ?>">

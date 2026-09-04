@@ -221,6 +221,7 @@ if ($error) {
 
     <div class="form-card">
         <form method="POST">
+@csrf
             <div class="row g-3">
 
                 <div class="col-md-6">
@@ -330,6 +331,7 @@ echo htmlspecialchars($user['fullname']);
             <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 16px;">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form method="POST" style="display: inline;">
+@csrf
                     <input type="hidden" name="delete_account" value="1">
                     <button type="submit" class="btn btn-danger" style="background: #dc2626; border: none; color: white; padding: 10px 16px; border-radius: 8px; font-weight: 600;">Delete Permanently</button>
                 </form>

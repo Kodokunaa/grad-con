@@ -266,6 +266,7 @@ if ($error) {
 ?>
 
         <form method="POST">
+@csrf
             <div class="row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Company Name</label>

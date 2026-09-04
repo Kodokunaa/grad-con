@@ -159,6 +159,7 @@ if (empty($archivedEvents)) {
                 echo \gc_e($comment['comment'] ?? '');
                 ?></div>
 										<form method="POST" onsubmit="return confirm('Delete this comment?');">
+@csrf
 											<input type="hidden" name="event_id" value="<?php 
                 echo (int) $event['id'];
                 ?>">

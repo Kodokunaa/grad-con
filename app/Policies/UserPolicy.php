@@ -15,4 +15,9 @@ final class UserPolicy
     {
         return $actor->role === 'admin' || $actor->is($subject);
     }
+
+    public function delete(User $actor, User $subject): bool
+    {
+        return $actor->role === 'admin' && $subject->role !== 'admin';
+    }
 }

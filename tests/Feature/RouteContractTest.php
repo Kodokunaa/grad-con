@@ -55,4 +55,22 @@ final class RouteContractTest extends TestCase
             ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
             ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     }
+
+    public function test_every_blade_post_form_declares_its_own_csrf_field(): void
+    {
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(resource_path('views')));
+        $failures = [];
+
+        foreach ($iterator as $file) {
+            if (! $file->isFile() || ! str_ends_with($file->getFilename(), '.blade.php')) {
+                continue;
+            }
+            $contents = file_get_contents($file->getPathname());
+            if (preg_match('/<form\b(?=[^>]*\bmethod\s*=\s*[\x22\x27]POST[\x22\x27])[^>]*>(?!\s*(?:@csrf|<input\b[^>]*\bname\s*=\s*[\x22\x27]_token[\x22\x27]))/i', $contents)) {
+                $failures[] = $file->getPathname();
+            }
+        }
+
+        $this->assertSame([], $failures, implode("\n", $failures));
+    }
 }

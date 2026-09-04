@@ -8,17 +8,17 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Database and migrations | In progress | Preserved baseline schema; Laravel infrastructure; job fields; social/interview upgrade and legacy social-data migration | Remove 29 request-time schema calls/checks; split the monolithic schema; improve rollback strategy |
 | Models and relationships | Foundation complete | Active domain models, relationships, casts, and status/role enums | Adopt models throughout legacy controllers; enable role/status enum casts after string comparisons are removed |
 | Routing | In progress | GET-only read pages and compatibility redirects; method regression tests | Split multi-action pages into named POST/PATCH/DELETE resource actions; remove destructive query parameters and `.php` URLs |
-| Authentication and account security | In progress | Hashing, centralized password policy, rehash-on-login, reset flow, security logging, and other-session invalidation | Convert remaining administrative password writes and remove `PasswordStatement`; review production cookie settings |
-| Authorization | In progress | Policies for jobs, applications, offers, interviews, events, training, and private user files | Enforce policies in every retained mutation controller and add record-level tests for each workflow |
-| Validation | In progress | Auth validation plus Form Requests for administrative employer, officer, and alumni creation | Add Form Requests for editing, jobs, applications, offers, interviews, events, training, profiles, education, employment, and social actions |
+| Authentication and account security | In progress | Hashing, centralized password policy, rehash-on-login, reset flow, security logging, other-session invalidation, and removal of automatic PDO password rewriting | Review production cookie settings and complete native account-management controllers |
+| Authorization | In progress | Policies for jobs, applications, offers, interviews, events, training, private files, and policy-enforced administrative alumni editing | Enforce policies in every retained mutation controller and add record-level tests for each workflow |
+| Validation | In progress | Auth validation plus Form Requests for administrative employer, officer, alumni creation, and alumni editing | Add Form Requests for jobs, applications, offers, interviews, events, training, profiles, education, employment, and social actions |
 | Uploads and files | In progress | Normalized private paths, Laravel disk writes, recognized categories, resume/certificate policies, portal-image scope tests | Convert deletion and reads fully to `Storage`; collision-resistant names; orphan reconciliation; MIME boundary tests |
-| Mail and queues | In progress | Laravel queued delivery and reset notification | Remove PHPMailer-style setup, consolidate mail templates, harden queued attachments, document/verify worker and SMTP deployment |
-| Views and frontend | In progress | Shared public-authentication document layout and logout modal regression coverage | Auth asset extraction; authenticated layouts/components/assets; remove response rewriting and duplicated inline CSS/JavaScript |
-| Middleware and responses | In progress | Idempotent CSRF/asset/modal augmentation, native auth CSRF, non-fatal audit records, upload validation, security headers | Remove HTML regex rewriting and query-action interception after native forms/routes are complete |
+| Mail and queues | In progress | Laravel queued delivery, reset notification, configured sender addresses, and removal of PHPMailer transport setup | Consolidate mail templates, harden queued attachments, document/verify worker and SMTP deployment |
+| Views and frontend | In progress | Shared public-authentication document layout, native CSRF in every Blade POST form, and logout modal regression coverage | Auth asset extraction; authenticated layouts/components/assets; remove remaining response rewriting and duplicated inline CSS/JavaScript |
+| Middleware and responses | In progress | Native form CSRF, idempotent asset/modal augmentation, non-fatal audit records, upload validation, security headers | Remove remaining head/modal HTML rewriting and query-action interception after native layouts/routes are complete |
 | Duplicate helpers | In progress | Consolidated 20 identical role-prefixed HTML escaping helpers into `gc_e()` | Consolidate formatting, alignment, schema, activity-log, social-feed, and email helpers |
 | Configuration and portability | In progress | Laravel root, environment templates, environment-driven timezone, declared PHP extensions, installation checker, MySQL migration path | Complete isolated clean-device install and production queue/mail verification |
 | Redundant files | Complete | Obsolete conversion tools/documentation, route dump, starter tests/views, blank views, empty migration directories, build cache, and temporary migration runtime removed | Reassess generated compatibility files as their owning architecture chapters are completed |
-| Tests | In progress | Authentication, role-route contracts, explicit POST contracts, response headers, record policies, uploads, mail envelopes, and primary workflows | Remaining mutation, Form Request, mail-worker, migration-upgrade, browser, and clean-device coverage |
+| Tests | In progress | Authentication, native-CSRF form inventory, role-route contracts, explicit POST contracts, response headers, record policies, uploads, mail envelopes, and primary workflows | Remaining mutation, Form Request, mail-worker, migration-upgrade, browser, and clean-device coverage |
 | Documentation | In progress | README, audit, route inventory, and this status tracker | Refresh final installation/deployment/backup/troubleshooting instructions after architecture stabilizes |
 
 ## Current mail and queue checkpoint
@@ -144,3 +144,22 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - Test migrations against both an empty database and a representative pre-Laravel schema snapshot.
 - Add browser tests for login, logout modal, navigation, uploads, applications, offers, interviews, and mobile layouts.
 - Run the full installation and test process from a clean checkout on Windows and Linux.
+
+## Current combined security and framework checkpoint
+
+### Done
+
+- Replaced the final automatic PDO password-hashing hook with an explicit hashed Eloquent update.
+- Added validated administrative alumni editing and enforced the user policy for edits and deletion.
+- Removed obsolete PHPMailer transport configuration and hard-coded sender addresses from runtime mail flows.
+- Added native CSRF fields to all 55 retained authenticated Blade POST forms and removed middleware form rewriting.
+- Added regression coverage for native CSRF declarations and administrative password updates.
+
+### Still needs fixing
+
+- Complete policy and Form Request adoption in the remaining multi-action compatibility controllers.
+- Convert remaining direct upload deletion and filesystem inspection to Laravel `Storage`.
+- Replace `PageMailer` and repeated message builders with dedicated Mailables or Notifications.
+- Add shared authenticated layouts and remove the remaining head/logout response augmentation.
+- Consolidate formatting, alignment, schema, logging, social-feed, and email helper families.
+- Complete clean-device, queue-worker, SMTP, browser, and migration-upgrade verification.

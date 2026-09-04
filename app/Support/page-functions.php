@@ -1177,17 +1177,10 @@ function gc_alumni_job_offers_send_offer_acceptance_notification($pdo, $offer, $
             return;
         }
         $mail = new PageMailer(true);
-        $mail->isSMTP();
 
-        $mail->SMTPAuth = true;
-
-        $mail->SMTPSecure = PageMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-        $mail->CharSet = 'UTF-8';
-        $mail->setFrom('cccgradconn@gmail.com', 'Job Portal Admin');
-        $mail->addReplyTo('cccgradconn@gmail.com', 'Job Portal Admin');
+        $mail->setFrom((string) \config('mail.from.address'), 'Job Portal Admin');
+        $mail->addReplyTo((string) \config('mail.from.address'), 'Job Portal Admin');
         $mail->addAddress($employer['email'], $employer['fullname'] ?? 'Employer');
-        $mail->isHTML(true);
         $alumniName = htmlspecialchars($alumniUser['fullname'] ?? 'Alumni');
         $offerLink = \url('').'/employer/job_offers.php';
         $mail->Subject = 'Job Offer Acceptance - '.$alumniName;

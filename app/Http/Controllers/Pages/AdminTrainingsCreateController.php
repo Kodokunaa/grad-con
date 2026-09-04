@@ -67,15 +67,9 @@ final class AdminTrainingsCreateController extends PageController
                             foreach ($recipients as $r) {
                                 $mail = new PageMailer(true);
                                 // SMTP CONFIG
-                                $mail->isSMTP();
 
-                                $mail->SMTPAuth = true;
-
-                                $mail->SMTPSecure = PageMailer::ENCRYPTION_STARTTLS;
-                                $mail->Port = 587;
-                                $mail->setFrom('cccgradconn@gmail.com', 'Training Notification');
+                                $mail->setFrom((string) \config('mail.from.address'), 'Training Notification');
                                 $mail->addAddress($r['email'], $r['fullname']);
-                                $mail->isHTML(true);
                                 $mail->Subject = 'New Training Opportunity Available';
                                 $safeName = htmlspecialchars($r['fullname']);
                                 $safeTitle = htmlspecialchars($title);

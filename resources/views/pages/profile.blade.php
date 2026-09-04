@@ -719,6 +719,7 @@ if ($role === 'alumni') {
     ?>
             <li class="nav-item">
                 <form method="POST" class="notification-toggle-form">
+@csrf
                     <label class="notification-toggle-label" for="receive_update_notifications">Notifications</label>
                     <input
                         class="notification-toggle"
@@ -883,9 +884,11 @@ if ($profile_error) {
 }
 ?>
 
-                        <form id="certificateForm" method="POST" enctype="multipart/form-data" style="display:none;"></form>
+                        <form id="certificateForm" method="POST" enctype="multipart/form-data" style="display:none;">
+@csrf</form>
 
                         <form method="POST" enctype="multipart/form-data">
+@csrf
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Fullname</label>
@@ -1354,6 +1357,7 @@ echo $role !== 'alumni' ? 'User Name' : 'Student ID';
                         <div class="section-title">Change Password</div>
 
                         <form method="POST">
+@csrf
                             <div class="mb-3">
                                 <label class="form-label">Old Password</label>
                                 <input class="form-control-custom" type="password" name="old_password" required>

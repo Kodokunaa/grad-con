@@ -58,24 +58,11 @@ final class AdminJobsCreateController extends PageController
                                 // ==========================
                                 // GMAIL SMTP CONFIGURATION
                                 // ==========================
-                                $smtpEmail = 'cccgradconn@gmail.com';
+                                $smtpEmail = (string) \config('mail.from.address');
                                 // Paste your CURRENT Google App Password below.
-                                $smtpPassword = \config('mail.mailers.smtp.password', '');
                                 // Remove spaces Google may display between password groups.
-                                $smtpPassword = \config('mail.mailers.smtp.password', '');
-                                $mail->isSMTP();
-
-                                $mail->SMTPAuth = true;
-                                $mail->AuthType = 'LOGIN';
-
-                                $mail->SMTPSecure = PageMailer::ENCRYPTION_STARTTLS;
-                                $mail->Port = 587;
-                                $mail->CharSet = 'UTF-8';
-                                $mail->Timeout = 60;
-                                $mail->SMTPKeepAlive = false;
 
                                 $mail->setFrom($smtpEmail, 'GradConn');
-                                $mail->Sender = $smtpEmail;
                                 $mail->addReplyTo($smtpEmail, 'GradConn');
                                 // One visible recipient; alumni remain hidden in BCC.
                                 $mail->addAddress($smtpEmail, 'GradConn');
@@ -85,7 +72,6 @@ final class AdminJobsCreateController extends PageController
                                     $bccCount++;
                                 }
                                 if ($bccCount > 0) {
-                                    $mail->isHTML(true);
                                     $mail->Subject = 'New Job Opportunity: '.$title;
                                     $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
                                     $safeEmployer = htmlspecialchars($employer_company, ENT_QUOTES, 'UTF-8');

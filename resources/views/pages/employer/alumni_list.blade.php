@@ -1561,6 +1561,7 @@ foreach ($alumni as $a) {
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content email-message-modal-content">
             <form method="POST" id="sendSnapshotEmailForm">
+@csrf
                 <input type="hidden" name="send_snapshot_email" value="1">
                 <input type="hidden" name="send_snapshot_email_token" value="<?php 
 echo \gc_e($sendSnapshotEmailToken);

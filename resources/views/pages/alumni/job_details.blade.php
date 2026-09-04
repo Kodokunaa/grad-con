@@ -286,6 +286,7 @@ if ($alreadyApplied) {
 } else {
     ?>
                 <form method="POST">
+@csrf
                     <button type="submit" class="btn-apply">
                         <i class="fas fa-paper-plane"></i> Apply Now
                     </button>

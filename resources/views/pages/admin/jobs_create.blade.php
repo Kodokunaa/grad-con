@@ -279,6 +279,7 @@ if ($error) {
 
     <div class="form-card">
         <form method="POST">
+@csrf
             <div class="row g-3">
 
                 <div class="col-md-6">

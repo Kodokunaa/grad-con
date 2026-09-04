@@ -541,6 +541,7 @@ echo htmlspecialchars($alumni["trainings"] ?? "");
         </div>
 
         <form method="POST" id="applicationForm" enctype="multipart/form-data">
+@csrf
 
             <div class="form-group">
                 <label class="form-label">Upload Apllciation letter (PDF only) <span style="color: #f97316;">*</span></label>

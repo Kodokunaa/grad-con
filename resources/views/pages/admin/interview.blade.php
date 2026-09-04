@@ -278,6 +278,7 @@ echo \gc_e($application['employer_company'] ?: $application['company']);
         </div>
 
         <form method="POST">
+@csrf
             <input type="hidden" name="application_id" value="<?php 
 echo (int) $application_id;
 ?>">

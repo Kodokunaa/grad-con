@@ -5,17 +5,8 @@ namespace App\Mail;
 use Illuminate\Support\Facades\Mail;
 
 /** Preserves existing email templates while routing delivery through Laravel's queue. */
-#[\AllowDynamicProperties]
 final class PageMailer
 {
-    public const ENCRYPTION_STARTTLS = 'tls';
-
-    public const ENCRYPTION_SMTPS = 'ssl';
-
-    public const DEBUG_OFF = 0;
-
-    public const DEBUG_SERVER = 2;
-
     public string $Subject = '';
 
     public string $Body = '';
@@ -35,10 +26,6 @@ final class PageMailer
     private ?array $sender = null;
 
     public function __construct(...$args) {}
-
-    public function isSMTP(): void {}
-
-    public function isHTML(bool $html = true): void {}
 
     public function setFrom(string $address, string $name = '', ...$args): void
     {
@@ -85,8 +72,6 @@ final class PageMailer
     {
         $this->attachments = [];
     }
-
-    public function smtpClose(): void {}
 
     public function send(): bool
     {

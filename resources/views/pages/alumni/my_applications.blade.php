@@ -679,6 +679,7 @@ if (count($apps) === 0) {
             ?>
 
                             <form method="POST" onsubmit="return confirm('Are you sure you want to remove this cancelled application?');">
+@csrf
                                 <input type="hidden" name="application_id" value="<?php 
             echo (int) $a['id'];
             ?>">
@@ -750,6 +751,7 @@ if (count($apps) === 0) {
         </p>
 
         <form method="POST" onsubmit="return validateCancelReason();">
+@csrf
             <input type="hidden" name="application_id" id="cancel_application_id">
 
             <textarea name="cancel_reason"
