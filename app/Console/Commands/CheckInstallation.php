@@ -49,7 +49,17 @@ final class CheckInstallation extends Command
         if ($this->option('mail')) {
             $mailer = (string) config('mail.default');
             if ($mailer === 'log' || $mailer === 'array') {
-                $failures[] = "MAIL_MAILER={$mailer} does not deliver email to recipients. Use smtp for Gmail delivery.";
+                $failures[] = "MAIL_MAILER={$mailer} does not deliver email to recipients. Use resend or smtp.";
+            } elseif ($mailer === 'resend') {
+                if (blank(config('services.resend.key'))) {
+                    $failures[] = 'RESEND_API_KEY is missing.';
+                }
+                $from = (string) config('mail.from.address');
+                if (! filter_var($from, FILTER_VALIDATE_EMAIL)) {
+                    $failures[] = 'MAIL_FROM_ADDRESS must be a valid email address.';
+                } elseif (str_ends_with(strtolower($from), '@gmail.com')) {
+                    $failures[] = 'MAIL_FROM_ADDRESS must use your Resend-verified domain, not gmail.com.';
+                }
             } elseif ($mailer === 'smtp') {
                 foreach (['host', 'port', 'username', 'password'] as $key) {
                     if (blank(config("mail.mailers.smtp.{$key}"))) {
@@ -59,6 +69,8 @@ final class CheckInstallation extends Command
                 if (! filter_var(config('mail.from.address'), FILTER_VALIDATE_EMAIL)) {
                     $failures[] = 'MAIL_FROM_ADDRESS must be a valid email address.';
                 }
+            } else {
+                $failures[] = "Unsupported delivery mailer: {$mailer}.";
             }
         }
 

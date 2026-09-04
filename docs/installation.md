@@ -28,3 +28,5 @@ bash scripts/verify.sh
 ```
 
 Point Apache or Nginx to `public`, never the repository root. Configure `APP_URL`, timezone, database, mail, queue, and session values in `.env`. Set `ADMIN_SEED_NAME`, `ADMIN_SEED_USERNAME`, `ADMIN_SEED_EMAIL`, and a 12+ character `ADMIN_SEED_PASSWORD`, then run `php artisan db:seed --class=AdminSeeder` for the first administrator.
+
+For outbound email, verify a domain in Resend and set `MAIL_MAILER=resend`, `RESEND_API_KEY`, and `MAIL_FROM_ADDRESS` using that verified domain. Run `php artisan gradconn:check --mail` before testing account workflows.

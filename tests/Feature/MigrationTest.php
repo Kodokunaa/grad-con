@@ -33,6 +33,21 @@ final class MigrationTest extends TestCase
         $this->artisan('gradconn:check')->assertSuccessful();
     }
 
+    public function test_resend_readiness_check_requires_key_and_verified_domain_sender(): void
+    {
+        config()->set('mail.default', 'resend');
+        config()->set('services.resend.key', null);
+        config()->set('mail.from.address', 'sender@gmail.com');
+        $this->artisan('gradconn:check --mail')
+            ->expectsOutputToContain('RESEND_API_KEY is missing.')
+            ->expectsOutputToContain('verified domain')
+            ->assertFailed();
+
+        config()->set('services.resend.key', 're_test_key');
+        config()->set('mail.from.address', 'notifications@updates.example.test');
+        $this->artisan('gradconn:check --mail')->assertSuccessful();
+    }
+
     protected function tearDown(): void
     {
         foreach ($this->createdFiles as $path) {
