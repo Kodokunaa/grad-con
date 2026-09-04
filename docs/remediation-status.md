@@ -17,7 +17,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Middleware and responses | In progress | Idempotent CSRF/asset/modal augmentation, native auth CSRF, non-fatal audit records, upload validation, security headers | Remove HTML regex rewriting and query-action interception after native forms/routes are complete |
 | Duplicate helpers | In progress | Consolidated 20 identical role-prefixed HTML escaping helpers into `gc_e()` | Consolidate formatting, alignment, schema, activity-log, social-feed, and email helpers |
 | Configuration and portability | In progress | Laravel root, environment templates, environment-driven timezone, declared PHP extensions, installation checker, MySQL migration path | Complete isolated clean-device install and production queue/mail verification |
-| Redundant files | In progress | Obsolete conversion tools, route dump, starter welcome view, and two blank views removed | Remove starter tests, empty directories, build cache, and migration runtime after final verification |
+| Redundant files | Complete | Obsolete conversion tools/documentation, route dump, starter tests/views, blank views, empty migration directories, build cache, and temporary migration runtime removed | Reassess generated compatibility files as their owning architecture chapters are completed |
 | Tests | In progress | Authentication, roles, routing, policy, upload, and primary workflow coverage | Remaining mutation, validation, mail-worker, migration-upgrade, browser, and clean-device coverage |
 | Documentation | In progress | README, audit, route inventory, and this status tracker | Refresh final installation/deployment/backup/troubleshooting instructions after architecture stabilizes |
 
@@ -109,3 +109,19 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - Verify real SMTP delivery with deployment-owned credentials.
 - Document web-server examples for Apache and Nginx with `public` as the document root.
 - Verify Linux filesystem permissions and case-sensitive paths.
+
+## Current redundant files and folders checkpoint
+
+### Done
+
+- Removed the two untouched Laravel example tests.
+- Removed the obsolete `MIGRATION.md` completion snapshot in favor of the live remediation tracker and README.
+- Removed ignored Composer/build caches, compiled views, PHPUnit result cache, and the unused SQLite artifact.
+- Removed the stopped temporary migration database runtime and empty migration/work directories.
+- Preserved `.migration-backup`, uploaded files, the active XAMPP MySQL data, application source, and frontend build configuration.
+
+### Still needs fixing
+
+- No standalone cleanup item remains in this chapter.
+- `PageContext`, `PageResponse`, `PasswordStatement`, `page-functions.php`, and generated page controllers remain required compatibility code; remove them only through their architecture chapters.
+- Reassess the Vite starter entry points when shared frontend asset extraction is complete.
