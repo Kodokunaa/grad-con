@@ -3,8 +3,10 @@
 use App\Http\Controllers\Admin\DestroyJobController;
 use App\Http\Controllers\Admin\DestroyTrainingController;
 use App\Http\Controllers\Admin\SendApplicantResumeController;
+use App\Http\Controllers\Admin\UpdateAlumniApprovalController;
 use App\Http\Controllers\Alumni\DestroyEmploymentController;
 use App\Http\Controllers\Alumni\RespondToOfferController;
+use App\Http\Controllers\Employer\AlumniDirectoryActionController;
 use App\Http\Controllers\Event\ArchiveEventController;
 use App\Http\Controllers\Event\RestoreEventController;
 use App\Http\Controllers\Event\StoreEventController;
@@ -120,7 +122,7 @@ Route::post('/admin/jobs_notify.php', SendJobNotificationController::class)->mid
 Route::post('/admin/jobs/{job}/notifications', SendJobNotificationController::class)->middleware('account:admin')->name('admin.jobs.notifications.store');
 Route::get('/admin/offers_history.php', AdminOffersHistoryController::class)->middleware('account:admin')->name('admin.offers_history');
 Route::get('/admin/pending_alumni.php', AdminPendingAlumniController::class)->middleware('account:admin')->name('admin.pending_alumni');
-Route::post('/admin/pending_alumni.php', AdminPendingAlumniController::class)->middleware('account:admin');
+Route::post('/admin/pending_alumni.php', UpdateAlumniApprovalController::class)->middleware('account:admin')->name('admin.alumni.approval.update');
 Route::get('/admin/reports.php', AdminReportsController::class)->middleware('account:admin')->name('admin.reports');
 Route::get('/admin/trainings_create.php', AdminTrainingsCreateController::class)->middleware('account:admin')->name('admin.trainings_create');
 Route::post('/admin/trainings_create.php', StoreTrainingController::class)->middleware('account:admin');
@@ -166,7 +168,7 @@ Route::post('/alumni_officer/events_edit.php', [UpdateEventController::class, 'l
 Route::get('/alumni_officer/events_list.php', AlumniOfficerEventsListController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_list');
 Route::post('/alumni_officer/events_list.php', AlumniOfficerEventsListController::class)->middleware('account:alumni_officer');
 Route::get('/employer/alumni_list.php', EmployerAlumniListController::class)->middleware('account:employer')->name('employer.alumni_list');
-Route::post('/employer/alumni_list.php', EmployerAlumniListController::class)->middleware('account:employer');
+Route::post('/employer/alumni_list.php', AlumniDirectoryActionController::class)->middleware('account:employer')->name('employer.alumni.actions');
 Route::get('/employer/applications.php', EmployerApplicationsController::class)->middleware('account:employer')->name('employer.applications');
 Route::post('/employer/applications.php', EmployerApplicationsController::class)->middleware('account:employer');
 Route::get('/employer/dashboard.php', EmployerDashboardController::class)->middleware('account:employer')->name('employer.dashboard');

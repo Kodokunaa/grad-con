@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Mail\AlumniAccountApprovedMail;
 use App\Mail\ApplicantResumeMail;
+use App\Mail\JobOfferMail;
 use App\Mail\JobOpportunityMail;
 use App\Mail\PageMailer;
 use App\Mail\PreservedNotification;
@@ -57,10 +59,10 @@ final class WorkflowTest extends TestCase
         $alumni->is_active = 0;
         $alumni->status = 'pending';
         $alumni->save();
-        $this->post('/admin/pending_alumni.php', ['user_id' => $alumni->id, 'action' => 'approve'])->assertOk();
+        $this->post('/admin/pending_alumni.php', ['user_id' => $alumni->id, 'action' => 'approve'])->assertRedirect();
         $this->assertSame('approved', $alumni->fresh()->status);
         $this->assertTrue($alumni->fresh()->is_active);
-        Mail::assertQueued(PreservedNotification::class);
+        Mail::assertQueued(AlumniAccountApprovedMail::class);
     }
 
     public function test_compatibility_mailer_preserves_sender_bcc_and_plain_text(): void
@@ -454,20 +456,10 @@ final class WorkflowTest extends TestCase
         $employer = $this->user('employer');
         $alumni = $this->user('alumni');
         $this->actingAs($employer)->get('/employer/alumni_list.php')->assertOk();
-        $state = session('page_state');
-        $token = $state['send_snapshot_email_token'] ?? null;
-        // Use the rendered field name to preserve the existing double-submit protection.
-        if (! $token) {
-            foreach ($state as $key => $value) {
-                if (str_contains($key, 'token')) {
-                    $token = $value;
-                }
-            }
-        }
-        $this->assertNotEmpty($token);
-        $this->post('/employer/alumni_list.php', ['send_snapshot_email' => 1, 'send_snapshot_email_token' => $token, 'email_alumni_id' => $alumni->id, 'email_subject' => 'Test offer', 'email_message' => 'A test job offer.'])->assertOk();
+        $this->post('/employer/alumni_list.php', ['email_alumni_id' => $alumni->id, 'email_subject' => 'Test offer', 'email_message' => 'A test job offer.'])->assertRedirect();
         $offer = DB::table('job_offers')->where('employer_id', $employer->id)->where('alumni_id', $alumni->id)->first();
         $this->assertNotNull($offer);
+        Mail::assertQueued(JobOfferMail::class);
         DB::table('job_offers')->where('id', $offer->id)->update(['expires_at' => date('Y-m-d H:i:s', strtotime('-1 day'))]);
         $this->actingAs($alumni)->post('/alumni/job_offers.php', ['offer_id' => $offer->id, 'offer_action' => 'accept'])->assertStatus(422);
         $this->assertDatabaseHas('job_offers', ['id' => $offer->id, 'status' => 'sent']);

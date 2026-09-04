@@ -1560,12 +1560,8 @@ foreach ($alumni as $a) {
 <div class="modal fade" id="emailMessageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content email-message-modal-content">
-            <form method="POST" id="sendSnapshotEmailForm">
+            <form method="POST" action="{{ route('employer.alumni.actions') }}" id="sendSnapshotEmailForm">
 @csrf
-                <input type="hidden" name="send_snapshot_email" value="1">
-                <input type="hidden" name="send_snapshot_email_token" value="<?php 
-echo \gc_e($sendSnapshotEmailToken);
-?>">
                 <input type="hidden" name="email_alumni_id" id="emailAlumniId" value="">
 
                 <div class="modal-header email-message-header">
@@ -1742,7 +1738,7 @@ $(function () {
 
         fetch(window.location.href, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
             body: payload.toString(),
             credentials: 'same-origin'
         }).catch(() => {});

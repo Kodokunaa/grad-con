@@ -318,7 +318,7 @@ if (!empty($pendingUsers)) {
                                 </span>
                             </td>
                             <td>
-                                <form method="POST" class="inline-form">
+                                <form method="POST" action="{{ route('admin.alumni.approval.update') }}" class="inline-form">
 @csrf
                                     <input type="hidden" name="user_id" value="<?php 
         echo (int) $user['id'];
@@ -327,7 +327,7 @@ if (!empty($pendingUsers)) {
                                     <button type="submit" class="btn btn-approve">Approve</button>
                                 </form>
 
-                                <form method="POST" class="inline-form">
+                                <form method="POST" action="{{ route('admin.alumni.approval.update') }}" class="inline-form">
 @csrf
                                     <input type="hidden" name="user_id" value="<?php 
         echo (int) $user['id'];
