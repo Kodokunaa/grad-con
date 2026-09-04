@@ -2,7 +2,6 @@
 
 namespace App\Support;
 
-use PDO;
 
 final class ViewFormatter
 {
@@ -262,23 +261,11 @@ final class ViewFormatter
 
     return e($first.$last);
 }
-    public static function admin_events_list_get_current_user_id(): int
-{
-    if (! empty(\gc_context()->session['user_id'])) {
-        return (int) \gc_context()->session['user_id'];
-    }
-    if (! empty(\gc_context()->session['id'])) {
-        return (int) \gc_context()->session['id'];
-    }
-    if (! empty(\gc_context()->session['auth_user']['id'])) {
-        return (int) \gc_context()->session['auth_user']['id'];
-    }
-    if (! empty(auth()->id())) {
-        return (int) auth()->id();
-    }
 
-    return 0;
-}
+    public static function admin_events_list_get_current_user_id(): int
+    {
+        return (int) (auth()->id() ?? 0);
+    }
 
     public static function admin_events_list_format_schedule_date($date): string
 {
@@ -340,26 +327,8 @@ final class ViewFormatter
     // Default path used by this system for user profile pictures.
     return \url('').'/uploads/profiles/'.$image;
 }
-    public static function admin_events_list_get_user_profile_column(PDO $pdo): ?string
-{
-    return 'profile_picture';
-}
-    public static function admin_events_list_get_current_user_photo(PDO $pdo, int $userId, ?string $profileColumn): string
-{
-    if ($userId <= 0 || ! $profileColumn) {
-        return '';
-    }
-    try {
-        $stmt = $pdo->prepare("SELECT `{$profileColumn}` FROM users WHERE id=? LIMIT 1");
-        $stmt->execute([$userId]);
 
-        return (string) ($stmt->fetchColumn() ?: '');
-    } catch (Throwable $e) {
-        
 
-        return '';
-    }
-}
     public static function admin_events_list_render_avatar(string $name, ?string $profileImage = '', string $class = 'avatar'): string
 {
     $url = self::admin_events_list_profile_image_url($profileImage);
@@ -376,83 +345,10 @@ final class ViewFormatter
 
     return nl2br($safe);
 }
-    public static function admin_events_list_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
-{
-    preg_match_all('/@([A-Za-z0-9_ .\-]+)/u', $comment, $matches);
-    if (empty($matches[1])) {
-        return [];
-    }
-    $names = [];
-    foreach ($matches[1] as $name) {
-        $clean = trim(preg_replace('/\s+/', ' ', $name));
-        if ($clean !== '') {
-            $names[] = function_exists('mb_strtolower') ? mb_strtolower($clean) : strtolower($clean);
-        }
-    }
-    $names = array_unique($names);
-    if (! $names) {
-        return [];
-    }
-    $stmt = $pdo->query("SELECT id, fullname FROM users WHERE fullname IS NOT NULL AND fullname <> ''");
-    $mentioned = [];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $user) {
-        $full = trim(preg_replace('/\s+/', ' ', (string) $user['fullname']));
-        $fullLower = function_exists('mb_strtolower') ? mb_strtolower($full) : strtolower($full);
-        foreach ($names as $name) {
-            if ($fullLower === $name || strpos($fullLower, $name) !== false || strpos($name, $fullLower) !== false) {
-                $uid = (int) $user['id'];
-                if ($uid > 0 && $uid !== $currentUserId) {
-                    $mentioned[$uid] = $uid;
-                }
-            }
-        }
-    }
 
-    return array_values($mentioned);
-}
-    public static function admin_events_list_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
-{
-    $stmt = $pdo->prepare('SELECT reaction_type, COUNT(*) AS total FROM post_reactions WHERE post_type=? AND post_id=? GROUP BY reaction_type');
-    $stmt->execute([$postType, $postId]);
-    $counts = ['like' => 0, 'love' => 0, 'haha' => 0, 'angry' => 0, 'total' => 0];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $type = $row['reaction_type'];
-        $total = (int) $row['total'];
-        if (isset($counts[$type])) {
-            $counts[$type] = $total;
-            $counts['total'] += $total;
-        }
-    }
 
-    return $counts;
-}
-    public static function admin_events_list_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
-{
-    if ($userId <= 0) {
-        return '';
-    }
-    $stmt = $pdo->prepare('SELECT reaction_type FROM post_reactions WHERE post_type=? AND post_id=? AND user_id=? LIMIT 1');
-    $stmt->execute([$postType, $postId, $userId]);
 
-    return (string) ($stmt->fetchColumn() ?: '');
-}
-    public static function admin_events_list_get_comments(PDO $pdo, string $postType, int $postId, string $profileSelect): array
-{
-    $stmt = $pdo->prepare("SELECT c.*, u.fullname, {$profileSelect} AS profile_image\r\n                           FROM post_comments c\r\n                           LEFT JOIN users u ON u.id=c.user_id\r\n                           WHERE c.post_type=? AND c.post_id=?\r\n                           ORDER BY COALESCE(c.parent_comment_id, c.id) ASC, c.parent_comment_id IS NOT NULL ASC, c.id ASC");
-    $stmt->execute([$postType, $postId]);
-    $grouped = ['comments' => [], 'replies' => [], 'total' => 0];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $grouped['total']++;
-        $parentId = (int) ($row['parent_comment_id'] ?? 0);
-        if ($parentId > 0) {
-            $grouped['replies'][$parentId][] = $row;
-        } else {
-            $grouped['comments'][] = $row;
-        }
-    }
 
-    return $grouped;
-}
     public static function admin_events_list_comment_total(array $commentData): int
 {
     return (int) ($commentData['total'] ?? count($commentData));
@@ -504,23 +400,8 @@ final class ViewFormatter
 }
 
 // Helper: Add security log
-    public static function alumni_add_degree_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null): void
-{
-    $ip = \request()->server->all()['REMOTE_ADDR'] ?? null;
-    $ua = substr(\request()->server->all()['HTTP_USER_AGENT'] ?? '', 0, 255);
-    $ins = $pdo->prepare("\r\n        INSERT INTO security_logs(user_id, action, details, ip_address, user_agent)\r\n        VALUES(?,?,?,?,?)\r\n    ");
-    $ins->execute([$user_id, $action, $details, $ip, $ua]);
-}
 
-// Helper: Add security log
-    public static function alumni_employment_history_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null): void
-{
-    $ip = \request()->server->all()['REMOTE_ADDR'] ?? null;
-    $ua = substr(\request()->server->all()['HTTP_USER_AGENT'] ?? '', 0, 255);
-    $ins = $pdo->prepare("\r\n        INSERT INTO security_logs(user_id, action, details, ip_address, user_agent)\r\n        VALUES(?,?,?,?,?)\r\n    ");
-    $ins->execute([$user_id, $action, $details, $ip, $ua]);
-}
-// Helper: Format employment dates for display
+
     public static function alumni_employment_history_format_employment_date(?string $date): string
 {
     if (empty($date) || strtotime($date) === false) {
@@ -653,14 +534,7 @@ final class ViewFormatter
     return ['status' => 'Not Aligned', 'class' => 'badge-not-aligned', 'score' => 0, 'reason' => 'The saved course/program was not recognized or no matching job keyword was found.'];
 }
 // Helper: Update users.employment_status based on current/present job records
-    public static function alumni_employment_history_refresh_employment_status(PDO $pdo, int $user_id): void
-{
-    $checkEmployment = $pdo->prepare('SELECT COUNT(*) FROM employment_history WHERE user_id = ? AND end_date IS NULL');
-    $checkEmployment->execute([$user_id]);
-    $isEmployed = (int) $checkEmployment->fetchColumn() > 0 ? 'Employed' : 'Unemployed';
-    $updEmployment = $pdo->prepare('UPDATE users SET employment_status=? WHERE id=?');
-    $updEmployment->execute([$isEmployed, $user_id]);
-}
+
     public static function alumni_feed_format_post_date($date)
 {
     if (! $date) {
@@ -698,10 +572,6 @@ final class ViewFormatter
     return e($first.$last);
 }
 
-    public static function alumni_feed_get_user_profile_column(PDO $pdo): ?string
-{
-    return 'profile_picture';
-}
     public static function alumni_feed_profile_image_url($photo): string
 {
     $photo = trim((string) ($photo ?? ''));
@@ -735,71 +605,10 @@ final class ViewFormatter
 
     return nl2br($safe);
 }
-    public static function alumni_feed_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
-{
-    preg_match_all('/@([A-Za-z0-9_ .\-]+)/u', $comment, $matches);
-    if (empty($matches[1])) {
-        return [];
-    }
-    $names = [];
-    foreach ($matches[1] as $name) {
-        $clean = trim(preg_replace('/\s+/', ' ', $name));
-        if ($clean !== '') {
-            $names[] = mb_strtolower($clean);
-        }
-    }
-    $names = array_unique($names);
-    if (! $names) {
-        return [];
-    }
-    $stmt = $pdo->query("SELECT id, fullname FROM users WHERE fullname IS NOT NULL AND fullname <> ''");
-    $mentioned = [];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $user) {
-        $full = mb_strtolower(trim(preg_replace('/\s+/', ' ', (string) $user['fullname'])));
-        foreach ($names as $name) {
-            if ($full === $name || strpos($full, $name) !== false || strpos($name, $full) !== false) {
-                $uid = (int) $user['id'];
-                if ($uid > 0 && $uid !== $currentUserId) {
-                    $mentioned[$uid] = $uid;
-                }
-            }
-        }
-    }
 
-    return array_values($mentioned);
-}
-    public static function alumni_feed_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
-{
-    $stmt = $pdo->prepare('SELECT reaction_type, COUNT(*) AS total FROM post_reactions WHERE post_type=? AND post_id=? GROUP BY reaction_type');
-    $stmt->execute([$postType, $postId]);
-    $counts = ['like' => 0, 'love' => 0, 'haha' => 0, 'angry' => 0, 'total' => 0];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $type = $row['reaction_type'];
-        $total = (int) $row['total'];
-        if (isset($counts[$type])) {
-            $counts[$type] = $total;
-            $counts['total'] += $total;
-        }
-    }
 
-    return $counts;
-}
-    public static function alumni_feed_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
-{
-    $stmt = $pdo->prepare('SELECT reaction_type FROM post_reactions WHERE post_type=? AND post_id=? AND user_id=? LIMIT 1');
-    $stmt->execute([$postType, $postId, $userId]);
 
-    return (string) ($stmt->fetchColumn() ?: '');
-}
-    public static function alumni_feed_get_comments(PDO $pdo, string $postType, int $postId): array
-{
-    $profileColumn = self::alumni_feed_get_user_profile_column($pdo);
-    $profileSelect = $profileColumn ? ", u.`{$profileColumn}` AS profile_photo" : ', NULL AS profile_photo';
-    $stmt = $pdo->prepare("SELECT c.*, u.fullname {$profileSelect} FROM post_comments c LEFT JOIN users u ON u.id=c.user_id WHERE c.post_type=? AND c.post_id=? ORDER BY c.id ASC");
-    $stmt->execute([$postType, $postId]);
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
     public static function alumni_feed_render_engagement_html(array $counts, int $commentCount, array $allowedReactions): string
 {
     ob_start();
@@ -1148,28 +957,12 @@ final class ViewFormatter
 
     return e($first.$last);
 }
+
     public static function alumni_officer_events_list_get_current_user_id(): int
-{
-    if (! empty(\gc_context()->session['user_id'])) {
-        return (int) \gc_context()->session['user_id'];
-    }
-    if (! empty(\gc_context()->session['id'])) {
-        return (int) \gc_context()->session['id'];
-    }
-    if (! empty(\gc_context()->session['auth_user']['id'])) {
-        return (int) \gc_context()->session['auth_user']['id'];
-    }
-    if (! empty(auth()->id())) {
-        return (int) auth()->id();
+    {
+        return (int) (auth()->id() ?? 0);
     }
 
-    return 0;
-}
-
-    public static function alumni_officer_events_list_get_user_profile_column(PDO $pdo): ?string
-{
-    return 'profile_picture';
-}
     public static function alumni_officer_events_list_profile_image_url($photo): string
 {
     $photo = trim((string) ($photo ?? ''));
@@ -1203,40 +996,7 @@ final class ViewFormatter
 
     return nl2br($safe);
 }
-    public static function alumni_officer_events_list_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
-{
-    preg_match_all('/@([A-Za-z0-9_ .\-]+)/u', $comment, $matches);
-    if (empty($matches[1])) {
-        return [];
-    }
-    $names = [];
-    foreach ($matches[1] as $name) {
-        $clean = trim(preg_replace('/\s+/', ' ', $name));
-        if ($clean !== '') {
-            $names[] = function_exists('mb_strtolower') ? mb_strtolower($clean) : strtolower($clean);
-        }
-    }
-    $names = array_unique($names);
-    if (! $names) {
-        return [];
-    }
-    $stmt = $pdo->query("SELECT id, fullname FROM users WHERE fullname IS NOT NULL AND fullname <> ''");
-    $mentioned = [];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $user) {
-        $full = trim(preg_replace('/\s+/', ' ', (string) $user['fullname']));
-        $fullLower = function_exists('mb_strtolower') ? mb_strtolower($full) : strtolower($full);
-        foreach ($names as $name) {
-            if ($fullLower === $name || strpos($fullLower, $name) !== false || strpos($name, $fullLower) !== false) {
-                $uid = (int) $user['id'];
-                if ($uid > 0 && $uid !== $currentUserId) {
-                    $mentioned[$uid] = $uid;
-                }
-            }
-        }
-    }
 
-    return array_values($mentioned);
-}
     public static function alumni_officer_events_list_format_schedule_date($date): string
 {
     if (! $date) {
@@ -1263,64 +1023,11 @@ final class ViewFormatter
 
     return ['Active', 'status-active'];
 }
-    public static function alumni_officer_events_list_is_event_visible_on_feed(PDO $pdo, int $eventId): bool
-{
-    if ($eventId <= 0) {
-        return false;
-    }
-    $stmt = $pdo->prepare("\r\n        SELECT id\r\n        FROM events\r\n        WHERE id = ?\r\n          AND (post_start_date IS NULL OR post_start_date <= NOW())\r\n          AND (post_end_date IS NULL OR post_end_date >= NOW())\r\n        LIMIT 1\r\n    ");
-    $stmt->execute([$eventId]);
 
-    return (bool) $stmt->fetchColumn();
-}
-    public static function alumni_officer_events_list_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
-{
-    $stmt = $pdo->prepare('SELECT reaction_type, COUNT(*) AS total FROM post_reactions WHERE post_type=? AND post_id=? GROUP BY reaction_type');
-    $stmt->execute([$postType, $postId]);
-    $counts = ['like' => 0, 'love' => 0, 'haha' => 0, 'angry' => 0, 'total' => 0];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $type = $row['reaction_type'];
-        $total = (int) $row['total'];
-        if (isset($counts[$type])) {
-            $counts[$type] = $total;
-            $counts['total'] += $total;
-        }
-    }
 
-    return $counts;
-}
-    public static function alumni_officer_events_list_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
-{
-    $stmt = $pdo->prepare('SELECT reaction_type FROM post_reactions WHERE post_type=? AND post_id=? AND user_id=? LIMIT 1');
-    $stmt->execute([$postType, $postId, $userId]);
 
-    return (string) ($stmt->fetchColumn() ?: '');
-}
-    public static function alumni_officer_events_list_get_comments(PDO $pdo, string $postType, int $postId): array
-{
-    $profileColumn = self::alumni_officer_events_list_get_user_profile_column($pdo);
-    $profileSelect = $profileColumn ? ", u.`{$profileColumn}` AS profile_photo" : ', NULL AS profile_photo';
-    $stmt = $pdo->prepare("SELECT c.*, u.fullname {$profileSelect}\r\n                           FROM post_comments c\r\n                           LEFT JOIN users u ON u.id=c.user_id\r\n                           WHERE c.post_type=? AND c.post_id=?\r\n                           ORDER BY COALESCE(c.parent_comment_id, c.id) ASC, c.parent_comment_id IS NOT NULL ASC, c.id ASC");
-    $stmt->execute([$postType, $postId]);
-    $mainComments = [];
-    $replies = [];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $parentId = (int) ($row['parent_comment_id'] ?? 0);
-        if ($parentId > 0) {
-            $replies[$parentId][] = $row;
-        } else {
-            $mainComments[] = $row;
-        }
-    }
 
-    return ['main' => $mainComments, 'replies' => $replies, 'total' => count($mainComments) + array_sum(array_map('count', $replies))];
-}
 
-    public static function employer_alumni_list_log_employer_activity(PDO $pdo, int $employerId, string $action, ?string $details = null, ?int $alumniId = null, ?int $offerId = null, ?string $courseFilter = null, ?string $batchFilter = null, ?string $skillSearch = null, ?int $resultCount = null): void
-{
-    $stmt = $pdo->prepare("INSERT INTO employer_activity_logs (employer_id, alumni_id, offer_id, action, details, course_filter, batch_filter, skill_search, result_count)\r\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$employerId, $alumniId, $offerId, $action, $details, $courseFilter, $batchFilter, $skillSearch, $resultCount]);
-}
     public static function employer_alumni_list_format_year_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
@@ -1611,14 +1318,7 @@ final class ViewFormatter
 // ========================
 
 // Helper: Add security log
-    public static function profile_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null)
-{
-    $ip = \request()->server->all()['REMOTE_ADDR'] ?? null;
-    $ua = substr(\request()->server->all()['HTTP_USER_AGENT'] ?? '', 0, 255);
-    $ins = $pdo->prepare('INSERT INTO security_logs(user_id, action, details, ip_address, user_agent) VALUES(?,?,?,?,?)');
-    $ins->execute([$user_id, $action, $details, $ip, $ua]);
-}
-// Helper: Normalize text for course-job alignment
+
     public static function profile_normalize_alignment_text(?string $text): string
 {
     $text = strtolower(trim((string) $text));
