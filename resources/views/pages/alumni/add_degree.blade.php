@@ -199,7 +199,7 @@ if ($error) {
 }
 ?>
 
-        <form method="POST" id="educationForm">
+        <form method="POST" action="{{ route('alumni.education.store') }}" id="educationForm">
 @csrf
             <div class="row g-3">
                 <div class="col-md-6">

@@ -272,7 +272,7 @@ final class WorkflowTest extends TestCase
         $this->assertNotNull($training);
         $this->get('/admin/trainings_edit.php?id='.$training->id)->assertOk();
         $alumni = $this->user('alumni');
-        $this->actingAs($alumni)->post('/alumni/add_degree.php', ['add_education' => 1, 'school_name' => 'Test College', 'degree' => 'Tertiary', 'start_year' => '2021', 'end_year' => '2025'])->assertOk();
+        $this->actingAs($alumni)->post('/alumni/add_degree.php', ['add_education' => 1, 'school_name' => 'Test College', 'degree' => 'Tertiary', 'start_year' => '2021', 'end_year' => '2025'])->assertRedirect();
         $this->assertDatabaseHas('alumni_education', ['user_id' => $alumni->id, 'school_name' => 'Test College']);
     }
 

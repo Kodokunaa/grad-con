@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SendApplicantResumeController;
 use App\Http\Controllers\Admin\UpdateAlumniApprovalController;
 use App\Http\Controllers\Alumni\DestroyEmploymentController;
 use App\Http\Controllers\Alumni\RespondToOfferController;
+use App\Http\Controllers\Alumni\StoreEducationController;
 use App\Http\Controllers\Application\UpdateApplicationStatusController;
 use App\Http\Controllers\Employer\AlumniDirectoryActionController;
 use App\Http\Controllers\Event\ArchiveEventController;
@@ -136,7 +137,7 @@ Route::post('/trainings', StoreTrainingController::class)->middleware('account:a
 Route::put('/trainings/{training}', UpdateTrainingController::class)->middleware('account:admin')->name('trainings.update');
 Route::post('/admin/trainings_list.php', AdminTrainingsListController::class)->middleware('account:admin');
 Route::get('/alumni/add_degree.php', AlumniAddDegreeController::class)->middleware('account:alumni')->name('alumni.add_degree');
-Route::post('/alumni/add_degree.php', AlumniAddDegreeController::class)->middleware('account:alumni');
+Route::post('/alumni/add_degree.php', StoreEducationController::class)->middleware('account:alumni')->name('alumni.education.store');
 Route::get('/alumni/apply.php', AlumniApplyController::class)->middleware('account:alumni')->name('alumni.apply');
 Route::post('/alumni/apply.php', AlumniApplyController::class)->middleware('account:alumni');
 Route::get('/alumni/change_password.php', AlumniChangePasswordController::class)->middleware('account:alumni')->name('alumni.change_password');
