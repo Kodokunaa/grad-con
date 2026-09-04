@@ -48,14 +48,6 @@ final class RespondToOfferController extends Controller
             : 'Offer declined successfully.');
     }
 
-    public function legacy(Request $request)
-    {
-        $data = $request->validate(['offer_id' => ['required', 'integer', 'exists:job_offers,id'], 'offer_action' => ['required', 'in:accept,decline']]);
-        $offer = JobOffer::findOrFail($data['offer_id']);
-
-        return $this->update($request, $offer->offer_token, $data['offer_action']);
-    }
-
     private function offer(string $token): JobOffer
     {
         return JobOffer::where('offer_token', $token)->firstOrFail();

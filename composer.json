@@ -58,6 +58,13 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "verify": [
+            "@php artisan optimize:clear --ansi",
+            "@php artisan route:list --except-vendor",
+            "@php artisan migrate:status",
+            "@php artisan test",
+            "@php artisan gradconn:check --database"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

@@ -239,16 +239,18 @@ if (empty($offers)) {
                     <?php 
         if ($offer['status'] === 'sent') {
             ?>
-                        <form method="POST" style="margin-top: 16px;">
+                        <div class="offer-actions" style="margin-top: 16px;">
+                        <form method="POST" action="{{ url('/alumni/offers/'.$offer['offer_token'].'/accept') }}">
 @csrf
-                            <input type="hidden" name="offer_id" value="<?php 
-            echo (int) $offer['id'];
-            ?>">
-                            <div class="offer-actions">
-                                <button type="submit" name="offer_action" value="accept" class="btn-accept">✓ Accept Invitation</button>
-                                <button type="submit" name="offer_action" value="decline" class="btn-decline">✗ Decline Invitation</button>
-                            </div>
+@method('PATCH')
+                                <button type="submit" class="btn-accept">✓ Accept Invitation</button>
                         </form>
+                        <form method="POST" action="{{ url('/alumni/offers/'.$offer['offer_token'].'/decline') }}">
+@csrf
+@method('PATCH')
+                                <button type="submit" class="btn-decline">✗ Decline Invitation</button>
+                        </form>
+                        </div>
                     <?php 
         }
         ?>
@@ -264,3 +266,4 @@ if (empty($offers)) {
 
 <?php 
 echo view('partials.footer', \get_defined_vars());
+

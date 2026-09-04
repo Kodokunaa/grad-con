@@ -62,6 +62,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        throw new RuntimeException('Use the documented database backup rollback.');
+        // Additive upgrade changes are retained; a fresh baseline rollback removes the owned schema.
     }
 };

@@ -152,7 +152,7 @@ final class WorkflowTest extends TestCase
         foreach (['admin', 'employer'] as $role) {
             $user = $this->user($role);
             $data = ['title' => 'Workflow '.$role.' job', 'location' => 'Calapan', 'job_type' => 'Full-time', 'start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d', strtotime('+30 days')), 'description' => 'Test job description', 'is_open' => 1, 'employer_company' => 'Test Company', 'email_address' => $user->email];
-            $this->actingAs($user)->post($role === 'admin' ? '/admin/jobs_create.php' : '/employer/post_job.php', $data)->assertRedirect();
+            $this->actingAs($user)->post('/jobs', $data)->assertRedirect();
             $this->assertDatabaseHas('jobs', ['title' => $data['title'], 'posted_by' => $user->id, 'is_open' => 1]);
         }
         Mail::assertQueued(JobOpportunityMail::class);
@@ -266,9 +266,9 @@ final class WorkflowTest extends TestCase
     {
         Mail::fake();
         $admin = $this->user('admin');
-        $this->actingAs($admin)->post('/admin/events_create.php', ['title' => 'Workflow event', 'content' => 'Event description'])->assertRedirect(route('admin.events_create'));
+        $this->actingAs($admin)->post('/events', ['title' => 'Workflow event', 'content' => 'Event description'])->assertRedirect(route('admin.events_create'));
         $this->assertDatabaseHas('events', ['title' => 'Workflow event', 'posted_by' => $admin->id]);
-        $this->post('/admin/trainings_create.php', ['title' => 'Workflow training', 'content' => 'Training description', 'training_date' => date('Y-m-d'), 'target_course' => 'BSIS', 'location' => 'Campus'])->assertRedirect(route('admin.trainings_create'));
+        $this->post('/trainings', ['title' => 'Workflow training', 'content' => 'Training description', 'training_date' => date('Y-m-d'), 'target_course' => 'BSIS', 'location' => 'Campus'])->assertRedirect(route('admin.trainings_create'));
         $training = DB::table('trainings')->where('title', 'Workflow training')->first();
         $this->assertNotNull($training);
         $this->get('/admin/trainings_edit.php?id='.$training->id)->assertOk();
@@ -439,7 +439,7 @@ final class WorkflowTest extends TestCase
         $this->assertNotNull($offer);
         Mail::assertQueued(JobOfferMail::class);
         DB::table('job_offers')->where('id', $offer->id)->update(['expires_at' => date('Y-m-d H:i:s', strtotime('-1 day'))]);
-        $this->actingAs($alumni)->post('/alumni/job_offers.php', ['offer_id' => $offer->id, 'offer_action' => 'accept'])->assertStatus(422);
+        $this->actingAs($alumni)->patch('/alumni/offers/'.$offer->offer_token.'/accept')->assertStatus(422);
         $this->assertDatabaseHas('job_offers', ['id' => $offer->id, 'status' => 'sent']);
     }
 
@@ -473,4 +473,5 @@ final class WorkflowTest extends TestCase
         $this->assertDatabaseHas('employment_history', ['user_id' => $alumni->id, 'company_name' => 'Employment Test']);
     }
 }
+
 
