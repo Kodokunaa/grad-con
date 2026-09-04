@@ -11,6 +11,8 @@ use App\Http\Controllers\Alumni\RespondToOfferController;
 use App\Http\Controllers\Alumni\StoreEducationController;
 use App\Http\Controllers\Alumni\StoreEmploymentController;
 use App\Http\Controllers\Application\UpdateApplicationStatusController;
+use App\Http\Controllers\Application\StoreApplicationController;
+use App\Http\Controllers\Application\AlumniApplicationActionController;
 use App\Http\Controllers\Employer\AlumniDirectoryActionController;
 use App\Http\Controllers\Employer\EmployerJobOfferActionController;
 use App\Http\Controllers\Event\ArchiveEventController;
@@ -148,7 +150,7 @@ Route::post('/admin/trainings_list.php', AdminTrainingsListController::class)->m
 Route::get('/alumni/add_degree.php', AlumniAddDegreeController::class)->middleware('account:alumni')->name('alumni.add_degree');
 Route::post('/alumni/add_degree.php', StoreEducationController::class)->middleware('account:alumni')->name('alumni.education.store');
 Route::get('/alumni/apply.php', AlumniApplyController::class)->middleware('account:alumni')->name('alumni.apply');
-Route::post('/alumni/apply.php', AlumniApplyController::class)->middleware('account:alumni');
+Route::post('/alumni/jobs/{job}/applications', StoreApplicationController::class)->middleware('account:alumni')->name('applications.store');
 Route::get('/alumni/change_password.php', AlumniChangePasswordController::class)->middleware('account:alumni')->name('alumni.change_password');
 Route::post('/alumni/change_password.php', AlumniChangePasswordController::class)->middleware('account:alumni');
 Route::get('/alumni/dashboard.php', AlumniDashboardController::class)->middleware('account:alumni')->name('alumni.dashboard');
@@ -166,7 +168,8 @@ Route::get('/alumni/offers/{token}/{action}', [RespondToOfferController::class, 
 Route::patch('/alumni/offers/{token}/{action}', [RespondToOfferController::class, 'update'])->whereIn('action', ['accept', 'decline'])->middleware('account:alumni')->name('offers.response.update');
 Route::get('/alumni/jobs.php', AlumniJobsController::class)->middleware('account:alumni')->name('alumni.jobs');
 Route::get('/alumni/my_applications.php', AlumniMyApplicationsController::class)->middleware('account:alumni')->name('alumni.my_applications');
-Route::post('/alumni/my_applications.php', AlumniMyApplicationsController::class)->middleware('account:alumni');
+Route::patch('/alumni/applications/{application}/cancel', [AlumniApplicationActionController::class, 'cancel'])->middleware('account:alumni')->name('applications.cancel');
+Route::delete('/alumni/applications/{application}', [AlumniApplicationActionController::class, 'destroy'])->middleware('account:alumni')->name('applications.destroy');
 Route::get('/alumni_officer/alumni_list.php', AlumniOfficerAlumniListController::class)->middleware('account:alumni_officer')->name('alumni_officer.alumni_list');
 Route::post('/alumni_officer/alumni_list.php', AlumniOfficerAlumniListController::class)->middleware('account:alumni_officer');
 Route::get('/alumni_officer/archive.php', AlumniOfficerArchiveController::class)->middleware('account:alumni_officer')->name('alumni_officer.archive');

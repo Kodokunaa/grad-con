@@ -22,7 +22,7 @@ final class PageSecurity
         // Validate every uploaded file before the retained handlers inspect it.
         foreach (Arr::flatten($request->allFiles()) as $file) {
             abort_unless($file->isValid(), 422, 'Upload failed.');
-            $isResume = $request->is('alumni/apply.php');
+            $isResume = $request->is('alumni/apply.php') || $request->routeIs('applications.store');
             validator(['upload' => $file], ['upload' => $isResume ? 'required|file|mimes:pdf|max:5120' : 'required|image|mimes:jpg,jpeg,png,gif,webp|max:5120'])->validate();
         }
         if ($request->isMethod('POST') && $request->user()) {

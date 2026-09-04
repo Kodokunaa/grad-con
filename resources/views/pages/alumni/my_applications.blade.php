@@ -678,12 +678,10 @@ if (count($apps) === 0) {
             }
             ?>
 
-                            <form method="POST" onsubmit="return confirm('Are you sure you want to remove this cancelled application?');">
+                            <form method="POST" action="{{ url('/alumni/applications/'.$a['id']) }}" onsubmit="return confirm('Are you sure you want to remove this cancelled application?');">
 @csrf
-                                <input type="hidden" name="application_id" value="<?php 
-            echo (int) $a['id'];
-            ?>">
-                                <button type="submit" name="remove_application" class="remove-btn">Remove Application</button>
+@method('DELETE')
+                                <button type="submit" class="remove-btn">Remove Application</button>
                             </form>
                         <?php 
         }
@@ -750,8 +748,9 @@ if (count($apps) === 0) {
             Please provide your reason for cancelling this application. This reason will be visible to the employer/admin.
         </p>
 
-        <form method="POST" onsubmit="return validateCancelReason();">
+        <form method="POST" id="cancelApplicationForm" onsubmit="return validateCancelReason();">
 @csrf
+@method('PATCH')
             <input type="hidden" name="application_id" id="cancel_application_id">
 
             <textarea name="cancel_reason"
@@ -772,6 +771,7 @@ if (count($apps) === 0) {
 <script>
     function openCancelModal(applicationId, jobTitle) {
         document.getElementById('cancel_application_id').value = applicationId;
+        document.getElementById('cancelApplicationForm').action = '{{ url('/alumni/applications') }}/' + applicationId + '/cancel';
         document.getElementById('cancel_reason').value = '';
 
         document.getElementById('cancelModalText').innerHTML =

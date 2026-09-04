@@ -540,7 +540,7 @@ echo htmlspecialchars($alumni["trainings"] ?? "");
             </div>
         </div>
 
-        <form method="POST" id="applicationForm" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('applications.store', $job_id) }}" id="applicationForm" enctype="multipart/form-data">
 @csrf
 
             <div class="form-group">

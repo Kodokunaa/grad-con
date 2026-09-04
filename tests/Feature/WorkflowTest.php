@@ -165,7 +165,7 @@ final class WorkflowTest extends TestCase
         $alumni = $this->user('alumni');
         $jobId = DB::table('jobs')->insertGetId(['title' => 'Application workflow', 'company' => 'Test Company', 'employer_company' => 'Test Company', 'target_course' => 'BSIS', 'description' => 'Test', 'posted_by' => $employer->id, 'employer_id' => $employer->id, 'is_open' => 1]);
         $upload = UploadedFile::fake()->createWithContent('resume.pdf', "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF");
-        $this->actingAs($alumni)->post('/alumni/apply.php?job_id='.$jobId, ['message' => 'Application test', 'agree_terms' => 1, 'resume' => $upload])->assertOk();
+        $this->actingAs($alumni)->post('/alumni/jobs/'.$jobId.'/applications', ['message' => 'Application test', 'agree_terms' => 1, 'resume' => $upload])->assertSessionHasNoErrors()->assertRedirect();
         $application = DB::table('applications')->where('job_id', $jobId)->where('alumni_id', $alumni->id)->first();
         $this->assertNotNull($application);
         $path = storage_path('app/private/files/uploads/resumes/'.$application->resume_file);
