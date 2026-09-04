@@ -245,25 +245,25 @@
     <div class="card-custom">
         <div class="section-title">Add New Employment History</div>
 
-        <?php 
+        <?php
 if ($msg) {
     ?>
-            <div class="alert-box alert-success-custom"><?php 
+            <div class="alert-box alert-success-custom"><?php
     echo htmlspecialchars($msg);
     ?></div>
-        <?php 
+        <?php
 }
-?>
+        ?>
 
-        <?php 
+        <?php
 if ($error) {
     ?>
-            <div class="alert-box alert-danger-custom"><?php 
+            <div class="alert-box alert-danger-custom"><?php
     echo htmlspecialchars($error);
     ?></div>
-        <?php 
+        <?php
 }
-?>
+        ?>
 
         <form method="POST">
 @csrf
@@ -275,9 +275,9 @@ if ($error) {
                         name="company_name"
                         class="form-control-custom"
                         placeholder="Enter company name"
-                        value="<?php 
-echo htmlspecialchars(\gc_context()->post['company_name'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars(\gc_context()->post['company_name'] ?? '');
+        ?>"
                         required
                     >
                 </div>
@@ -289,9 +289,9 @@ echo htmlspecialchars(\gc_context()->post['company_name'] ?? '');
                         name="job_title"
                         class="form-control-custom"
                         placeholder="Enter job title"
-                        value="<?php 
-echo htmlspecialchars(\gc_context()->post['job_title'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars(\gc_context()->post['job_title'] ?? '');
+        ?>"
                         required
                     >
                 </div>
@@ -303,9 +303,9 @@ echo htmlspecialchars(\gc_context()->post['job_title'] ?? '');
                         name="employment_type"
                         class="form-control-custom"
                         placeholder="Full-time, Part-time, Contract"
-                        value="<?php 
-echo htmlspecialchars(\gc_context()->post['employment_type'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars(\gc_context()->post['employment_type'] ?? '');
+        ?>"
                     >
                 </div>
 
@@ -316,9 +316,9 @@ echo htmlspecialchars(\gc_context()->post['employment_type'] ?? '');
                         name="location"
                         class="form-control-custom"
                         placeholder="Enter work location"
-                        value="<?php 
-echo htmlspecialchars(\gc_context()->post['location'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars(\gc_context()->post['location'] ?? '');
+        ?>"
                     >
                 </div>
 
@@ -328,9 +328,9 @@ echo htmlspecialchars(\gc_context()->post['location'] ?? '');
                         type="date"
                         name="start_date"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars(\gc_context()->post['start_date'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars(\gc_context()->post['start_date'] ?? '');
+        ?>"
                         required
                     >
                 </div>
@@ -341,9 +341,9 @@ echo htmlspecialchars(\gc_context()->post['start_date'] ?? '');
                         type="date"
                         name="end_date"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars(\gc_context()->post['end_date'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars(\gc_context()->post['end_date'] ?? '');
+        ?>"
                     >
                 </div>
 
@@ -353,9 +353,9 @@ echo htmlspecialchars(\gc_context()->post['end_date'] ?? '');
                         name="job_description"
                         class="form-textarea-custom"
                         placeholder="Optional job description"
-                    ><?php 
-echo htmlspecialchars(\gc_context()->post['job_description'] ?? '');
-?></textarea>
+                    ><?php
+        echo htmlspecialchars(\gc_context()->post['job_description'] ?? '');
+        ?></textarea>
                 </div>
 
                 <div class="col-12">
@@ -370,9 +370,9 @@ echo htmlspecialchars(\gc_context()->post['job_description'] ?? '');
 
         <div class="course-info-box">
             <strong>Course/Program:</strong>
-            <?php 
-echo $alumniCourse !== "" ? htmlspecialchars($alumniCourse) : "Not set in profile";
-?>
+            <?php
+        echo $alumniCourse !== '' ? htmlspecialchars($alumniCourse) : 'Not set in profile';
+        ?>
             <br>
             <span class="muted-small">
                 The newest job with blank End Date is your Present job. When you add a new Present job, the old Present job is automatically moved to past history. Alignment checks BSIS, BSTM, BLIS, BSHM, BSED Math, BSED Science, BSNED, and BPA keywords.
@@ -395,95 +395,91 @@ echo $alumniCourse !== "" ? htmlspecialchars($alumniCourse) : "Not set in profil
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
+                    <?php
 if (count($employment_list) === 0) {
     ?>
                         <tr>
                             <td colspan="9" class="muted-small">No employment history added yet.</td>
                         </tr>
-                    <?php 
+                    <?php
 } else {
     ?>
-                        <?php 
+                        <?php
     foreach ($employment_list as $emp) {
         ?>
                             <tr>
-                                <td><?php 
+                                <td><?php
         echo htmlspecialchars($emp['company_name']);
         ?></td>
-                                <td><?php 
+                                <td><?php
         echo htmlspecialchars($emp['job_title']);
         ?></td>
-                                <td><?php 
+                                <td><?php
         echo htmlspecialchars($emp['employment_type'] ?? '');
         ?></td>
-                                <td><?php 
+                                <td><?php
         echo htmlspecialchars($emp['location'] ?? '');
         ?></td>
                                 <td>
-                                    <?php 
+                                    <?php
         $start = $emp['start_date'] ?? '';
         $end = $emp['end_date'] ?? '';
         $formattedStart = \gc_alumni_employment_history_format_employment_date($start);
         $formattedEnd = \gc_alumni_employment_history_format_employment_date($end);
         if ($formattedStart !== '' && $formattedEnd !== '') {
-            echo htmlspecialchars($formattedStart . ' to ' . $formattedEnd);
+            echo htmlspecialchars($formattedStart.' to '.$formattedEnd);
         } elseif ($formattedStart !== '' && $formattedEnd === '') {
-            echo htmlspecialchars($formattedStart . ' to Present');
+            echo htmlspecialchars($formattedStart.' to Present');
             echo '<br><span class="current-job-badge">Current / Present Job</span>';
         } else {
             echo '<span class="muted-small">N/A</span>';
         }
         ?>
                                 </td>
-                                <td class="muted-small"><?php 
+                                <td class="muted-small"><?php
         echo htmlspecialchars($emp['job_description'] ?? '');
         ?></td>
                                 <td>
-                                    <?php 
+                                    <?php
         $alignment = \gc_alumni_employment_history_analyze_course_job_alignment($alumniCourse, $emp['job_title'] ?? '', $emp['job_description'] ?? '');
         ?>
-                                    <span class="alignment-badge <?php 
+                                    <span class="alignment-badge <?php
         echo htmlspecialchars($alignment['class']);
         ?>">
-                                        <?php 
+                                        <?php
         echo htmlspecialchars($alignment['status']);
         ?>
                                     </span>
                                     <div class="muted-small">
-                                        <?php 
+                                        <?php
         echo htmlspecialchars($alignment['reason']);
         ?>
                                     </div>
                                 </td>
-                                <td class="muted-small"><?php 
+                                <td class="muted-small"><?php
         echo htmlspecialchars($emp['created_at']);
         ?></td>
                                 <td>
-                                    <a
-                                        href="employment_history.php?delete=<?php 
-        echo (int) $emp['id'];
-        ?>"
-                                        class="text-danger-link"
-                                        onclick="return confirm('Delete this employment history?');"
-                                    >
-                                        Delete
-                                    </a>
+                                    <form method="POST" action="{{ route('alumni.employment.destroy', $emp['id']) }}" onsubmit="return confirm('Delete this employment history?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-danger-link border-0 bg-transparent p-0">Delete</button>
+                                    </form>
                                 </td>
                             </tr>
-                        <?php 
+                        <?php
     }
     ?>
-                    <?php 
+                    <?php
 }
-?>
+        ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+        echo \gc_partial('footer', \get_defined_vars());
 ?>  
 

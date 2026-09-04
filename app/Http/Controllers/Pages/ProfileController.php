@@ -48,7 +48,7 @@ final class ProfileController extends PageController
                     $profile_error = 'Unable to update notification settings.';
                 }
             }
-            $cert_msg = '';
+            $cert_msg = (string) session('status', '');
             $cert_error = '';
             $certificates_list = [];
             // ========================
@@ -96,29 +96,6 @@ final class ProfileController extends PageController
                             PrivateUploads::delete('certificates', $certificate_image_name);
                         }
                         $cert_error = 'Certificates table is missing the certificate_image column. Run the SQL fix first.';
-                    }
-                }
-            }
-            if ($role === 'alumni' && isset(\gc_context()->query['delete_certificate'])) {
-                $active_tab = 'profile';
-                $deleteCertificateId = (int) (\gc_context()->query['delete_certificate'] ?? 0);
-                if ($deleteCertificateId > 0) {
-                    try {
-                        $findCert = $pdo->prepare('SELECT certificate_image FROM alumni_certificates WHERE id=? AND user_id=? LIMIT 1');
-                        $findCert->execute([$deleteCertificateId, $id]);
-                        $certRow = $findCert->fetch(\PDO::FETCH_ASSOC);
-                        if ($certRow && ! empty($certRow['certificate_image'])) {
-                            PrivateUploads::delete('certificates', $certRow['certificate_image']);
-                        }
-                        $del = $pdo->prepare('DELETE FROM alumni_certificates WHERE id=? AND user_id=?');
-                        $del->execute([$deleteCertificateId, $id]);
-                        \gc_profile_add_log($pdo, $id, 'CERTIFICATE_DELETED', 'Certificate deleted');
-                        $cert_msg = 'Certificate deleted successfully!';
-                    } catch (\Throwable $e) {
-                        if ($e instanceof PageResponse) {
-                            throw $e;
-                        }
-                        $cert_error = 'Unable to delete certificate.';
                     }
                 }
             }

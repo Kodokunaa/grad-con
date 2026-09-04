@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AlumniCertificate;
 use App\Models\Event;
 use App\Models\Interview;
 use App\Models\Job;
@@ -95,5 +96,18 @@ final class AuthorizationTest extends TestCase
         $this->assertTrue(Gate::forUser($officer)->allows('update', $training));
         $this->assertFalse(Gate::forUser($otherOfficer)->allows('update', $training));
         $this->assertFalse(Gate::forUser($employer)->allows('viewAny', Training::class));
+    }
+
+    public function test_certificate_policy_enforces_alumni_ownership(): void
+    {
+        $owner = $this->user('alumni');
+        $other = $this->user('alumni');
+        $admin = $this->user('admin');
+        $certificate = new AlumniCertificate(['certificate_name' => 'Test', 'issuer' => 'GradConn']);
+        $certificate->user_id = $owner->id;
+
+        $this->assertTrue($owner->can('delete', $certificate));
+        $this->assertFalse($other->can('delete', $certificate));
+        $this->assertTrue($admin->can('delete', $certificate));
     }
 }

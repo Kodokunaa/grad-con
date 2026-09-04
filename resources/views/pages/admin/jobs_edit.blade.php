@@ -222,30 +222,30 @@
 
     <div class="page-header">
         <h3 class="page-title">Edit Job</h3>
-        <a class="back-btn" href="<?php 
+        <a class="back-btn" href="<?php
 echo \url('');
-?>/admin/jobs_list.php">Back to Job List</a>
+        ?>/admin/jobs_list.php">Back to Job List</a>
     </div>
 
-    <?php 
+    <?php
 if ($msg) {
     ?>
-        <div class="alert-box alert-success-custom"><?php 
+        <div class="alert-box alert-success-custom"><?php
     echo htmlspecialchars($msg);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+        ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert-box alert-danger-custom"><?php 
+        <div class="alert-box alert-danger-custom"><?php
     echo htmlspecialchars($error);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+        ?>
 
     <div class="form-card">
         <form method="POST">
@@ -258,9 +258,9 @@ if ($error) {
                         type="text"
                         name="title"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars($job['title']);
-?>"
+                        value="<?php
+        echo htmlspecialchars($job['title']);
+        ?>"
                         required
                     >
                 </div>
@@ -271,9 +271,9 @@ echo htmlspecialchars($job['title']);
                         type="text"
                         name="company"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars($job['company']);
-?>"
+                        value="<?php
+        echo htmlspecialchars($job['company']);
+        ?>"
                         required
                     >
                 </div>
@@ -285,9 +285,9 @@ echo htmlspecialchars($job['company']);
                         class="form-textarea-custom"
                         rows="5"
                         required
-                    ><?php 
-echo htmlspecialchars($job['description']);
-?></textarea>
+                    ><?php
+        echo htmlspecialchars($job['description']);
+        ?></textarea>
                 </div>
 
                 <div class="col-md-6">
@@ -296,9 +296,9 @@ echo htmlspecialchars($job['description']);
                         type="text"
                         name="location"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars($job['location'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars($job['location'] ?? '');
+        ?>"
                         placeholder="Calapan City / Remote / etc."
                     >
                 </div>
@@ -306,13 +306,13 @@ echo htmlspecialchars($job['location'] ?? '');
                 <div class="col-md-6">
                     <label class="form-label">Job Type</label>
                     <select name="job_type" class="form-select-custom">
-                        <?php 
-$types = ["Full-time", "Part-time", "Internship", "Contract", "Remote"];
-foreach ($types as $t) {
-    $selected = ($job['job_type'] ?? '') === $t ? "selected" : "";
-    echo '<option value="' . htmlspecialchars($t) . '" ' . $selected . '>' . htmlspecialchars($t) . '</option>';
-}
-?>
+                        <?php
+        $types = ['Full-time', 'Part-time', 'Internship', 'Contract', 'Remote'];
+        foreach ($types as $t) {
+            $selected = ($job['job_type'] ?? '') === $t ? 'selected' : '';
+            echo '<option value="'.htmlspecialchars($t).'" '.$selected.'>'.htmlspecialchars($t).'</option>';
+        }
+        ?>
                     </select>
                 </div>
 
@@ -322,51 +322,51 @@ foreach ($types as $t) {
                         name="requirements"
                         class="form-textarea-custom"
                         rows="4"
-                    ><?php 
-echo htmlspecialchars($job['requirements'] ?? '');
-?></textarea>
+                    ><?php
+        echo htmlspecialchars($job['requirements'] ?? '');
+        ?></textarea>
                     <div class="helper-text">Add the qualifications, skills, or experience needed for this job.</div>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Status</label>
                     <select name="is_open" class="form-select-custom">
-                        <option value="1" <?php 
-echo (int) $job['is_open'] === 1 ? 'selected' : '';
-?>>Open</option>
-                        <option value="0" <?php 
-echo (int) $job['is_open'] === 0 ? 'selected' : '';
-?>>Closed</option>
+                        <option value="1" <?php
+        echo (int) $job['is_open'] === 1 ? 'selected' : '';
+        ?>>Open</option>
+                        <option value="0" <?php
+        echo (int) $job['is_open'] === 0 ? 'selected' : '';
+        ?>>Closed</option>
                     </select>
 
                     <div class="mt-2">
-                        <span class="status-preview <?php 
-echo (int) $job['is_open'] === 1 ? 'status-open' : 'status-closed';
-?>">
-                            Current: <?php 
-echo (int) $job['is_open'] === 1 ? 'Open' : 'Closed';
-?>
+                        <span class="status-preview <?php
+        echo (int) $job['is_open'] === 1 ? 'status-open' : 'status-closed';
+        ?>">
+                            Current: <?php
+        echo (int) $job['is_open'] === 1 ? 'Open' : 'Closed';
+        ?>
                         </span>
                     </div>
                 </div>
 
                 <div class="col-12 actions">
                     <button type="submit" class="btn-orange">Save Changes</button>
-                    <a class="btn-outline-custom" href="<?php 
-echo \url('');
-?>/admin/jobs_list.php">Cancel</a>
-                    <a class="btn-delete" onclick="return confirm('Delete this job? This cannot be undone.');" href="<?php 
-echo \url('');
-?>/admin/jobs_edit.php?id=<?php 
-echo (int) $id;
-?>&delete=1">Delete Job</a>
+                    <a class="btn-outline-custom" href="<?php
+        echo \url('');
+        ?>/admin/jobs_list.php">Cancel</a>
+                    <button class="btn-delete" type="submit" form="deleteJobForm" onclick="return confirm('Delete this job? This cannot be undone.');">Delete Job</button>
                 </div>
 
             </div>
+        </form>
+        <form id="deleteJobForm" method="POST" action="{{ route('admin.jobs.destroy', $id) }}">
+            @csrf
+            @method('DELETE')
         </form>
     </div>
 
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+        echo \gc_partial('footer', \get_defined_vars());

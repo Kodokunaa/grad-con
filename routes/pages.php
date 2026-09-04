@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\DestroyJobController;
 use App\Http\Controllers\Admin\DestroyTrainingController;
 use App\Http\Controllers\Admin\SendApplicantResumeController;
+use App\Http\Controllers\Alumni\DestroyEmploymentController;
+use App\Http\Controllers\Event\RestoreEventController;
 use App\Http\Controllers\Pages\AdminAdminArchiveController;
 use App\Http\Controllers\Pages\AdminAlumniCreateController;
 use App\Http\Controllers\Pages\AdminAlumniEditController;
@@ -56,6 +59,7 @@ use App\Http\Controllers\Pages\EmployerJobOffersController;
 use App\Http\Controllers\Pages\EmployerPostedJobController;
 use App\Http\Controllers\Pages\EmployerPostJobController;
 use App\Http\Controllers\Pages\ProfileController;
+use App\Http\Controllers\Profile\DestroyCertificateController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/admin/admin_archive.php', AdminAdminArchiveController::class)->middleware('account:admin')->name('admin.admin_archive');
@@ -95,6 +99,7 @@ Route::post('/admin/jobs_create.php', AdminJobsCreateController::class)->middlew
 Route::get('/admin/jobs_edit.php', AdminJobsEditController::class)->middleware('account:admin')->name('admin.jobs_edit');
 Route::post('/admin/jobs_edit.php', AdminJobsEditController::class)->middleware('account:admin');
 Route::get('/admin/jobs_list.php', AdminJobsListController::class)->middleware('account:admin')->name('admin.jobs_list');
+Route::delete('/admin/jobs/{job}', DestroyJobController::class)->middleware('account:admin')->name('admin.jobs.destroy');
 Route::get('/admin/jobs_notify.php', AdminJobsNotifyController::class)->middleware('account:admin')->name('admin.jobs_notify');
 Route::post('/admin/jobs_notify.php', AdminJobsNotifyController::class)->middleware('account:admin');
 Route::get('/admin/offers_history.php', AdminOffersHistoryController::class)->middleware('account:admin')->name('admin.offers_history');
@@ -119,6 +124,7 @@ Route::get('/alumni/edit_profile.php', AlumniEditProfileController::class)->midd
 Route::post('/alumni/edit_profile.php', AlumniEditProfileController::class)->middleware('account:alumni');
 Route::get('/alumni/employment_history.php', AlumniEmploymentHistoryController::class)->middleware('account:alumni')->name('alumni.employment_history');
 Route::post('/alumni/employment_history.php', AlumniEmploymentHistoryController::class)->middleware('account:alumni');
+Route::delete('/alumni/employment/{employment}', DestroyEmploymentController::class)->middleware('account:alumni')->name('alumni.employment.destroy');
 Route::get('/alumni/feed.php', AlumniFeedController::class)->middleware('account:alumni')->name('alumni.feed');
 Route::post('/alumni/feed.php', AlumniFeedController::class)->middleware('account:alumni');
 Route::get('/alumni/job_details.php', AlumniJobDetailsController::class)->middleware('account:alumni')->name('alumni.job_details');
@@ -154,4 +160,6 @@ Route::get('/employer/posted_job.php', EmployerPostedJobController::class)->midd
 Route::post('/employer/posted_job.php', EmployerPostedJobController::class)->middleware('account:employer');
 Route::get('/profile.php', ProfileController::class)->middleware('account')->name('profile');
 Route::post('/profile.php', ProfileController::class)->middleware('account');
+Route::delete('/profile/certificates/{certificate}', DestroyCertificateController::class)->middleware('account')->name('profile.certificates.destroy');
+Route::patch('/events/{event}/restore', RestoreEventController::class)->middleware('account')->name('events.restore');
 Route::get('/archive.php', ArchiveController::class)->middleware('account:alumni_officer')->name('archive');

@@ -84,30 +84,7 @@ final class AlumniEmploymentHistoryController extends PageController
                     }
                 }
             }
-            // ========================
-            // DELETE EMPLOYMENT HISTORY
-            // ========================
-            if (isset(\gc_context()->query['delete'])) {
-                $delete_id = (int) (\gc_context()->query['delete'] ?? 0);
-                if ($delete_id > 0) {
-                    try {
-                        $del = $pdo->prepare('DELETE FROM employment_history WHERE id=? AND user_id=?');
-                        $del->execute([$delete_id, $id]);
-                        \gc_alumni_employment_history_refresh_employment_status($pdo, $id);
-                        \gc_alumni_employment_history_add_log($pdo, $id, 'EMPLOYMENT_HISTORY_DELETED', 'Employment history deleted');
-                        \gc_header('Location: employment_history.php?deleted=1');
-                        \gc_finish();
-                    } catch (\Throwable $e) {
-                        if ($e instanceof PageResponse) {
-                            throw $e;
-                        }
-                        $error = 'Unable to delete employment history.';
-                    }
-                }
-            }
-            if (isset(\gc_context()->query['deleted'])) {
-                $msg = 'Employment history deleted successfully!';
-            }
+            $msg = (string) session('status', $msg);
             // ========================
             // LOAD EMPLOYMENT HISTORY
             // ========================

@@ -63,6 +63,9 @@
 
 <div class="content">
     <div class="wall-wrapper">
+        @if ($message)
+            <div class="alert alert-success">{{ $message }}</div>
+        @endif
         <div class="cover-card">
             <div class="cover-bg"></div>
             <div class="profile-section">
@@ -74,7 +77,7 @@
         </div>
 
         <div class="feed-area">
-            <?php 
+            <?php
 if (empty($archivedEvents)) {
     ?>
                 <div class="empty-state">
@@ -82,135 +85,135 @@ if (empty($archivedEvents)) {
                     <div class="empty-state-text">No archived events yet.</div>
                     <div class="empty-state-subtext">Archived posts will appear here in the same layout as the event feed.</div>
                 </div>
-            <?php 
+            <?php
 } else {
     ?>
-                <?php 
+                <?php
     foreach ($archivedEvents as $event) {
         ?>
-                    <?php 
+                    <?php
         [$statusText, $statusClass] = \gc_alumni_officer_archive_post_status_label($event['post_start_date'] ?? null, $event['post_end_date'] ?? null);
         ?>
                     <div class="event-post">
                         <div class="post-header">
                             <div class="poster-info">
-                                <?php 
+                                <?php
         echo \gc_alumni_officer_archive_avatar_html($event['fullname'] ?? 'Unknown', 'user-avatar poster-avatar');
         ?>
                                 <div>
-                                    <h4 class="poster-name"><?php 
+                                    <h4 class="poster-name"><?php
         echo \gc_e($event['fullname'] ?? 'Unknown');
         ?></h4>
-                                    <div class="post-meta">Archived on <?php 
-        echo \gc_e(!empty($event['archived_at']) ? $event['archived_at'] : 'Unknown');
+                                    <div class="post-meta">Archived on <?php
+        echo \gc_e(! empty($event['archived_at']) ? $event['archived_at'] : 'Unknown');
         ?></div>
                                 </div>
                             </div>
                             <div class="post-badges-right">
                                 <div class="post-id-badge">Archived Event</div>
-                                <div class="status-pill <?php 
+                                <div class="status-pill <?php
         echo \gc_e($statusClass);
-        ?>"><?php 
+        ?>"><?php
         echo \gc_e($statusText);
         ?></div>
                             </div>
                         </div>
 
                         <div class="post-content">
-                            <h2 class="event-title"><?php 
+                            <h2 class="event-title"><?php
         echo \gc_e($event['title'] ?? 'Untitled event');
         ?></h2>
-                            <div class="event-text"><?php 
+                            <div class="event-text"><?php
         echo nl2br(\gc_e($event['content'] ?? 'No description provided.'));
         ?></div>
                             <div class="schedule-line">
-                                <span>🟢 Start: <?php 
-        echo \gc_e(!empty($event['post_start_date']) ? \gc_alumni_officer_archive_format_schedule_date($event['post_start_date']) : 'Immediately');
+                                <span>🟢 Start: <?php
+        echo \gc_e(! empty($event['post_start_date']) ? \gc_alumni_officer_archive_format_schedule_date($event['post_start_date']) : 'Immediately');
         ?></span>
-                                <span>🔴 End: <?php 
-        echo \gc_e(!empty($event['post_end_date']) ? \gc_alumni_officer_archive_format_schedule_date($event['post_end_date']) : 'No end date');
+                                <span>🔴 End: <?php
+        echo \gc_e(! empty($event['post_end_date']) ? \gc_alumni_officer_archive_format_schedule_date($event['post_end_date']) : 'No end date');
         ?></span>
                             </div>
                         </div>
 
-                        <?php 
-        if (!empty($event['image'])) {
+                        <?php
+        if (! empty($event['image'])) {
             ?>
                             <div class="event-image-wrap">
-                                <img src="<?php 
+                                <img src="<?php
             echo \url('');
-            ?>/uploads/events/<?php 
+            ?>/uploads/events/<?php
             echo \gc_e($event['image']);
             ?>" class="event-image" alt="Archived event image" onclick="openImageLightbox(this.src)">
                             </div>
-                        <?php 
+                        <?php
         } else {
             ?>
                             <div class="event-image-wrap">
                                 <div class="no-image-banner"><span>🖼️</span>No event image uploaded</div>
                             </div>
-                        <?php 
+                        <?php
         }
         ?>
 
                         <div class="engagement-row">
                             <div>📦 Archived post</div>
-                            <div><?php 
+                            <div><?php
         echo count($event['comments'] ?? []);
-        ?> Comment<?php 
+        ?> Comment<?php
         echo count($event['comments'] ?? []) === 1 ? '' : 's';
         ?></div>
                         </div>
 
                         <div class="post-actions">
-                            <a href="<?php 
-        echo \url('');
-        ?>/alumni_officer/archive.php?restore=<?php 
-        echo (int) $event['id'];
-        ?>" class="btn-action btn-edit">↺ Restore</a>
+                            <form method="POST" action="{{ route('events.restore', $event['id']) }}">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn-action btn-edit">↺ Restore</button>
+                            </form>
                         </div>
 
-                        <?php 
-        if (!empty($event['comments'])) {
+                        <?php
+        if (! empty($event['comments'])) {
             ?>
                             <div class="comment-section">
                                 <div class="comments-list">
-                                    <?php 
+                                    <?php
             foreach ($event['comments'] as $comment) {
                 ?>
                                         <div class="comment-item">
-                                            <?php 
+                                            <?php
                 echo \gc_alumni_officer_archive_avatar_html($comment['fullname'] ?? 'User', 'user-avatar comment-avatar');
                 ?>
                                             <div class="comment-bubble">
                                                 <div class="comment-top">
-                                                    <div class="comment-name"><?php 
+                                                    <div class="comment-name"><?php
                 echo \gc_e($comment['fullname'] ?? 'Unknown');
                 ?></div>
-                                                    <div class="comment-date"><?php 
-                echo \gc_e(!empty($comment['created_at']) ? date('M d, Y', strtotime($comment['created_at'])) : '');
+                                                    <div class="comment-date"><?php
+                echo \gc_e(! empty($comment['created_at']) ? date('M d, Y', strtotime($comment['created_at'])) : '');
                 ?></div>
                                                 </div>
-                                                <div class="comment-text"><?php 
+                                                <div class="comment-text"><?php
                 echo nl2br(\gc_e($comment['comment'] ?? ''));
                 ?></div>
                                             </div>
                                         </div>
-                                    <?php 
+                                    <?php
             }
             ?>
                                 </div>
                             </div>
-                        <?php 
+                        <?php
         }
         ?>
                     </div>
-                <?php 
+                <?php
     }
     ?>
-            <?php 
+            <?php
 }
-?>
+            ?>
         </div>
     </div>
 </div>
@@ -253,5 +256,5 @@ document.addEventListener('keydown', function (event) {
 });
 </script>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+            echo \gc_partial('footer', \get_defined_vars());

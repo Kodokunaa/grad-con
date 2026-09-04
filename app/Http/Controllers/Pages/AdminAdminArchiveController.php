@@ -14,17 +14,9 @@ final class AdminAdminArchiveController extends PageController
             $pdo = gc_context()->pdo();
 
             \gc_require_role('admin');
-            $message = '';
+            $message = (string) session('status', '');
             $error = '';
             try {
-                if (isset(\gc_context()->query['restore'])) {
-                    $restoreId = (int) \gc_context()->query['restore'];
-                    if ($restoreId > 0) {
-                        $restore = $pdo->prepare('UPDATE events SET is_archived=0, archived_at=NULL WHERE id=?');
-                        $restore->execute([$restoreId]);
-                        $message = $restore->rowCount() ? 'Event restored successfully.' : 'Archived event was not found.';
-                    }
-                }
                 if (\request()->server->all()['REQUEST_METHOD'] === 'POST' && isset(\gc_context()->post['delete_comment'])) {
                     $eventId = (int) (\gc_context()->post['event_id'] ?? 0);
                     $commentId = (int) (\gc_context()->post['comment_id'] ?? 0);

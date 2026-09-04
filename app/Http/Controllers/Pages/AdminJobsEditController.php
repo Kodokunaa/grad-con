@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
-use App\Support\PageResponse;
 use Illuminate\Http\Request;
 
 final class AdminJobsEditController extends PageController
@@ -15,20 +14,6 @@ final class AdminJobsEditController extends PageController
 
             \gc_require_role('admin');
             $id = (int) (\gc_context()->query['id'] ?? 0);
-            // Handle delete request
-            if (isset(\gc_context()->query['delete']) && \gc_context()->query['delete'] === '1') {
-                try {
-                    $deleteStmt = $pdo->prepare('DELETE FROM jobs WHERE id=?');
-                    $deleteStmt->execute([$id]);
-                    \gc_header('Location: '.\url('').'/admin/jobs_list.php?deleted=1');
-                    \gc_finish();
-                } catch (\PDOException $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    $error = 'Failed to delete job: '.\gc_public_error($e);
-                }
-            }
             $stmt = $pdo->prepare('SELECT * FROM jobs WHERE id=? LIMIT 1');
             $stmt->execute([$id]);
             $job = $stmt->fetch(\PDO::FETCH_ASSOC);

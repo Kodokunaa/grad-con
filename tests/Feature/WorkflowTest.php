@@ -310,6 +310,86 @@ final class WorkflowTest extends TestCase
         $this->assertDatabaseMissing('trainings', ['id' => $trainingId]);
     }
 
+    public function test_admin_job_deletion_uses_the_named_delete_route(): void
+    {
+        $admin = $this->user('admin');
+        $jobId = DB::table('jobs')->insertGetId([
+            'title' => 'Delete job route test', 'company' => 'Test Company',
+            'employer_company' => 'Test Company', 'description' => 'Test',
+            'posted_by' => $admin->id, 'is_open' => 1,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.jobs.destroy', $jobId))
+            ->assertRedirect(route('admin.jobs_list'));
+        $this->assertDatabaseMissing('jobs', ['id' => $jobId]);
+    }
+
+    public function test_alumni_can_delete_only_their_certificate_through_the_resource_route(): void
+    {
+        $owner = $this->user('alumni');
+        $other = $this->user('alumni');
+        $certificateId = DB::table('alumni_certificates')->insertGetId([
+            'user_id' => $owner->id, 'certificate_name' => 'Delete test', 'issuer' => 'GradConn',
+        ]);
+
+        $this->actingAs($other)
+            ->delete(route('profile.certificates.destroy', $certificateId))
+            ->assertForbidden();
+        $this->assertDatabaseHas('alumni_certificates', ['id' => $certificateId]);
+
+        $this->actingAs($owner)
+            ->delete(route('profile.certificates.destroy', $certificateId))
+            ->assertRedirect(route('profile'));
+        $this->assertDatabaseMissing('alumni_certificates', ['id' => $certificateId]);
+    }
+
+    public function test_archived_event_restore_uses_policy_and_patch_route(): void
+    {
+        $officer = $this->user('alumni_officer');
+        $otherOfficer = $this->user('alumni_officer');
+        $eventId = DB::table('events')->insertGetId([
+            'title' => 'Restore route test', 'content' => 'Test',
+            'posted_by' => $officer->id, 'is_archived' => 1,
+            'archived_at' => now(),
+        ]);
+
+        $this->actingAs($otherOfficer)
+            ->patch(route('events.restore', $eventId))
+            ->assertForbidden();
+        $this->assertDatabaseHas('events', ['id' => $eventId, 'is_archived' => 1]);
+
+        $this->actingAs($officer)
+            ->patch(route('events.restore', $eventId))
+            ->assertRedirect(route('alumni_officer.archive'));
+        $this->assertDatabaseHas('events', ['id' => $eventId, 'is_archived' => 0]);
+    }
+
+    public function test_alumni_employment_deletion_updates_status_and_checks_ownership(): void
+    {
+        $owner = $this->user('alumni');
+        $other = $this->user('alumni');
+        $owner->forceFill(['employment_status' => 'Employed'])->save();
+        $employmentId = DB::table('employment_history')->insertGetId([
+            'user_id' => $owner->id, 'company_name' => 'Test Company',
+            'job_title' => 'Developer', 'start_date' => '2025-01-01', 'end_date' => null,
+        ]);
+
+        $this->actingAs($other)
+            ->delete(route('alumni.employment.destroy', $employmentId))
+            ->assertForbidden();
+        $this->assertDatabaseHas('employment_history', ['id' => $employmentId]);
+
+        $this->actingAs($owner)
+            ->delete(route('alumni.employment.destroy', $employmentId))
+            ->assertRedirect(route('alumni.employment_history'));
+        $this->assertDatabaseMissing('employment_history', ['id' => $employmentId]);
+        $this->assertSame('Unemployed', $owner->fresh()->employment_status);
+        $this->assertDatabaseHas('security_logs', [
+            'user_id' => $owner->id, 'action' => 'EMPLOYMENT_HISTORY_DELETED',
+        ]);
+    }
+
     public function test_offer_tokens_persist_between_requests_and_offers_expire(): void
     {
         Mail::fake();

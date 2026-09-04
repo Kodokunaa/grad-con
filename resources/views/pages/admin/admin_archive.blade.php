@@ -54,22 +54,22 @@
 			<p>Events archived from the active event list are stored here and can be restored whenever they need to be published again.</p>
 		</section>
 
-		<?php 
+		<?php
 if ($message) {
-    ?><div class="alert-box alert-success"><?php 
+    ?><div class="alert-box alert-success"><?php
     echo \gc_e($message);
-    ?></div><?php 
+    ?></div><?php
 }
-?>
-		<?php 
+		?>
+		<?php
 if ($error) {
-    ?><div class="alert-box alert-error"><?php 
+    ?><div class="alert-box alert-error"><?php
     echo \gc_e($error);
-    ?></div><?php 
+    ?></div><?php
 }
-?>
+		?>
 
-		<?php 
+		<?php
 if (empty($archivedEvents)) {
     ?>
 			<div class="empty-state">
@@ -77,10 +77,10 @@ if (empty($archivedEvents)) {
 				<div class="empty-title">No archived events yet</div>
 				<div class="empty-text">Events archived from the Event List will appear here.</div>
 			</div>
-		<?php 
+		<?php
 } else {
     ?>
-			<?php 
+			<?php
     foreach ($archivedEvents as $event) {
         ?>
 				<article class="event-card">
@@ -88,10 +88,10 @@ if (empty($archivedEvents)) {
 						<div class="poster">
 							<div class="poster-avatar">📅</div>
 							<div>
-								<h2 class="poster-name"><?php 
+								<h2 class="poster-name"><?php
         echo \gc_e($event['poster'] ?? 'Unknown');
         ?></h2>
-								<div class="posted-date">Archived on <?php 
+								<div class="posted-date">Archived on <?php
         echo \gc_e(\gc_admin_admin_archive_format_date($event['archived_at'] ?? ''));
         ?></div>
 							</div>
@@ -99,93 +99,93 @@ if (empty($archivedEvents)) {
 						<span class="archive-badge">Archived Event</span>
 					</div>
 					<div class="event-body">
-						<h3 class="event-title"><?php 
+						<h3 class="event-title"><?php
         echo \gc_e($event['title'] ?? 'Untitled event');
         ?></h3>
-						<div class="event-description"><?php 
+						<div class="event-description"><?php
         echo \gc_e($event['content'] ?? 'No description provided.');
         ?></div>
 						<div class="schedule">
-							<span>Start: <?php 
+							<span>Start: <?php
         echo \gc_e(\gc_admin_admin_archive_format_date($event['post_start_date'] ?? ''));
         ?></span>
-							<span>End: <?php 
+							<span>End: <?php
         echo \gc_e(\gc_admin_admin_archive_format_date($event['post_end_date'] ?? ''));
         ?></span>
 						</div>
 					</div>
-					<?php 
-        if (!empty($event['image'])) {
+					<?php
+        if (! empty($event['image'])) {
             ?>
-						<img class="event-image" src="<?php 
+						<img class="event-image" src="<?php
             echo \url('');
-            ?>/uploads/events/<?php 
+            ?>/uploads/events/<?php
             echo \gc_e($event['image']);
             ?>" alt="Archived event image">
-					<?php 
+					<?php
         }
         ?>
 					<div class="event-footer">
-						<a class="restore-btn" href="<?php 
-        echo \url('');
-        ?>/admin/admin_archive.php?restore=<?php 
-        echo (int) $event['id'];
-        ?>" onclick="return confirm('Restore this event to the active event list?');">↺ Restore Event</a>
+						<form method="POST" action="{{ route('events.restore', $event['id']) }}" onsubmit="return confirm('Restore this event to the active event list?');">
+                            @csrf
+                            @method('PATCH')
+                            <button class="restore-btn" type="submit">↺ Restore Event</button>
+                        </form>
 					</div>
-					<?php 
-        if (!empty($event['comments'])) {
+					<?php
+        if (! empty($event['comments'])) {
             ?>
 						<div class="comments-section">
-							<div class="comments-heading">Comments (<?php 
+							<div class="comments-heading">Comments (<?php
             echo count($event['comments']);
             ?>)</div>
-							<?php 
+							<?php
             foreach ($event['comments'] as $comment) {
                 ?>
 								<div class="comment-item">
-									<div class="comment-avatar"><?php 
+									<div class="comment-avatar"><?php
                 echo \gc_e(strtoupper(substr(trim($comment['fullname'] ?? 'U'), 0, 1)));
                 ?></div>
 									<div class="comment-bubble">
 										<div class="comment-meta">
-											<span class="comment-name"><?php 
+											<span class="comment-name"><?php
                 echo \gc_e($comment['fullname'] ?? 'Unknown user');
                 ?></span>
-											<span class="comment-date"><?php 
+											<span class="comment-date"><?php
                 echo \gc_e(\gc_admin_admin_archive_format_date($comment['created_at'] ?? ''));
                 ?></span>
 										</div>
-										<div class="comment-text"><?php 
+										<div class="comment-text"><?php
                 echo \gc_e($comment['comment'] ?? '');
                 ?></div>
 										<form method="POST" onsubmit="return confirm('Delete this comment?');">
 @csrf
-											<input type="hidden" name="event_id" value="<?php 
+											<input type="hidden" name="event_id" value="<?php
                 echo (int) $event['id'];
                 ?>">
-											<input type="hidden" name="comment_id" value="<?php 
+											<input type="hidden" name="comment_id" value="<?php
                 echo (int) $comment['id'];
                 ?>">
 											<button type="submit" name="delete_comment" class="comment-delete">Delete comment</button>
 										</form>
 									</div>
 								</div>
-							<?php 
+							<?php
             }
             ?>
 						</div>
-					<?php 
+					<?php
         }
         ?>
 				</article>
-			<?php 
+			<?php
     }
     ?>
-		<?php 
+		<?php
 }
-?>
+		?>
 	</div>
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+		echo \gc_partial('footer', \get_defined_vars());

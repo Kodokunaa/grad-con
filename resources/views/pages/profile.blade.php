@@ -694,27 +694,27 @@
             <h3 class="page-title">My Profile</h3>
             <p class="page-subtitle">Manage your personal information, certificates, and account security in one place.</p>
         </div>
-        <span class="role-badge-custom"><?php 
+        <span class="role-badge-custom"><?php
 echo htmlspecialchars($role);
-?></span>
+        ?></span>
     </div>
 
     <ul class="nav nav-tabs custom-tabs mb-4">
         <li class="nav-item">
-            <button class="nav-link <?php 
-echo $active_tab === 'profile' ? 'active' : '';
-?>" data-bs-toggle="tab" data-bs-target="#tabProfile" type="button">
+            <button class="nav-link <?php
+        echo $active_tab === 'profile' ? 'active' : '';
+        ?>" data-bs-toggle="tab" data-bs-target="#tabProfile" type="button">
                 Profile
             </button>
         </li>
         <li class="nav-item">
-            <button class="nav-link <?php 
-echo $active_tab === 'security' ? 'active' : '';
-?>" data-bs-toggle="tab" data-bs-target="#tabSecurity" type="button">
+            <button class="nav-link <?php
+        echo $active_tab === 'security' ? 'active' : '';
+        ?>" data-bs-toggle="tab" data-bs-target="#tabSecurity" type="button">
                 Security
             </button>
         </li>
-        <?php 
+        <?php
 if ($role === 'alumni') {
     ?>
             <li class="nav-item">
@@ -727,8 +727,8 @@ if ($role === 'alumni') {
                         id="receive_update_notifications"
                         name="receive_update_notifications"
                         value="1"
-                        <?php 
-    echo !isset($user['receive_update_notifications']) || (int) $user['receive_update_notifications'] === 1 ? 'checked' : '';
+                        <?php
+    echo ! isset($user['receive_update_notifications']) || (int) $user['receive_update_notifications'] === 1 ? 'checked' : '';
     ?>
                         onchange="this.form.submit()"
                         aria-label="Enable website update notifications"
@@ -736,106 +736,106 @@ if ($role === 'alumni') {
                     <input type="hidden" name="update_notifications" value="1">
                 </form>
             </li>
-        <?php 
+        <?php
 }
-?>
+        ?>
     </ul>
 
     <div class="tab-content">
 
-        <div class="tab-pane fade <?php 
-echo $active_tab === 'profile' ? 'show active' : '';
-?>" id="tabProfile">
+        <div class="tab-pane fade <?php
+        echo $active_tab === 'profile' ? 'show active' : '';
+        ?>" id="tabProfile">
             <div class="profile-main-card">
                 <div class="card-custom profile-card">
                     <div class="profile-card-inner">
                         <div class="profile-avatar-wrap">
-                            <?php 
+                            <?php
 if ($picUrl) {
     ?>
-                                <img src="<?php 
+                                <img src="<?php
     echo htmlspecialchars($picUrl);
     ?>" class="profile-avatar-img" alt="Profile">
-                            <?php 
+                            <?php
 } else {
     ?>
                                 <div class="profile-avatar-letter">
-                                    <?php 
+                                    <?php
     echo strtoupper(substr($user['fullname'], 0, 1));
     ?>
                                 </div>
-                            <?php 
+                            <?php
 }
-?>
+        ?>
                         </div>
 
-                        <div class="profile-name"><?php 
-echo htmlspecialchars($user['fullname']);
-?></div>
-                        <div class="profile-username"><?php 
-echo htmlspecialchars($user['username']);
-?></div>
+                        <div class="profile-name"><?php
+        echo htmlspecialchars($user['fullname']);
+        ?></div>
+                        <div class="profile-username"><?php
+        echo htmlspecialchars($user['username']);
+        ?></div>
 
                         <div class="profile-meta-row">
                             <div class="profile-meta-chip">
-                                <div class="profile-meta-label"><?php 
-echo $role !== 'alumni' ? 'User Name' : 'Student ID';
-?></div>
-                                <div class="profile-meta-value"><?php 
-echo htmlspecialchars($user['username']);
-?></div>
+                                <div class="profile-meta-label"><?php
+        echo $role !== 'alumni' ? 'User Name' : 'Student ID';
+        ?></div>
+                                <div class="profile-meta-value"><?php
+        echo htmlspecialchars($user['username']);
+        ?></div>
                             </div>
-                            <?php 
+                            <?php
 if ($role === 'alumni') {
     ?>
                             <div class="profile-meta-chip">
                                 <div class="profile-meta-label">Course</div>
-                                <div class="profile-meta-value"><?php 
+                                <div class="profile-meta-value"><?php
     echo htmlspecialchars($user['course'] ?? 'N/A');
     ?></div>
                             </div>
                             <div class="profile-meta-chip">
                                 <div class="profile-meta-label">Batch Year</div>
-                                <div class="profile-meta-value"><?php 
+                                <div class="profile-meta-value"><?php
     echo htmlspecialchars($user['batch_year'] ?? 'N/A');
     ?></div>
                             </div>
-                            <?php 
+                            <?php
 } elseif ($role === 'employer') {
     ?>
                             <div class="profile-meta-chip">
                                 <div class="profile-meta-label">Company Address</div>
-                                <div class="profile-meta-value"><?php 
+                                <div class="profile-meta-value"><?php
     echo htmlspecialchars($user['address'] ?? 'Not provided');
     ?></div>
                             </div>
                             <div class="profile-meta-chip">
                                 <div class="profile-meta-label">Branch Location</div>
                                 <div class="profile-meta-value">
-                                    <?php 
-    echo !empty($user['has_multiple_branches']) ? htmlspecialchars($user['branch_location'] ?? 'Not provided') : 'Main Office Only';
+                                    <?php
+    echo ! empty($user['has_multiple_branches']) ? htmlspecialchars($user['branch_location'] ?? 'Not provided') : 'Main Office Only';
     ?>
                                 </div>
                             </div>
-                            <?php 
+                            <?php
 } else {
     ?>
                             <div class="profile-meta-chip">
                                 <div class="profile-meta-label">Role</div>
-                                <div class="profile-meta-value"><?php 
+                                <div class="profile-meta-value"><?php
     echo htmlspecialchars(ucfirst($role));
     ?></div>
                             </div>
-                            <?php 
+                            <?php
 }
-?>
+        ?>
                         </div>
 
-                        <div class="helper-text"><?php 
-echo $role !== 'alumni' ? 'User Name' : 'Student ID';
-?> cannot be changed. Upload profile picture: jpg / png / webp, maximum 2MB.</div>
+                        <div class="helper-text"><?php
+        echo $role !== 'alumni' ? 'User Name' : 'Student ID';
+        ?> cannot be changed. Upload profile picture: jpg / png / webp, maximum 2MB.</div>
 
-                        <?php 
+                        <?php
 if ($role === 'alumni') {
     ?>
                             <div class="resume-export-card">
@@ -855,34 +855,34 @@ if ($role === 'alumni') {
                                 </div>
                                 <iframe id="resumeExportFrame" class="d-none" title="Resume Export"></iframe>
                             </div>
-                        <?php 
+                        <?php
 }
-?>
+        ?>
                     </div>
                 </div>
 
                 <div class="section-block wide-section">
                         <div class="section-title">Edit Profile</div>
 
-                        <?php 
+                        <?php
 if ($profile_msg) {
     ?>
-                            <div class="alert-box alert-success-custom"><?php 
+                            <div class="alert-box alert-success-custom"><?php
     echo htmlspecialchars($profile_msg);
     ?></div>
-                        <?php 
+                        <?php
 }
-?>
+        ?>
 
-                        <?php 
+                        <?php
 if ($profile_error) {
     ?>
-                            <div class="alert-box alert-danger-custom"><?php 
+                            <div class="alert-box alert-danger-custom"><?php
     echo htmlspecialchars($profile_error);
     ?></div>
-                        <?php 
+                        <?php
 }
-?>
+        ?>
 
                         <form id="certificateForm" method="POST" enctype="multipart/form-data" style="display:none;">
 @csrf</form>
@@ -892,28 +892,28 @@ if ($profile_error) {
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Fullname</label>
-                                    <input class="form-control-custom" name="fullname" value="<?php 
-echo htmlspecialchars($user['fullname']);
-?>" required>
+                                    <input class="form-control-custom" name="fullname" value="<?php
+        echo htmlspecialchars($user['fullname']);
+        ?>" required>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Email</label>
-                                    <input class="form-control-custom" name="email" value="<?php 
-echo htmlspecialchars($user['email'] ?? '');
-?>">
+                                    <input class="form-control-custom" name="email" value="<?php
+        echo htmlspecialchars($user['email'] ?? '');
+        ?>">
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label"><?php 
-echo $role !== 'alumni' ? 'User Name' : 'Student ID';
-?></label>
-                                    <input class="form-control-custom readonly-field" value="<?php 
-echo htmlspecialchars($user['username']);
-?>" readonly>
+                                    <label class="form-label"><?php
+        echo $role !== 'alumni' ? 'User Name' : 'Student ID';
+        ?></label>
+                                    <input class="form-control-custom readonly-field" value="<?php
+        echo htmlspecialchars($user['username']);
+        ?>" readonly>
                                 </div>
 
-                                <?php 
+                                <?php
 if ($role === 'employer') {
     ?>
                                     <div class="col-12 mt-2">
@@ -923,7 +923,7 @@ if ($role === 'employer') {
 
                                     <div class="col-md-6">
                                         <label class="form-label">Company Address</label>
-                                        <input class="form-control-custom" name="address" placeholder="Building/Street, Barangay, City, Province" value="<?php 
+                                        <input class="form-control-custom" name="address" placeholder="Building/Street, Barangay, City, Province" value="<?php
     echo htmlspecialchars($user['address'] ?? '');
     ?>" required>
                                     </div>
@@ -931,27 +931,27 @@ if ($role === 'employer') {
                                     <div class="col-md-6">
                                         <label class="form-label">Does the company have multiple branches?</label>
                                         <select class="form-select-custom" name="has_multiple_branches" id="has_multiple_branches">
-                                            <option value="" <?php 
+                                            <option value="" <?php
     echo empty($user['has_multiple_branches']) ? 'selected' : '';
     ?>>No</option>
-                                            <option value="1" <?php 
-    echo !empty($user['has_multiple_branches']) ? 'selected' : '';
+                                            <option value="1" <?php
+    echo ! empty($user['has_multiple_branches']) ? 'selected' : '';
     ?>>Yes</option>
                                         </select>
                                     </div>
 
                                     <div class="col-md-12" id="branch_location_wrap">
                                         <label class="form-label">Branch Location</label>
-                                        <input class="form-control-custom" name="branch_location" id="branch_location" placeholder="Example: Calapan Branch, Batangas Branch, Manila Main Branch" value="<?php 
+                                        <input class="form-control-custom" name="branch_location" id="branch_location" placeholder="Example: Calapan Branch, Batangas Branch, Manila Main Branch" value="<?php
     echo htmlspecialchars($user['branch_location'] ?? '');
     ?>">
                                         <div class="tip-text">Leave this blank if the employer account represents the main office only.</div>
                                     </div>
-                                <?php 
+                                <?php
 }
-?>
+        ?>
 
-                                <?php 
+                                <?php
 if ($role === 'alumni') {
     ?>
                                     <div class="col-12">
@@ -961,14 +961,14 @@ if ($role === 'alumni') {
 
                                     <div class="col-md-6">
                                         <label class="form-label">Course</label>
-                                        <input class="form-control-custom readonly-field" value="<?php 
+                                        <input class="form-control-custom readonly-field" value="<?php
     echo htmlspecialchars($user['course'] ?? '');
     ?>" readonly>
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label">Batch Year</label>
-                                        <input class="form-control-custom readonly-field" value="<?php 
+                                        <input class="form-control-custom readonly-field" value="<?php
     echo htmlspecialchars($user['batch_year'] ?? '');
     ?>" readonly>
                                     </div>
@@ -980,14 +980,14 @@ if ($role === 'alumni') {
 
                                     <div class="col-md-6">
                                         <label class="form-label">Birthdate</label>
-                                        <input type="date" class="form-control-custom" name="birthdate" id="birthdate" value="<?php 
+                                        <input type="date" class="form-control-custom" name="birthdate" id="birthdate" value="<?php
     echo htmlspecialchars($user['birthdate'] ?? '');
     ?>">
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label">Age</label>
-                                        <input type="number" min="1" max="120" class="form-control-custom readonly-field" name="age" id="age" value="<?php 
+                                        <input type="number" min="1" max="120" class="form-control-custom readonly-field" name="age" id="age" value="<?php
     echo htmlspecialchars($user['age'] ?? '');
     ?>" readonly>
                                     </div>
@@ -996,10 +996,10 @@ if ($role === 'alumni') {
                                         <label class="form-label">Gender</label>
                                         <select class="form-select-custom" name="gender">
                                             <option value="">-- Select Gender --</option>
-                                            <option value="Male" <?php 
+                                            <option value="Male" <?php
     echo ($user['gender'] ?? '') === 'Male' ? 'selected' : '';
     ?>>Male</option>
-                                            <option value="Female" <?php 
+                                            <option value="Female" <?php
     echo ($user['gender'] ?? '') === 'Female' ? 'selected' : '';
     ?>>Female</option>
                                         </select>
@@ -1009,16 +1009,16 @@ if ($role === 'alumni') {
                                         <label class="form-label">Civil Status</label>
                                         <select class="form-select-custom" name="civil_status">
                                             <option value="">-- Select Civil Status --</option>
-                                            <option value="Single" <?php 
+                                            <option value="Single" <?php
     echo ($user['civil_status'] ?? '') === 'Single' ? 'selected' : '';
     ?>>Single</option>
-                                            <option value="Married" <?php 
+                                            <option value="Married" <?php
     echo ($user['civil_status'] ?? '') === 'Married' ? 'selected' : '';
     ?>>Married</option>
-                                            <option value="Widowed" <?php 
+                                            <option value="Widowed" <?php
     echo ($user['civil_status'] ?? '') === 'Widowed' ? 'selected' : '';
     ?>>Widowed</option>
-                                            <option value="Separated" <?php 
+                                            <option value="Separated" <?php
     echo ($user['civil_status'] ?? '') === 'Separated' ? 'selected' : '';
     ?>>Separated</option>
                                         </select>
@@ -1026,21 +1026,21 @@ if ($role === 'alumni') {
 
                                     <div class="col-md-6">
                                         <label class="form-label">Contact Number</label>
-                                        <input class="form-control-custom" name="contact_number" placeholder="09XXXXXXXXX" value="<?php 
+                                        <input class="form-control-custom" name="contact_number" placeholder="09XXXXXXXXX" value="<?php
     echo htmlspecialchars($user['contact_number'] ?? '');
     ?>">
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label">Address</label>
-                                        <input class="form-control-custom" name="address" placeholder="Street, Barangay, City, Province" value="<?php 
+                                        <input class="form-control-custom" name="address" placeholder="Street, Barangay, City, Province" value="<?php
     echo htmlspecialchars($user['address'] ?? '');
     ?>">
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label">Indigenous Tribe</label>
-                                        <input class="form-control-custom" name="indigenous_tribe" placeholder="Enter indigenous tribe (optional)" value="<?php 
+                                        <input class="form-control-custom" name="indigenous_tribe" placeholder="Enter indigenous tribe (optional)" value="<?php
     echo htmlspecialchars($user['indigenous_tribe'] ?? '');
     ?>">
                                     </div>
@@ -1049,37 +1049,37 @@ if ($role === 'alumni') {
                                         <label class="form-label">Disability</label>
                                         <select class="form-select-custom" name="special_needs">
                                             <option value="">-- Select Disability --</option>
-                                            <option value="Visual Impairment" <?php 
+                                            <option value="Visual Impairment" <?php
     echo ($user['special_needs'] ?? '') === 'Visual Impairment' ? 'selected' : '';
     ?>>Visual Impairment</option>
-                                            <option value="Hearing Impairment" <?php 
+                                            <option value="Hearing Impairment" <?php
     echo ($user['special_needs'] ?? '') === 'Hearing Impairment' ? 'selected' : '';
     ?>>Hearing Impairment</option>
-                                            <option value="Speech Impairment" <?php 
+                                            <option value="Speech Impairment" <?php
     echo ($user['special_needs'] ?? '') === 'Speech Impairment' ? 'selected' : '';
     ?>>Speech Impairment</option>
-                                            <option value="Physical Disability" <?php 
+                                            <option value="Physical Disability" <?php
     echo ($user['special_needs'] ?? '') === 'Physical Disability' ? 'selected' : '';
     ?>>Physical Disability</option>
-                                            <option value="Learning Disability" <?php 
+                                            <option value="Learning Disability" <?php
     echo ($user['special_needs'] ?? '') === 'Learning Disability' ? 'selected' : '';
     ?>>Learning Disability</option>
-                                            <option value="Intellectual Disability" <?php 
+                                            <option value="Intellectual Disability" <?php
     echo ($user['special_needs'] ?? '') === 'Intellectual Disability' ? 'selected' : '';
     ?>>Intellectual Disability</option>
-                                            <option value="Psychosocial Disability" <?php 
+                                            <option value="Psychosocial Disability" <?php
     echo ($user['special_needs'] ?? '') === 'Psychosocial Disability' ? 'selected' : '';
     ?>>Psychosocial Disability</option>
-                                            <option value="Autism Spectrum Disorder" <?php 
+                                            <option value="Autism Spectrum Disorder" <?php
     echo ($user['special_needs'] ?? '') === 'Autism Spectrum Disorder' ? 'selected' : '';
     ?>>Autism Spectrum Disorder</option>
-                                            <option value="Multiple Disabilities" <?php 
+                                            <option value="Multiple Disabilities" <?php
     echo ($user['special_needs'] ?? '') === 'Multiple Disabilities' ? 'selected' : '';
     ?>>Multiple Disabilities</option>
-                                            <option value="Chronic Illness" <?php 
+                                            <option value="Chronic Illness" <?php
     echo ($user['special_needs'] ?? '') === 'Chronic Illness' ? 'selected' : '';
     ?>>Chronic Illness</option>
-                                            <option value="Orthopedic Disability" <?php 
+                                            <option value="Orthopedic Disability" <?php
     echo ($user['special_needs'] ?? '') === 'Orthopedic Disability' ? 'selected' : '';
     ?>>Orthopedic Disability</option>
                                         </select>
@@ -1094,10 +1094,10 @@ if ($role === 'alumni') {
                                         <label class="form-label">Employment Status</label>
                                         <select class="form-select-custom" name="employment_status" id="employment_status">
                                             <option value="">-- Select Employment Status --</option>
-                                            <option value="Employed" <?php 
+                                            <option value="Employed" <?php
     echo ($user['employment_status'] ?? '') === 'Employed' ? 'selected' : '';
     ?>>Employed</option>
-                                            <option value="Unemployed" <?php 
+                                            <option value="Unemployed" <?php
     echo ($user['employment_status'] ?? '') === 'Unemployed' ? 'selected' : '';
     ?>>Unemployed</option>
                                         </select>
@@ -1106,46 +1106,46 @@ if ($role === 'alumni') {
                                     <div class="col-md-6" id="job_aligned_wrap">
                                         <label class="form-label">Job Alignment to Course</label>
                                         <div class="alignment-display-card">
-                                            <span class="alignment-status-badge <?php 
+                                            <span class="alignment-status-badge <?php
     echo htmlspecialchars($latestEmploymentAlignment['class'] ?? 'alignment-not');
     ?>">
-                                                <?php 
+                                                <?php
     echo htmlspecialchars($latestEmploymentAlignment['status'] ?? 'Not Aligned');
     ?>
                                             </span>
 
-                                            <?php 
-    if (!empty($current_employment)) {
+                                            <?php
+    if (! empty($current_employment)) {
         ?>
                                                 <div class="alignment-job-title">
-                                                    <?php 
+                                                    <?php
         echo htmlspecialchars($current_employment['job_title'] ?? 'Latest Job');
         ?>
                                                 </div>
                                                 <div class="alignment-job-meta">
-                                                    <?php 
+                                                    <?php
         echo htmlspecialchars($current_employment['company_name'] ?? '');
         ?>
-                                                    <?php 
-        if (!empty($current_employment['employment_type'])) {
+                                                    <?php
+        if (! empty($current_employment['employment_type'])) {
             ?>
-                                                        • <?php 
+                                                        • <?php
             echo htmlspecialchars($current_employment['employment_type']);
             ?>
-                                                    <?php 
+                                                    <?php
         }
         ?>
                                                 </div>
-                                            <?php 
+                                            <?php
     } else {
         ?>
                                                 <div class="alignment-job-title">No employment history found</div>
-                                            <?php 
+                                            <?php
     }
     ?>
 
                                             <div class="alignment-job-meta mt-1">
-                                                <?php 
+                                                <?php
     echo htmlspecialchars($latestEmploymentAlignment['reason'] ?? 'The system checks your course and latest/current job.');
     ?>
                                             </div>
@@ -1159,21 +1159,21 @@ if ($role === 'alumni') {
 
                                     <div class="col-12">
                                         <label class="form-label">Career Objective</label>
-                                        <textarea class="form-textarea-custom" name="career_objective" placeholder="Write your short career objective"><?php 
+                                        <textarea class="form-textarea-custom" name="career_objective" placeholder="Write your short career objective"><?php
     echo htmlspecialchars($user['career_objective'] ?? '');
     ?></textarea>
                                     </div>
 
                                     <div class="col-12">
                                         <label class="form-label">Skills</label>
-                                        <textarea class="form-textarea-custom" name="skills" placeholder="List your skills, separated by commas or lines"><?php 
+                                        <textarea class="form-textarea-custom" name="skills" placeholder="List your skills, separated by commas or lines"><?php
     echo htmlspecialchars($user['skills'] ?? '');
     ?></textarea>
                                     </div>
 
                                     <div class="col-12">
                                         <label class="form-label">Trainings / Seminars</label>
-                                        <textarea class="form-textarea-custom" name="trainings" placeholder="Enter your trainings and seminars"><?php 
+                                        <textarea class="form-textarea-custom" name="trainings" placeholder="Enter your trainings and seminars"><?php
     echo htmlspecialchars($user['trainings'] ?? '');
     ?></textarea>
                                     </div>
@@ -1184,23 +1184,23 @@ if ($role === 'alumni') {
                                     </div>
 
                                     <div class="col-12">
-                                        <?php 
+                                        <?php
     if ($cert_msg) {
         ?>
-                                            <div class="alert-box alert-success-custom"><?php 
+                                            <div class="alert-box alert-success-custom"><?php
         echo htmlspecialchars($cert_msg);
         ?></div>
-                                        <?php 
+                                        <?php
     }
     ?>
 
-                                        <?php 
+                                        <?php
     if ($cert_error) {
         ?>
-                                            <div class="alert-box alert-danger-custom"><?php 
+                                            <div class="alert-box alert-danger-custom"><?php
         echo htmlspecialchars($cert_error);
         ?></div>
-                                        <?php 
+                                        <?php
     }
     ?>
                                     </div>
@@ -1236,63 +1236,65 @@ if ($role === 'alumni') {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <?php 
+                                                    <?php
     if (count($certificates_list) === 0) {
         ?>
                                                         <tr>
                                                             <td colspan="4" class="empty-state">No certificates added yet.</td>
                                                         </tr>
-                                                    <?php 
+                                                    <?php
     } else {
         ?>
-                                                        <?php 
+                                                        <?php
         foreach ($certificates_list as $cert) {
             ?>
                                                             <tr>
-                                                                <td><?php 
+                                                                <td><?php
             echo htmlspecialchars($cert['certificate_name']);
             ?></td>
                                                                 <td>
-                                                                    <?php 
-            if (!empty($cert['certificate_image'])) {
+                                                                    <?php
+            if (! empty($cert['certificate_image'])) {
                 ?>
-                                                                        <a href="<?php 
-                echo htmlspecialchars(\url('') . '/uploads/certificates/' . $cert['certificate_image']);
+                                                                        <a href="<?php
+                echo htmlspecialchars(\url('').'/uploads/certificates/'.$cert['certificate_image']);
                 ?>" target="_blank">
-                                                                            <img src="<?php 
-                echo htmlspecialchars(\url('') . '/uploads/certificates/' . $cert['certificate_image']);
+                                                                            <img src="<?php
+                echo htmlspecialchars(\url('').'/uploads/certificates/'.$cert['certificate_image']);
                 ?>" alt="Certificate" class="certificate-thumb">
                                                                         </a>
-                                                                    <?php 
+                                                                    <?php
             } else {
                 ?>
                                                                         <span class="muted-small">No image</span>
-                                                                    <?php 
+                                                                    <?php
             }
             ?>
                                                                 </td>
-                                                                <td><?php 
+                                                                <td><?php
             echo htmlspecialchars($cert['issue_date'] ?? '');
             ?></td>
                                                                 <td>
-                                                                    <a href="?delete_certificate=<?php 
-            echo (int) $cert['id'];
-            ?>" class="text-danger" onclick="return confirm('Delete this certificate?');">Delete</a>
+                                                                    <form method="POST" action="{{ route('profile.certificates.destroy', $cert['id']) }}" onsubmit="return confirm('Delete this certificate?');">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="text-danger border-0 bg-transparent p-0">Delete</button>
+                                                                    </form>
                                                                 </td>
                                                             </tr>
-                                                        <?php 
+                                                        <?php
         }
         ?>
-                                                    <?php 
+                                                    <?php
     }
     ?>
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
-                                <?php 
+                                <?php
 }
-?>
+        ?>
 
                                 <div class="col-12">
                                     <label class="form-label">Profile Picture</label>
@@ -1309,47 +1311,47 @@ if ($role === 'alumni') {
             </div>
         </div>
 
-        <div class="tab-pane fade <?php 
-echo $active_tab === 'security' ? 'show active' : '';
-?>" id="tabSecurity">
+        <div class="tab-pane fade <?php
+        echo $active_tab === 'security' ? 'show active' : '';
+        ?>" id="tabSecurity">
             <div class="row g-4">
 
                 <div class="col-lg-6">
                     <div class="card-custom">
                         <div class="section-title">Account Information</div>
 
-                        <?php 
+                        <?php
 if ($password_msg) {
     ?>
-                            <div class="alert-box alert-success-custom"><?php 
+                            <div class="alert-box alert-success-custom"><?php
     echo htmlspecialchars($password_msg);
     ?></div>
-                        <?php 
+                        <?php
 }
-?>
+        ?>
 
-                        <?php 
+                        <?php
 if ($password_error) {
     ?>
-                            <div class="alert-box alert-danger-custom"><?php 
+                            <div class="alert-box alert-danger-custom"><?php
     echo htmlspecialchars($password_error);
     ?></div>
-                        <?php 
+                        <?php
 }
-?>
+        ?>
 
                         <div class="mb-4">
-                            <label class="form-label"><?php 
-echo $role !== 'alumni' ? 'User Name' : 'Student ID';
-?></label>
+                            <label class="form-label"><?php
+        echo $role !== 'alumni' ? 'User Name' : 'Student ID';
+        ?></label>
                             <input class="form-control-custom readonly-field"
-                                   value="<?php 
-echo htmlspecialchars($user['username']);
-?>"
+                                   value="<?php
+        echo htmlspecialchars($user['username']);
+        ?>"
                                    readonly>
-                            <div class="helper-text"><?php 
-echo $role !== 'alumni' ? 'User Name' : 'Student ID';
-?> cannot be changed.</div>
+                            <div class="helper-text"><?php
+        echo $role !== 'alumni' ? 'User Name' : 'Student ID';
+        ?> cannot be changed.</div>
                         </div>
 
                         <hr class="custom-divider">
@@ -1392,40 +1394,40 @@ echo $role !== 'alumni' ? 'User Name' : 'Student ID';
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php 
+                                    <?php
 if (count($logs) === 0) {
     ?>
                                         <tr>
                                             <td colspan="3" class="empty-state">No logs yet.</td>
                                         </tr>
-                                    <?php 
+                                    <?php
 } else {
     ?>
-                                        <?php 
+                                        <?php
     foreach ($logs as $l) {
         ?>
                                             <tr>
                                                 <td>
-                                                    <div class="log-action"><?php 
+                                                    <div class="log-action"><?php
         echo htmlspecialchars($l['action']);
         ?></div>
-                                                    <div class="muted-small"><?php 
+                                                    <div class="muted-small"><?php
         echo htmlspecialchars($l['details'] ?? '');
         ?></div>
                                                 </td>
-                                                <td class="muted-small"><?php 
+                                                <td class="muted-small"><?php
         echo htmlspecialchars($l['ip_address'] ?? '');
         ?></td>
-                                                <td class="muted-small"><?php 
+                                                <td class="muted-small"><?php
         echo htmlspecialchars($l['created_at']);
         ?></td>
                                             </tr>
-                                        <?php 
+                                        <?php
     }
     ?>
-                                    <?php 
+                                    <?php
 }
-?>
+        ?>
                                 </tbody>
                             </table>
                         </div>
@@ -1443,7 +1445,7 @@ if (count($logs) === 0) {
     </div>
 </div>
 
-<?php 
+<?php
 if ($role === 'alumni') {
     ?>
 <div class="modal fade" id="resumePreviewModal" tabindex="-1" aria-hidden="true">
@@ -1459,9 +1461,9 @@ if ($role === 'alumni') {
         </div>
     </div>
 </div>
-<?php 
+<?php
 }
-?>
+        ?>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -1545,5 +1547,5 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<?php 
+<?php
 echo \gc_partial('footer', \get_defined_vars());
