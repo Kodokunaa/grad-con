@@ -19,10 +19,6 @@ final class ProfileController extends PageController
             \gc_require_role();
             $id = (int) \gc_context()->session['user']['id'];
             $role = \gc_context()->session['user']['role'];
-            \gc_profile_ensure_users_column($pdo, 'address', 'VARCHAR(255) NULL');
-            \gc_profile_ensure_users_column($pdo, 'has_multiple_branches', 'TINYINT(1) NOT NULL DEFAULT 0');
-            \gc_profile_ensure_users_column($pdo, 'branch_location', 'VARCHAR(255) NULL');
-            \gc_profile_ensure_users_column($pdo, 'receive_update_notifications', 'TINYINT(1) NOT NULL DEFAULT 1');
             // Load user
             $stmt = $pdo->prepare('SELECT * FROM users WHERE id=? LIMIT 1');
             $stmt->execute([$id]);

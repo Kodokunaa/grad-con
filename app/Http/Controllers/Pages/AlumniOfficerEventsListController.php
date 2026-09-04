@@ -32,31 +32,6 @@ final class AlumniOfficerEventsListController extends PageController
                     $currentUserPhoto = '';
                 }
             }
-            try {
-                \gc_alumni_officer_events_list_ensure_column($pdo, 'events', 'is_archived', 'TINYINT(1) NOT NULL DEFAULT 0');
-                \gc_alumni_officer_events_list_ensure_column($pdo, 'events', 'archived_at', 'DATETIME NULL');
-                \gc_context()->schemaChange($pdo, "CREATE TABLE IF NOT EXISTS post_reactions (\r\n        id INT AUTO_INCREMENT PRIMARY KEY,\r\n        post_type VARCHAR(30) NOT NULL DEFAULT 'event',\r\n        post_id INT NOT NULL,\r\n        parent_comment_id INT NULL DEFAULT NULL,\r\n        user_id INT NOT NULL,\r\n        reaction_type VARCHAR(20) NOT NULL DEFAULT 'like',\r\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n        UNIQUE KEY unique_post_user_reaction (post_type, post_id, user_id),\r\n        INDEX idx_post_reactions_post (post_type, post_id),\r\n        INDEX idx_post_reactions_user (user_id)\r\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-                \gc_context()->schemaChange($pdo, "CREATE TABLE IF NOT EXISTS post_comments (\r\n        id INT AUTO_INCREMENT PRIMARY KEY,\r\n        post_type VARCHAR(30) NOT NULL DEFAULT 'event',\r\n        post_id INT NOT NULL,\r\n        parent_comment_id INT NULL DEFAULT NULL,\r\n        user_id INT NOT NULL,\r\n        comment TEXT NOT NULL,\r\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n        INDEX idx_post_comments_post (post_type, post_id),\r\n        INDEX idx_post_comments_user (user_id)\r\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-                \gc_context()->schemaChange($pdo, "CREATE TABLE IF NOT EXISTS post_notifications (\r\n        id INT AUTO_INCREMENT PRIMARY KEY,\r\n        recipient_user_id INT NOT NULL,\r\n        sender_user_id INT NOT NULL,\r\n        post_type VARCHAR(30) NOT NULL DEFAULT 'event',\r\n        post_id INT NOT NULL,\r\n        notification_type VARCHAR(50) NOT NULL DEFAULT 'comment',\r\n        message TEXT NOT NULL,\r\n        is_read TINYINT(1) NOT NULL DEFAULT 0,\r\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n        INDEX idx_post_notifications_recipient (recipient_user_id),\r\n        INDEX idx_post_notifications_post (post_type, post_id)\r\n    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-                foreach (['post_comments' => ['post_type' => "ALTER TABLE post_comments ADD COLUMN post_type VARCHAR(30) NOT NULL DEFAULT 'event' AFTER id", 'post_id' => 'ALTER TABLE post_comments ADD COLUMN post_id INT NOT NULL DEFAULT 0 AFTER post_type', 'parent_comment_id' => 'ALTER TABLE post_comments ADD COLUMN parent_comment_id INT NULL DEFAULT NULL AFTER post_id', 'user_id' => 'ALTER TABLE post_comments ADD COLUMN user_id INT NOT NULL DEFAULT 0 AFTER parent_comment_id', 'comment' => 'ALTER TABLE post_comments ADD COLUMN comment TEXT NOT NULL AFTER user_id', 'created_at' => 'ALTER TABLE post_comments ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER comment'], 'post_reactions' => ['post_type' => "ALTER TABLE post_reactions ADD COLUMN post_type VARCHAR(30) NOT NULL DEFAULT 'event' AFTER id", 'post_id' => 'ALTER TABLE post_reactions ADD COLUMN post_id INT NOT NULL DEFAULT 0 AFTER post_type', 'user_id' => 'ALTER TABLE post_reactions ADD COLUMN user_id INT NOT NULL DEFAULT 0 AFTER post_id', 'reaction_type' => "ALTER TABLE post_reactions ADD COLUMN reaction_type VARCHAR(20) NOT NULL DEFAULT 'like' AFTER user_id", 'created_at' => 'ALTER TABLE post_reactions ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER reaction_type']] as $table => $columns) {
-                    foreach ($columns as $column => $sql) {
-                        if (! \gc_alumni_officer_events_list_column_exists($pdo, $table, $column)) {
-                            \gc_context()->schemaChange($pdo, $sql);
-                        }
-                    }
-                }
-                if (\gc_alumni_officer_events_list_table_exists($pdo, 'event_reactions')) {
-                    \gc_context()->schemaChange($pdo, "INSERT IGNORE INTO post_reactions (post_type, post_id, user_id, reaction_type, created_at)\r\n                    SELECT 'event', event_id, user_id, reaction_type, created_at FROM event_reactions");
-                }
-                if (\gc_alumni_officer_events_list_table_exists($pdo, 'event_comments')) {
-                    \gc_context()->schemaChange($pdo, "INSERT INTO post_comments (post_type, post_id, parent_comment_id, user_id, comment, created_at)\r\n                    SELECT 'event', ec.event_id, NULL, ec.user_id, ec.comment, ec.created_at\r\n                    FROM event_comments ec\r\n                    WHERE NOT EXISTS (\r\n                        SELECT 1 FROM post_comments pc\r\n                        WHERE pc.post_type='event'\r\n                          AND pc.post_id=ec.event_id\r\n                          AND pc.user_id=ec.user_id\r\n                          AND pc.comment=ec.comment\r\n                          AND pc.created_at=ec.created_at\r\n                    )");
-                }
-            } catch (\Throwable $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-                $error = 'Database setup error: '.\gc_public_error($e);
-            }
             $allowedReactions = ['like' => ['emoji' => '👍', 'label' => 'Like'], 'love' => ['emoji' => '❤️', 'label' => 'Love'], 'haha' => ['emoji' => '😂', 'label' => 'Haha'], 'angry' => ['emoji' => '😡', 'label' => 'Angry']];
             // React to event using AJAX so the page will NOT refresh, will NOT scroll to top, and will NOT show popup alerts
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST' && isset(\gc_context()->post['toggle_reaction'])) {

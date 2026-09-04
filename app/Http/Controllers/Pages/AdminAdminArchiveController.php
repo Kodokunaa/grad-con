@@ -17,8 +17,6 @@ final class AdminAdminArchiveController extends PageController
             $message = '';
             $error = '';
             try {
-                \gc_admin_admin_archive_ensure_archive_column($pdo, 'is_archived', 'TINYINT(1) NOT NULL DEFAULT 0');
-                \gc_admin_admin_archive_ensure_archive_column($pdo, 'archived_at', 'DATETIME NULL');
                 if (isset(\gc_context()->query['restore'])) {
                     $restoreId = (int) \gc_context()->query['restore'];
                     if ($restoreId > 0) {

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
-use App\Support\PageResponse;
 use Illuminate\Http\Request;
 
 final class AlumniOfficerArchiveController extends PageController
@@ -14,14 +13,6 @@ final class AlumniOfficerArchiveController extends PageController
             $pdo = gc_context()->pdo();
 
             \gc_require_role('alumni_officer');
-            try {
-                \gc_alumni_officer_archive_ensure_column($pdo, 'events', 'is_archived', 'TINYINT(1) NOT NULL DEFAULT 0');
-                \gc_alumni_officer_archive_ensure_column($pdo, 'events', 'archived_at', 'DATETIME NULL');
-            } catch (\Throwable $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-            }
             if (isset(\gc_context()->query['restore'])) {
                 $restoreId = (int) (\gc_context()->query['restore'] ?? 0);
                 if ($restoreId > 0) {

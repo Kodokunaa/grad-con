@@ -5,7 +5,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Chapter | Status | Completed | Still needs fixing |
 |---|---|---|---|
 | Critical architecture | In progress | Native authentication; initial report/list controllers; native redirects and event deletion | Remaining PDO controllers, `PageContext`, `PageResponse`, `PasswordStatement`, global helpers, and `page-functions.php` |
-| Database and migrations | In progress | Preserved baseline schema; Laravel infrastructure; job fields; social/interview upgrade and legacy social-data migration | Remove 29 request-time schema calls/checks; split the monolithic schema; improve rollback strategy |
+| Database and migrations | In progress | Preserved baseline schema; Laravel infrastructure; job fields; social/interview upgrade, legacy social-data migration, and removal of request-time DDL/data migration | Remove remaining dynamic schema inspection; split the monolithic schema; improve rollback strategy |
 | Models and relationships | Foundation complete | Active domain models, relationships, casts, and status/role enums | Adopt models throughout legacy controllers; enable role/status enum casts after string comparisons are removed |
 | Routing | In progress | GET-only read pages and compatibility redirects; method regression tests | Split multi-action pages into named POST/PATCH/DELETE resource actions; remove destructive query parameters and `.php` URLs |
 | Authentication and account security | In progress | Hashing, centralized password policy, rehash-on-login, reset flow, security logging, other-session invalidation, and removal of automatic PDO password rewriting | Review production cookie settings and complete native account-management controllers |
