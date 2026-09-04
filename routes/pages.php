@@ -9,6 +9,8 @@ use App\Http\Controllers\Event\ArchiveEventController;
 use App\Http\Controllers\Event\RestoreEventController;
 use App\Http\Controllers\Event\StoreEventController;
 use App\Http\Controllers\Event\UpdateEventController;
+use App\Http\Controllers\Job\StoreJobController;
+use App\Http\Controllers\Job\UpdateJobController;
 use App\Http\Controllers\Pages\AdminAdminArchiveController;
 use App\Http\Controllers\Pages\AdminAlumniCreateController;
 use App\Http\Controllers\Pages\AdminAlumniEditController;
@@ -66,6 +68,8 @@ use App\Http\Controllers\Pages\ProfileController;
 use App\Http\Controllers\Profile\DestroyCertificateController;
 use App\Http\Controllers\Training\StoreTrainingController;
 use App\Http\Controllers\Training\UpdateTrainingController;
+use App\Models\Job;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/admin/admin_archive.php', AdminAdminArchiveController::class)->middleware('account:admin')->name('admin.admin_archive');
@@ -101,11 +105,15 @@ Route::get('/admin/graduates_stats.php', AdminGraduatesStatsController::class)->
 Route::get('/admin/interview.php', AdminInterviewController::class)->middleware('account:admin')->name('admin.interview');
 Route::post('/admin/interview.php', AdminInterviewController::class)->middleware('account:admin');
 Route::get('/admin/jobs_create.php', AdminJobsCreateController::class)->middleware('account:admin')->name('admin.jobs_create');
-Route::post('/admin/jobs_create.php', AdminJobsCreateController::class)->middleware('account:admin');
+Route::post('/admin/jobs_create.php', StoreJobController::class)->middleware('account:admin');
 Route::get('/admin/jobs_edit.php', AdminJobsEditController::class)->middleware('account:admin')->name('admin.jobs_edit');
-Route::post('/admin/jobs_edit.php', AdminJobsEditController::class)->middleware('account:admin');
+Route::post('/admin/jobs_edit.php', function (Request $request) {
+    return app(UpdateJobController::class)($request, Job::findOrFail($request->integer('id')));
+})->middleware('account:admin');
 Route::get('/admin/jobs_list.php', AdminJobsListController::class)->middleware('account:admin')->name('admin.jobs_list');
 Route::delete('/admin/jobs/{job}', DestroyJobController::class)->middleware('account:admin')->name('admin.jobs.destroy');
+Route::post('/jobs', StoreJobController::class)->middleware('account:admin,employer')->name('jobs.store');
+Route::put('/jobs/{job}', UpdateJobController::class)->middleware('account:admin,employer')->name('jobs.update');
 Route::get('/admin/jobs_notify.php', AdminJobsNotifyController::class)->middleware('account:admin')->name('admin.jobs_notify');
 Route::post('/admin/jobs_notify.php', AdminJobsNotifyController::class)->middleware('account:admin');
 Route::get('/admin/offers_history.php', AdminOffersHistoryController::class)->middleware('account:admin')->name('admin.offers_history');
@@ -165,7 +173,7 @@ Route::post('/employer/interview.php', EmployerInterviewController::class)->midd
 Route::get('/employer/job_offers.php', EmployerJobOffersController::class)->middleware('account:employer')->name('employer.job_offers');
 Route::post('/employer/job_offers.php', EmployerJobOffersController::class)->middleware('account:employer');
 Route::get('/employer/post_job.php', EmployerPostJobController::class)->middleware('account:employer')->name('employer.post_job');
-Route::post('/employer/post_job.php', EmployerPostJobController::class)->middleware('account:employer');
+Route::post('/employer/post_job.php', StoreJobController::class)->middleware('account:employer');
 Route::get('/employer/posted_job.php', EmployerPostedJobController::class)->middleware('account:employer')->name('employer.posted_job');
 Route::post('/employer/posted_job.php', EmployerPostedJobController::class)->middleware('account:employer');
 Route::get('/profile.php', ProfileController::class)->middleware('account')->name('profile');

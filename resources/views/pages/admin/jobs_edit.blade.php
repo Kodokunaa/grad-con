@@ -248,8 +248,9 @@ if ($error) {
         ?>
 
     <div class="form-card">
-        <form method="POST">
+        <form method="POST" action="{{ route('jobs.update', $id) }}">
 @csrf
+@method('PUT')
             <div class="row g-3">
 
                 <div class="col-12">

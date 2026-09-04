@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 final class AccountAccess
 {
-    public function handle(Request $request, Closure $next, ?string $role = null)
+    public function handle(Request $request, Closure $next, string ...$roles)
     {
         $user = $request->user()?->fresh();
         if (! $user) {
@@ -23,8 +23,8 @@ final class AccountAccess
 
             return redirect()->route('login')->withErrors(['username' => 'Your account is not active or approved.']);
         }
-        if ($role) {
-            abort_unless($user->role === $role, 403);
+        if ($roles !== []) {
+            abort_unless(in_array($user->role, $roles, true), 403);
         }
 
         return $next($request);

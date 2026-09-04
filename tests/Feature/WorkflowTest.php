@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\ApplicantResumeMail;
+use App\Mail\JobOpportunityMail;
 use App\Mail\PageMailer;
 use App\Mail\PreservedNotification;
 use App\Mail\TrainingOpportunityMail;
@@ -172,10 +173,10 @@ final class WorkflowTest extends TestCase
         foreach (['admin', 'employer'] as $role) {
             $user = $this->user($role);
             $data = ['title' => 'Workflow '.$role.' job', 'location' => 'Calapan', 'job_type' => 'Full-time', 'start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d', strtotime('+30 days')), 'description' => 'Test job description', 'is_open' => 1, 'employer_company' => 'Test Company', 'email_address' => $user->email];
-            $this->actingAs($user)->post($role === 'admin' ? '/admin/jobs_create.php' : '/employer/post_job.php', $data)->assertOk();
+            $this->actingAs($user)->post($role === 'admin' ? '/admin/jobs_create.php' : '/employer/post_job.php', $data)->assertRedirect();
             $this->assertDatabaseHas('jobs', ['title' => $data['title'], 'posted_by' => $user->id, 'is_open' => 1]);
         }
-        Mail::assertQueued(PreservedNotification::class);
+        Mail::assertQueued(JobOpportunityMail::class);
     }
 
     public function test_application_upload_review_and_download_are_scoped(): void

@@ -316,7 +316,7 @@ if ($error) {
 ?>
 
     <div class="form-card">
-        <form method="POST">
+        <form method="POST" action="{{ route('jobs.store') }}">
 @csrf
             <div class="form-grid">
 
