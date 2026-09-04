@@ -49,19 +49,34 @@ final class PageSecurity
         unset($state['user'], $state['alumni_user']);
         $request->session()->put('page_state', $state);
         if ($request->isMethod('POST') && $request->user()) {
-            DB::table('audit_logs')->insert(['user_id' => $request->user()->id, 'method' => 'POST', 'path' => $request->path(), 'status' => $response->getStatusCode(), 'ip_address' => $request->ip()]);
+            try {
+                DB::table('audit_logs')->insert(['user_id' => $request->user()->id, 'method' => 'POST', 'path' => $request->path(), 'status' => $response->getStatusCode(), 'ip_address' => $request->ip()]);
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
         }
         if (! ($response instanceof BinaryFileResponse)
             && ! ($response instanceof StreamedResponse)
             && str_contains($response->headers->get('Content-Type', 'text/html'), 'text/html')) {
             $html = $response->getContent();
             if (is_string($html) && str_contains($html, '<')) {
-                $html = preg_replace_callback('/<form\b[^>]*>/i', function ($m) {
-                    return $m[0].(preg_match('/method\s*=\s*[\x22\x27]?post\b/i', $m[0]) ? csrf_field() : '');
-                }, $html);
-                $script = '<meta name="csrf-token" content="'.e(csrf_token()).'"><script src="'.e(asset('js/request-security.js')).'"></script>';
-                $html = preg_replace('/<head\b[^>]*>/i', '$0'.$script, $html, 1);
-                if ($request->user()) {
+                $html = preg_replace(
+                    '/(<form\b(?=[^>]*\bmethod\s*=\s*[\x22\x27]?post\b)[^>]*>)(?!\s*<input\b[^>]*\bname\s*=\s*[\x22\x27]_token[\x22\x27])/i',
+                    '$1'.csrf_field(),
+                    $html,
+                );
+                if (! preg_match('/<meta\b[^>]*\bname\s*=\s*[\x22\x27]csrf-token[\x22\x27]/i', $html)) {
+                    $meta = '<meta name="csrf-token" content="'.e(csrf_token()).'">';
+                    $html = preg_replace('/<head\b[^>]*>/i', '$0'.$meta, $html, 1);
+                }
+                if (! str_contains($html, 'js/request-security.js')) {
+                    $script = '<script src="'.e(asset('js/request-security.js')).'"></script>';
+                    $html = preg_replace('/<\/head>/i', $script.'</head>', $html, 1, $scriptCount);
+                    if ($scriptCount === 0) {
+                        $html = $script.$html;
+                    }
+                }
+                if ($request->user() && ! str_contains($html, 'id="logoutLightbox"')) {
                     $logoutModal = view('partials.logout-modal')->render();
                     $html = preg_replace('/<\/body>/i', $logoutModal.'</body>', $html, 1, $modalCount);
                     if ($modalCount === 0) {

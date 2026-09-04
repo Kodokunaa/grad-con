@@ -14,7 +14,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Uploads and files | In progress | Normalized private paths, Laravel disk writes, recognized categories, resume/certificate policies, portal-image scope tests | Convert deletion and reads fully to `Storage`; collision-resistant names; orphan reconciliation; MIME boundary tests |
 | Mail and queues | In progress | Laravel queued delivery and reset notification | Remove PHPMailer-style setup, consolidate mail templates, harden queued attachments, document/verify worker and SMTP deployment |
 | Views and frontend | In progress | Shared public-authentication document layout and logout modal regression coverage | Auth asset extraction; authenticated layouts/components/assets; remove response rewriting and duplicated inline CSS/JavaScript |
-| Middleware and responses | In progress | CSRF compatibility, upload validation, audit records, security headers | Remove HTML regex rewriting and query-action interception after native forms/routes are complete |
+| Middleware and responses | In progress | Idempotent CSRF/asset/modal augmentation, native auth CSRF, non-fatal audit records, upload validation, security headers | Remove HTML regex rewriting and query-action interception after native forms/routes are complete |
 | Duplicate helpers | Not started | Initial duplicates identified | Consolidate role-prefixed helpers, formatting, alignment, schema, and email functions |
 | Configuration and portability | In progress | Laravel root, environment templates, MySQL migration path | Set application timezone, verify clean-device install, document extensions and queue/mail requirements |
 | Redundant files | In progress | Obsolete conversion tools, route dump, starter welcome view, and two blank views removed | Remove starter tests, empty directories, build cache, and migration runtime after final verification |
@@ -56,3 +56,21 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - Convert repeated sidebars, headers, alerts, forms, tables, and modals into Blade components.
 - Remove inline CSS from the remaining page views and inline JavaScript from interactive views.
 - Remove middleware-based HTML rewriting after forms and logout markup are native Blade components.
+
+## Current middleware and responses checkpoint
+
+### Done
+
+- Added native CSRF fields to all public authentication forms.
+- Prevented duplicate CSRF metadata, request-security assets, form tokens, and logout modals when views already provide them.
+- Kept compatibility CSRF injection for retained legacy POST forms.
+- Prevented audit-log storage failures from replacing an otherwise valid application response.
+- Retained security headers and private cache controls.
+
+### Still needs fixing
+
+- Add native CSRF fields to every retained authenticated POST form.
+- Move global upload and password validation into route-specific Form Requests.
+- Replace destructive GET query interception with explicit mutation routes and confirmation components.
+- Remove response-body regular-expression rewriting after the remaining views use shared layouts and components.
+- Move audit recording to a dedicated service or event listener with operational failure monitoring.

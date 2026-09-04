@@ -145,6 +145,7 @@ input:focus{
 
         <?php if (!$msg): ?>
         <form method="POST">
+            @csrf
             <div class="form-group">
                 <label>New Password</label>
                 <input type="password" name="password" placeholder="Enter new password" required>

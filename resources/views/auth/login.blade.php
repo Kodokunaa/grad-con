@@ -332,6 +332,7 @@ body{
             <?php endif; ?>
 
             <form method="POST" autocomplete="off">
+                @csrf
                 <div class="form-group">
                     <label class="form-label">Student ID</label>
                     <div class="input-wrap">

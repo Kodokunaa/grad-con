@@ -115,6 +115,7 @@ button:hover {
 <?php endif; ?>
 
 <form method="POST">
+    @csrf
 <input type="email" name="email" value="<?php echo htmlspecialchars(old('email', '')); ?>" placeholder="Enter your email" required>
 <button type="submit">Send Reset Link</button>
 </form>

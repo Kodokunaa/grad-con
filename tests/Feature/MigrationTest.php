@@ -70,21 +70,29 @@ final class MigrationTest extends TestCase
 
     public function test_login_displays_flash_status_messages(): void
     {
-        $this->withSession(['status' => 'Password reset successful. Please sign in.'])
+        $response = $this->withSession(['status' => 'Password reset successful. Please sign in.'])
             ->get('/')
             ->assertSee('Password reset successful. Please sign in.');
+
+        $html = $response->getContent();
+        $this->assertSame(1, substr_count($html, 'name="csrf-token"'));
+        $this->assertSame(1, substr_count($html, 'js/request-security.js'));
+        $this->assertSame(1, substr_count($html, 'name="_token"'));
     }
 
     public function test_logout_uses_an_in_page_modal_and_remains_post_only(): void
     {
         $admin = $this->user('admin');
 
-        $this->actingAs($admin)
+        $response = $this->actingAs($admin)
             ->get('/admin/dashboard.php')
             ->assertOk()
             ->assertSee('id="logoutLightbox"', false)
             ->assertSee('data-logout-trigger', false)
             ->assertSee('Log out of GradConn?');
+
+        $this->assertSame(1, substr_count($response->getContent(), 'id="logoutLightbox"'));
+        $this->assertSame(1, substr_count($response->getContent(), 'js/request-security.js'));
 
         $this->get('/auth/logout.php')->assertRedirect('/');
         $this->assertAuthenticatedAs($admin);
