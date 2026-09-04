@@ -38,7 +38,7 @@ final class AdminEventsEditController extends PageController
                     // Remove current image
                     if ($remove_image === 1) {
                         if (! empty($newImageName)) {
-                            $oldPath = \storage_path('app/private/files/admin').'/../uploads/events/'.$newImageName;
+                            $oldPath = \storage_path('app/private/files/uploads/events/'.$newImageName);
                             if (file_exists($oldPath)) {
                                 @unlink($oldPath);
                             }
@@ -54,7 +54,7 @@ final class AdminEventsEditController extends PageController
                         } elseif (\gc_files()['image']['size'] > 3 * 1024 * 1024) {
                             $error = 'Image too large. Max 3MB.';
                         } else {
-                            $dir = \storage_path('app/private/files/admin').'/../uploads/events/';
+                            $dir = \storage_path('app/private/files/uploads/events/');
                             if (! is_dir($dir)) {
                                 mkdir($dir, 0777, true);
                             }

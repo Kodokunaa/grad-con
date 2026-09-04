@@ -42,7 +42,7 @@ final class AdminTrainingsEditController extends PageController
                         if (! in_array($ext, $allowed, true)) {
                             $error = 'Invalid image type. Allowed: jpg, jpeg, png, gif, webp.';
                         } else {
-                            $upload_dir = \storage_path('app/private/files/admin').'/../uploads/trainings/';
+                            $upload_dir = \storage_path('app/private/files/uploads/trainings/');
                             if (! is_dir($upload_dir)) {
                                 mkdir($upload_dir, 0777, true);
                             }

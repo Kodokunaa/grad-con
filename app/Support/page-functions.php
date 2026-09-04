@@ -1908,7 +1908,7 @@ function gc_employer_alumni_list_build_alumni_snapshot_email_html(array $alumni,
     $profilePicturePath = '';
     if (! empty($alumni['profile_picture'])) {
         // Adjust this path to match your actual uploads directory
-        $profilePicturePath = \storage_path('app/private/files/employer').'/../uploads/profiles/'.$alumni['profile_picture'];
+        $profilePicturePath = \storage_path('app/private/files/uploads/profiles/'.$alumni['profile_picture']);
     }
     $profilePicHtml = \gc_employer_alumni_list_build_profile_picture_email_html($profilePicturePath ?: null, $alumni['fullname'] ?? 'Alumni');
     $html = '

@@ -217,6 +217,19 @@ final class MigrationTest extends TestCase
         $this->actingAs($this->user())->get('/uploads/resumes/'.urlencode($application->resume_file))->assertForbidden();
     }
 
+    public function test_upload_categories_reject_unknown_paths_and_scope_portal_images(): void
+    {
+        $filename = 'event_'.bin2hex(random_bytes(5)).'.png';
+        $path = storage_path('app/private/files/uploads/events/'.$filename);
+        file_put_contents($path, base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='));
+        $this->createdFiles[] = $path;
+
+        $this->actingAs($this->user('employer'))->get('/uploads/events/'.$filename)->assertForbidden();
+        $this->actingAs($this->user('alumni'))->get('/uploads/events/'.$filename)->assertOk()->assertHeader('content-type', 'image/png');
+        $this->get('/uploads/unknown/'.$filename)->assertNotFound();
+        $this->get('/uploads/events/nested/'.$filename)->assertNotFound();
+    }
+
     public function test_deletion_link_does_not_mutate_on_get(): void
     {
         $admin = $this->user('admin');

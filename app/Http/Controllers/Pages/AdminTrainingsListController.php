@@ -20,7 +20,7 @@ final class AdminTrainingsListController extends PageController
                 $getImg->execute([$id]);
                 $old = $getImg->fetch(\PDO::FETCH_ASSOC);
                 if ($old && ! empty($old['image'])) {
-                    $imgPath = \storage_path('app/private/files/admin').'/../uploads/trainings/'.$old['image'];
+                    $imgPath = \storage_path('app/private/files/uploads/trainings/'.$old['image']);
                     if (file_exists($imgPath)) {
                         @unlink($imgPath);
                     }

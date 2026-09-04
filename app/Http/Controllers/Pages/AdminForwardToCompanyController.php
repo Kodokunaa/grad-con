@@ -21,7 +21,7 @@ final class AdminForwardToCompanyController extends PageController
             if (! $app) {
                 \gc_finish('Not found.');
             }
-            $resumePath = \storage_path('app/private/files/admin').'/../uploads/resumes/'.$app['resume_file'];
+            $resumePath = \storage_path('app/private/files/uploads/resumes/'.$app['resume_file']);
             $msg = '';
             $error = '';
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST') {

@@ -27,6 +27,9 @@ final class FileController extends Controller
 
     public function upload(Request $request, string $path)
     {
+        $parts = explode('/', trim($path, '/'));
+        abort_unless(count($parts) === 2 && in_array($parts[0], ['resumes', 'certificates', 'profiles', 'events', 'trainings'], true), 404);
+        [$category] = $parts;
         if (str_starts_with($path, 'resumes/')) {
             return $this->resume($request, basename($path));
         }
@@ -34,6 +37,9 @@ final class FileController extends Controller
             $ownerId = DB::table('alumni_certificates')->where('certificate_image', basename($path))->value('user_id');
             $owner = User::findOrFail($ownerId);
             Gate::authorize('viewPrivateFile', $owner);
+        }
+        if (in_array($category, ['events', 'trainings'], true)) {
+            abort_unless(in_array($request->user()->role, ['admin', 'alumni', 'alumni_officer'], true), 403);
         }
 
         return $this->serve($path, false);

@@ -37,7 +37,7 @@ final class AlumniOfficerEventsEditController extends PageController
                         } elseif ((\gc_files()['image']['size'] ?? 0) > 3 * 1024 * 1024) {
                             $error = 'Image too large. Max 3MB.';
                         } else {
-                            $upload_dir = \storage_path('app/private/files/alumni_officer').'/../uploads/events/';
+                            $upload_dir = \storage_path('app/private/files/uploads/events/');
                             if (! is_dir($upload_dir)) {
                                 mkdir($upload_dir, 0777, true);
                             }
@@ -45,7 +45,7 @@ final class AlumniOfficerEventsEditController extends PageController
                             $target = $upload_dir.$new_image_name;
                             if (\gc_move_upload(\gc_files()['image']['tmp_name'], $target)) {
                                 if (! empty($event['image'])) {
-                                    $oldImage = \storage_path('app/private/files/alumni_officer').'/../uploads/events/'.$event['image'];
+                                    $oldImage = \storage_path('app/private/files/uploads/events/'.$event['image']);
                                     if (is_file($oldImage)) {
                                         @unlink($oldImage);
                                     }

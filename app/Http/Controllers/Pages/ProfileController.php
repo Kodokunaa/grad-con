@@ -77,7 +77,7 @@ final class ProfileController extends PageController
                         } elseif ((\gc_files()['certificate_image']['size'] ?? 0) > 3 * 1024 * 1024) {
                             $cert_error = 'Certificate image too large. Max 3MB.';
                         } else {
-                            $upload_dir = \storage_path('app/private/files').'/uploads/certificates/';
+                            $upload_dir = \storage_path('app/private/files/uploads/certificates/');
                             if (! is_dir($upload_dir)) {
                                 mkdir($upload_dir, 0777, true);
                             }
@@ -100,7 +100,7 @@ final class ProfileController extends PageController
                             throw $e;
                         }
                         if ($certificate_image_name) {
-                            $fullPath = \storage_path('app/private/files').'/uploads/certificates/'.$certificate_image_name;
+                            $fullPath = \storage_path('app/private/files/uploads/certificates/'.$certificate_image_name);
                             if (is_file($fullPath)) {
                                 @unlink($fullPath);
                             }
@@ -118,7 +118,7 @@ final class ProfileController extends PageController
                         $findCert->execute([$deleteCertificateId, $id]);
                         $certRow = $findCert->fetch(\PDO::FETCH_ASSOC);
                         if ($certRow && ! empty($certRow['certificate_image'])) {
-                            $fullPath = \storage_path('app/private/files').'/uploads/certificates/'.$certRow['certificate_image'];
+                            $fullPath = \storage_path('app/private/files/uploads/certificates/'.$certRow['certificate_image']);
                             if (is_file($fullPath)) {
                                 @unlink($fullPath);
                             }
@@ -239,7 +239,7 @@ final class ProfileController extends PageController
                 \gc_header('Content-Type: text/html; charset=UTF-8');
                 $profilePhotoPath = '';
                 if (! empty($user['profile_picture'])) {
-                    $candidate = \storage_path('app/private/files').'/uploads/profiles/'.$user['profile_picture'];
+                    $candidate = \storage_path('app/private/files/uploads/profiles/'.$user['profile_picture']);
                     if (is_file($candidate)) {
                         $profilePhotoPath = \url('').'/uploads/profiles/'.rawurlencode($user['profile_picture']);
                     }
@@ -988,7 +988,7 @@ final class ProfileController extends PageController
                         } elseif (\gc_files()['profile_picture']['size'] > 2 * 1024 * 1024) {
                             $profile_error = 'Image too large. Max 2MB.';
                         } else {
-                            $upload_dir = \storage_path('app/private/files').'/uploads/profiles/';
+                            $upload_dir = \storage_path('app/private/files/uploads/profiles/');
                             if (! is_dir($upload_dir)) {
                                 mkdir($upload_dir, 0777, true);
                             }

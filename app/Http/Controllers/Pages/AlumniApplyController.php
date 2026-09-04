@@ -89,7 +89,7 @@ final class AlumniApplyController extends PageController
                         $error = 'File size exceeds 5MB limit.';
                     } else {
                         // Create resume upload directory if it doesn't exist
-                        $upload_dir = \storage_path('app/private/files/alumni').'/../uploads/resumes/';
+                        $upload_dir = \storage_path('app/private/files/uploads/resumes/');
                         if (! is_dir($upload_dir)) {
                             mkdir($upload_dir, 0755, true);
                         }

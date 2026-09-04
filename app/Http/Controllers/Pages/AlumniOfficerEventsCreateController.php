@@ -38,7 +38,7 @@ final class AlumniOfficerEventsCreateController extends PageController
                         } elseif ((\gc_files()['image']['size'] ?? 0) > 3 * 1024 * 1024) {
                             $error = 'Image too large. Max 3MB.';
                         } else {
-                            $upload_dir = \storage_path('app/private/files/alumni_officer').'/../uploads/events/';
+                            $upload_dir = \storage_path('app/private/files/uploads/events/');
                             if (! is_dir($upload_dir)) {
                                 mkdir($upload_dir, 0777, true);
                             }
