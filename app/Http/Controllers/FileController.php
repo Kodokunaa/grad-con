@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JobApplication;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -30,8 +31,9 @@ final class FileController extends Controller
             return $this->resume($request, basename($path));
         }
         if (str_starts_with($path, 'certificates/')) {
-            $owner = DB::table('alumni_certificates')->where('certificate_image', basename($path))->value('user_id');
-            abort_unless($request->user()->role === 'admin' || (int) $owner === (int) $request->user()->id, 403);
+            $ownerId = DB::table('alumni_certificates')->where('certificate_image', basename($path))->value('user_id');
+            $owner = User::findOrFail($ownerId);
+            Gate::authorize('viewPrivateFile', $owner);
         }
 
         return $this->serve($path, false);
