@@ -25,11 +25,7 @@ final class UpdateAlumniRequest extends FormRequest
 
     public function rules(): array
     {
-        if (! $this->isMethod('POST') || $this->boolean('delete_account')) {
-            return [];
-        }
-
-        $userId = (int) $this->query('id');
+        $userId = (int) $this->route('alumni')?->id;
 
         return [
             'fullname' => ['required', 'string', 'max:150'],

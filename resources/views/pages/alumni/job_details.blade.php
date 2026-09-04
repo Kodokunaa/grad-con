@@ -287,12 +287,9 @@ if ($alreadyApplied) {
             <?php
 } else {
     ?>
-                <form method="POST">
-@csrf
-                    <button type="submit" class="btn-apply">
+                <a href="{{ route('alumni.apply', ['job_id' => $job_id]) }}" class="btn-apply">
                         <i class="fas fa-paper-plane"></i> Apply Now
-                    </button>
-                </form>
+                </a>
             <?php
 }
 ?>

@@ -158,15 +158,10 @@ if (empty($archivedEvents)) {
 										<div class="comment-text"><?php
                 echo \gc_e($comment['comment'] ?? '');
                 ?></div>
-										<form method="POST" onsubmit="return confirm('Delete this comment?');">
+										<form method="POST" action="{{ url('/admin/archive/events/'.$event['id'].'/comments/'.$comment['id']) }}" onsubmit="return confirm('Delete this comment?');">
 @csrf
-											<input type="hidden" name="event_id" value="<?php
-                echo (int) $event['id'];
-                ?>">
-											<input type="hidden" name="comment_id" value="<?php
-                echo (int) $comment['id'];
-                ?>">
-											<button type="submit" name="delete_comment" class="comment-delete">Delete comment</button>
+@method('DELETE')
+											<button type="submit" class="comment-delete">Delete comment</button>
 										</form>
 									</div>
 								</div>

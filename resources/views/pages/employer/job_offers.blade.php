@@ -350,23 +350,19 @@ if (empty($offers)) {
                                     <?php 
         if ($offer['status'] !== 'done') {
             ?>
-                                        <form method="POST" style="display:inline-block; margin:0;">
+                                        <form method="POST" action="{{ route('employer.offers.done', $offer['id']) }}" style="display:inline-block; margin:0;">
 @csrf
-                                            <input type="hidden" name="offer_id" value="<?php 
-            echo (int) $offer['id'];
-            ?>">
-                                            <button type="submit" name="offer_action" value="done" class="btn-action btn-done">Done</button>
+@method('PATCH')
+                                            <button type="submit" class="btn-action btn-done">Done</button>
                                         </form>
                                     <?php 
         }
         ?>
 
-                                    <form method="POST" style="display:inline-block; margin:0;">
+                                    <form method="POST" action="{{ route('employer.offers.destroy', $offer['id']) }}" style="display:inline-block; margin:0;">
 @csrf
-                                        <input type="hidden" name="offer_id" value="<?php 
-        echo (int) $offer['id'];
-        ?>">
-                                        <button type="submit" name="offer_action" value="remove" class="btn-action btn-remove" onclick="return confirm('Remove this offer?');">Remove</button>
+@method('DELETE')
+                                        <button type="submit" class="btn-action btn-remove" onclick="return confirm('Remove this offer?');">Remove</button>
                                     </form>
                                 </td>
                             </tr>

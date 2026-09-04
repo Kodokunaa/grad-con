@@ -119,9 +119,9 @@ final class WorkflowTest extends TestCase
     {
         $admin = $this->user('admin');
         $alumni = $this->user('alumni');
-        $path = '/admin/alumni_edit.php?id='.$alumni->id;
+        $path = '/admin/alumni/'.$alumni->id;
 
-        $this->actingAs($admin)->post($path, [
+        $this->actingAs($admin)->put($path, [
             'fullname' => 'Updated Graduate',
             'email' => 'invalid-email',
             'course' => 'BSIS',
@@ -131,14 +131,14 @@ final class WorkflowTest extends TestCase
         ])->assertSessionHasErrors('email');
         $this->assertNotSame('Updated Graduate', $alumni->fresh()->fullname);
 
-        $this->post($path, [
+        $this->put($path, [
             'fullname' => 'Updated Graduate',
             'email' => 'updated-graduate@example.test',
             'course' => 'BSIS',
             'batch_year' => '2025',
             'is_active' => '1',
             'password' => 'replacement-password',
-        ])->assertOk();
+        ])->assertRedirect('/admin/alumni_edit.php?id='.$alumni->id);
 
         $alumni->refresh();
         $this->assertSame('Updated Graduate', $alumni->fullname);
@@ -192,9 +192,10 @@ final class WorkflowTest extends TestCase
             'is_open' => 1,
         ]);
 
-        $this->actingAs($alumni)
-            ->post('/alumni/job_details.php?id='.$jobId)
-            ->assertRedirect('/alumni/apply.php?job_id='.$jobId);
+        $this->actingAs($alumni)->get('/alumni/job_details.php?id='.$jobId)
+            ->assertOk()->assertSee('/alumni/apply.php?job_id='.$jobId, false);
+
+        $this->post('/alumni/job_details.php?id='.$jobId)->assertMethodNotAllowed();
 
         $this->assertDatabaseMissing('applications', ['job_id' => $jobId, 'alumni_id' => $alumni->id]);
     }
