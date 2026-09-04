@@ -215,7 +215,7 @@ if ($error) {
                     name="title"
                     class="form-control-custom"
                     value="<?php
-    echo htmlspecialchars(\gc_context()->post['title'] ?? '');
+    echo htmlspecialchars(old('title', request()->input('title')) ?? '');
     ?>"
                     required
                 >
@@ -229,7 +229,7 @@ if ($error) {
                     class="form-textarea-custom"
                     required
                 ><?php
-    echo htmlspecialchars(\gc_context()->post['content'] ?? '');
+    echo htmlspecialchars(old('content', request()->input('content')) ?? '');
     ?></textarea>
             </div>
 
@@ -241,7 +241,7 @@ if ($error) {
                         name="training_date"
                         class="form-control-custom"
                         value="<?php
-    echo htmlspecialchars(\gc_context()->post['training_date'] ?? '');
+    echo htmlspecialchars(old('training_date', request()->input('training_date')) ?? '');
     ?>"
                         required
                     >
@@ -254,7 +254,7 @@ if ($error) {
                         name="location"
                         class="form-control-custom"
                         value="<?php
-    echo htmlspecialchars(\gc_context()->post['location'] ?? '');
+    echo htmlspecialchars(old('location', request()->input('location')) ?? '');
     ?>"
                         placeholder="Enter training location"
                     >
@@ -272,7 +272,7 @@ foreach ($allowed_courses as $course) {
     echo htmlspecialchars($course);
     ?>"
                             <?php
-    echo $course === (\gc_context()->post['target_course'] ?? '') ? 'selected' : '';
+    echo $course === (old('target_course', request()->input('target_course')) ?? '') ? 'selected' : '';
     ?>>
                             <?php
     echo htmlspecialchars($course);
@@ -312,4 +312,4 @@ foreach ($allowed_courses as $course) {
 </div>
 
 <?php
-    echo \gc_partial('footer', \get_defined_vars());
+    echo view('partials.footer', \get_defined_vars());

@@ -220,7 +220,7 @@ if ($error) {
                     name="subject"
                     class="form-control-custom"
                     value="<?php 
-echo htmlspecialchars(\gc_context()->post['subject'] ?? '');
+echo htmlspecialchars(old('subject', request()->input('subject')) ?? '');
 ?>"
                     required
                 >
@@ -233,7 +233,7 @@ echo htmlspecialchars(\gc_context()->post['subject'] ?? '');
                     class="form-textarea-custom"
                     required
                 ><?php 
-echo htmlspecialchars(\gc_context()->post['message'] ?? '');
+echo htmlspecialchars(old('message', request()->input('message')) ?? '');
 ?></textarea>
             </div>
 
@@ -248,4 +248,4 @@ echo \url('');
 </div>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

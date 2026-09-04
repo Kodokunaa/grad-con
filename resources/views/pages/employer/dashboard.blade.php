@@ -14,7 +14,7 @@ body{margin:0;background:#f5f7fb;overflow-x:hidden;font-family:-apple-system,Bli
                 <div class="eyebrow">Employer Panel</div>
                 <h2 class="page-title">Employer Dashboard</h2>
                 <div class="page-subtitle">Welcome, <?php 
-echo \gc_e($fullname);
+echo e($fullname);
 ?>. Manage your job posts and applications in one place.</div>
             </div>
 
@@ -120,26 +120,26 @@ if (count($latest) === 0) {
                                         <td>
                                             <div class="applicant-cell">
                                                 <div class="mini-avatar"><?php 
-        echo \gc_employer_dashboard_initials($a['fullname'] ?? 'A');
+        echo \App\Support\ViewFormatter::employer_dashboard_initials($a['fullname'] ?? 'A');
         ?></div>
                                                 <div>
                                                     <div class="alumni-name"><?php 
-        echo \gc_e($a['fullname']);
+        echo e($a['fullname']);
         ?></div>
                                                     <div class="alumni-email"><?php 
-        echo \gc_e($a['email'] ?? '');
+        echo e($a['email'] ?? '');
         ?></div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td><div class="job-title"><?php 
-        echo \gc_e($a['title']);
+        echo e($a['title']);
         ?></div></td>
                                         <td><?php 
-        echo \gc_employer_dashboard_statusBadge($a['status'] ?? 'pending');
+        echo \App\Support\ViewFormatter::employer_dashboard_statusBadge($a['status'] ?? 'pending');
         ?></td>
                                         <td><span class="date-text"><?php 
-        echo \gc_e(date('M d, Y', strtotime($a['created_at'])));
+        echo e(date('M d, Y', strtotime($a['created_at'])));
         ?></span></td>
                                         <td><a class="manage-btn" href="<?php 
         echo \url('');
@@ -243,23 +243,23 @@ if (count($latestOffers) === 0) {
                                         <td>
                                             <div class="applicant-cell">
                                                 <div class="mini-avatar"><?php 
-        echo \gc_employer_dashboard_initials($offer['fullname'] ?? 'A');
+        echo \App\Support\ViewFormatter::employer_dashboard_initials($offer['fullname'] ?? 'A');
         ?></div>
                                                 <div>
                                                     <div class="alumni-name"><?php 
-        echo \gc_e($offer['fullname']);
+        echo e($offer['fullname']);
         ?></div>
                                                     <div class="alumni-email"><?php 
-        echo \gc_e($offer['email'] ?? '');
+        echo e($offer['email'] ?? '');
         ?></div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td><?php 
-        echo \gc_employer_dashboard_offerStatusBadge($offer['status'] ?? 'sent');
+        echo \App\Support\ViewFormatter::employer_dashboard_offerStatusBadge($offer['status'] ?? 'sent');
         ?></td>
                                         <td><span class="date-text"><?php 
-        echo \gc_e(date('M d, Y', strtotime($offer['created_at'])));
+        echo e(date('M d, Y', strtotime($offer['created_at'])));
         ?></span></td>
                                         <td><a class="manage-btn" href="<?php 
         echo \url('');
@@ -306,4 +306,4 @@ echo \url('');
 </div>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

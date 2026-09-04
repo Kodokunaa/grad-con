@@ -41,8 +41,8 @@ final class AlumniChangePasswordController extends PageController
                 }
             }
 
-            echo \gc_partial('header', get_defined_vars());
-            echo \gc_partial('alumni_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.alumni_sidebar', get_defined_vars());
 
             return $this->pageView('pages.alumni.change_password', get_defined_vars());
         });

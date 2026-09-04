@@ -11,7 +11,6 @@ final class AlumniOfficerAlumniListController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('alumni_officer');
             $alumniModels = User::query()->where('role', 'alumni')->with(['education', 'certificates', 'employmentHistory', 'degrees'])->latest('id')->get();
             $alumni = $alumniModels->map->toArray()->all();
             $educationByUser = $alumniModels->mapWithKeys(fn ($user) => [$user->id => $user->education->map->toArray()->all()])->all();
@@ -32,8 +31,8 @@ final class AlumniOfficerAlumniListController extends PageController
             $batchOptions = array_values(array_unique($batchOptions));
             sort($courseOptions, SORT_NATURAL | SORT_FLAG_CASE);
             sort($batchOptions, SORT_NATURAL | SORT_FLAG_CASE);
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('alumni_officer_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.alumni_officer_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.alumni_officer.alumni_list', get_defined_vars());
         });

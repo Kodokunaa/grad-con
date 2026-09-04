@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Support\PageContext;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -13,11 +12,6 @@ final class PageSecurity
 {
     public function handle(Request $request, Closure $next)
     {
-        app()->instance(PageContext::class, new PageContext);
-        $context = app(PageContext::class);
-        $context->session = array_replace($request->session()->get('page_state', []), ['user' => gc_user(), 'alumni_user' => gc_user()]);
-        $context->post = $request->request->all();
-        $context->query = $request->query();
         $request->server->set('PHP_SELF', $request->getBaseUrl().$request->getPathInfo());
         // Validate every uploaded file before the retained handlers inspect it.
         foreach (Arr::flatten($request->allFiles()) as $file) {
@@ -38,9 +32,6 @@ final class PageSecurity
             }
         }
         $response = $next($request);
-        $state = $context->session;
-        unset($state['user'], $state['alumni_user']);
-        $request->session()->put('page_state', $state);
         if ($request->isMethod('POST') && $request->user()) {
             try {
                 DB::table('audit_logs')->insert(['user_id' => $request->user()->id, 'method' => 'POST', 'path' => $request->path(), 'status' => $response->getStatusCode(), 'ip_address' => $request->ip()]);

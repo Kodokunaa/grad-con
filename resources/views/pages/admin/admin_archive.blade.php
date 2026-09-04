@@ -57,14 +57,14 @@
 		<?php
 if ($message) {
     ?><div class="alert-box alert-success"><?php
-    echo \gc_e($message);
+    echo e($message);
     ?></div><?php
 }
 		?>
 		<?php
 if ($error) {
     ?><div class="alert-box alert-error"><?php
-    echo \gc_e($error);
+    echo e($error);
     ?></div><?php
 }
 		?>
@@ -89,10 +89,10 @@ if (empty($archivedEvents)) {
 							<div class="poster-avatar">📅</div>
 							<div>
 								<h2 class="poster-name"><?php
-        echo \gc_e($event['poster'] ?? 'Unknown');
+        echo e($event['poster'] ?? 'Unknown');
         ?></h2>
 								<div class="posted-date">Archived on <?php
-        echo \gc_e(\gc_admin_admin_archive_format_date($event['archived_at'] ?? ''));
+        echo e(\App\Support\ViewFormatter::admin_admin_archive_format_date($event['archived_at'] ?? ''));
         ?></div>
 							</div>
 						</div>
@@ -100,17 +100,17 @@ if (empty($archivedEvents)) {
 					</div>
 					<div class="event-body">
 						<h3 class="event-title"><?php
-        echo \gc_e($event['title'] ?? 'Untitled event');
+        echo e($event['title'] ?? 'Untitled event');
         ?></h3>
 						<div class="event-description"><?php
-        echo \gc_e($event['content'] ?? 'No description provided.');
+        echo e($event['content'] ?? 'No description provided.');
         ?></div>
 						<div class="schedule">
 							<span>Start: <?php
-        echo \gc_e(\gc_admin_admin_archive_format_date($event['post_start_date'] ?? ''));
+        echo e(\App\Support\ViewFormatter::admin_admin_archive_format_date($event['post_start_date'] ?? ''));
         ?></span>
 							<span>End: <?php
-        echo \gc_e(\gc_admin_admin_archive_format_date($event['post_end_date'] ?? ''));
+        echo e(\App\Support\ViewFormatter::admin_admin_archive_format_date($event['post_end_date'] ?? ''));
         ?></span>
 						</div>
 					</div>
@@ -120,7 +120,7 @@ if (empty($archivedEvents)) {
 						<img class="event-image" src="<?php
             echo \url('');
             ?>/uploads/events/<?php
-            echo \gc_e($event['image']);
+            echo e($event['image']);
             ?>" alt="Archived event image">
 					<?php
         }
@@ -144,19 +144,19 @@ if (empty($archivedEvents)) {
                 ?>
 								<div class="comment-item">
 									<div class="comment-avatar"><?php
-                echo \gc_e(strtoupper(substr(trim($comment['fullname'] ?? 'U'), 0, 1)));
+                echo e(strtoupper(substr(trim($comment['fullname'] ?? 'U'), 0, 1)));
                 ?></div>
 									<div class="comment-bubble">
 										<div class="comment-meta">
 											<span class="comment-name"><?php
-                echo \gc_e($comment['fullname'] ?? 'Unknown user');
+                echo e($comment['fullname'] ?? 'Unknown user');
                 ?></span>
 											<span class="comment-date"><?php
-                echo \gc_e(\gc_admin_admin_archive_format_date($comment['created_at'] ?? ''));
+                echo e(\App\Support\ViewFormatter::admin_admin_archive_format_date($comment['created_at'] ?? ''));
                 ?></span>
 										</div>
 										<div class="comment-text"><?php
-                echo \gc_e($comment['comment'] ?? '');
+                echo e($comment['comment'] ?? '');
                 ?></div>
 										<form method="POST" action="{{ url('/admin/archive/events/'.$event['id'].'/comments/'.$comment['id']) }}" onsubmit="return confirm('Delete this comment?');">
 @csrf
@@ -183,4 +183,4 @@ if (empty($archivedEvents)) {
 </div>
 
 <?php
-		echo \gc_partial('footer', \get_defined_vars());
+		echo view('partials.footer', \get_defined_vars());

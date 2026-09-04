@@ -11,8 +11,7 @@ final class AlumniMyApplicationsController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('alumni');
-            $alumni_id = (int) \gc_context()->session['user']['id'];
+            $alumni_id = (int) request()->user()?->id;
             $msg = '';
             $error = '';
             /*
@@ -28,8 +27,8 @@ final class AlumniMyApplicationsController extends PageController
                 $row['job_type'] = $application->job?->job_type;
                 return $row;
             })->all();
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('alumni_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.alumni_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.alumni.my_applications', get_defined_vars());
         });

@@ -40,7 +40,7 @@ final class ProfileController extends PageController
                 $employment = $account->employmentHistory->sortByDesc(fn ($item) => ($item->end_date === null ? '9999-12-31' : $item->getRawOriginal('end_date')).$item->getRawOriginal('start_date'))->first();
                 $current_employment = $employment?->getAttributes();
                 if ($current_employment) {
-                    $latestEmploymentAlignment = gc_profile_analyze_course_job_alignment($user['course'] ?? '', $current_employment['job_title'] ?? '', $current_employment['job_description'] ?? '');
+                    $latestEmploymentAlignment = \App\Support\ViewFormatter::profile_analyze_course_job_alignment($user['course'] ?? '', $current_employment['job_title'] ?? '', $current_employment['job_description'] ?? '');
                 }
             }
             $employment_history_list = [];
@@ -88,7 +88,7 @@ final class ProfileController extends PageController
                 $filenameName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $user['fullname'] ?? 'alumni_resume');
                 $pdfFilename = 'resume_'.$filenameName.'_'.date('Ymd_His').'.pdf';
                 // This page uses client-side PDF generation, so no Composer/Dompdf installation is needed.
-                \gc_header('Content-Type: text/html; charset=UTF-8');
+                
                 $profilePhotoPath = '';
                 if (! empty($user['profile_picture'])) {
                     if (PrivateUploads::exists('profiles', $user['profile_picture'])) {
@@ -721,22 +721,22 @@ final class ProfileController extends PageController
 </body>
 </html>
     <?php
-                \gc_finish();
+                return;
             }
             // ========================
             // PROFILE UPDATE + PHOTO UPLOAD
             // ========================
             // Load latest logs
             $logs = $account->securityLogs->sortByDesc('id')->take(10)->map->getAttributes()->values()->all();
-            echo \gc_partial('header', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
             if ($role === 'admin') {
-                echo \gc_partial('admin_sidebar', \get_defined_vars());
+                echo view('partials.admin_sidebar', \get_defined_vars());
             } elseif ($role === 'employer') {
-                echo \gc_partial('employer_sidebar', \get_defined_vars());
+                echo view('partials.employer_sidebar', \get_defined_vars());
             } elseif ($role === 'alumni_officer') {
-                echo \gc_partial('alumni_officer_sidebar', \get_defined_vars());
+                echo view('partials.alumni_officer_sidebar', \get_defined_vars());
             } else {
-                echo \gc_partial('alumni_sidebar', \get_defined_vars());
+                echo view('partials.alumni_sidebar', \get_defined_vars());
             }
             $picUrl = null;
             if (! empty($user['profile_picture'])) {

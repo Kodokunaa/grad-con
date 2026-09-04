@@ -17,8 +17,8 @@ final class AdminJobsEditController extends PageController
             $id = $model->id;
             $msg = session('status', '');
             $error = '';
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('admin_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.admin_sidebar', get_defined_vars());
 
             return $this->pageView('pages.admin.jobs_edit', get_defined_vars());
         });

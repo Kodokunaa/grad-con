@@ -22,8 +22,8 @@ final class AlumniJobOffersController extends PageController
             $msg = session('status', '');
             $offers = JobOffer::with('employer')->where('alumni_id', $request->user()->id)->orderByDesc('created_at')->get()
                 ->map(fn ($offer) => array_merge($offer->getAttributes(), ['employer_name' => $offer->employer->fullname, 'employer_email' => $offer->employer->email]))->all();
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('alumni_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.alumni_sidebar', get_defined_vars());
 
             return $this->pageView('pages.alumni.job_offers', get_defined_vars());
         });

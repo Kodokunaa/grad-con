@@ -244,7 +244,7 @@ tr:last-child td {
 if ($error !== '') {
     ?>
         <div class="error-box"><?php 
-    echo \gc_e($error);
+    echo e($error);
     ?></div>
     <?php 
 }
@@ -325,10 +325,10 @@ if (empty($logs)) {
         echo $index + 1;
         ?></td>
                                 <td><?php 
-        echo \gc_e(\gc_admin_offers_history_format_activity_date($log['created_at'] ?? ''));
+        echo e(\App\Support\ViewFormatter::admin_offers_history_format_activity_date($log['created_at'] ?? ''));
         ?></td>
                                 <td><?php 
-        echo \gc_e($log['employer_name'] ?? 'Unknown');
+        echo e($log['employer_name'] ?? 'Unknown');
         ?></td>
                                 <td>
                                     <?php 
@@ -337,7 +337,7 @@ if (empty($logs)) {
                                     <span class="badge <?php 
         echo $action === 'SEARCH_ALUMNI' ? 'badge-search' : 'badge-offer';
         ?>"><?php 
-        echo \gc_e(str_replace('_', ' ', $action));
+        echo e(str_replace('_', ' ', $action));
         ?></span>
                                 </td>
                                 <td>
@@ -345,13 +345,13 @@ if (empty($logs)) {
         if (!empty($log['alumni_name'])) {
             ?>
                                         <?php 
-            echo \gc_e($log['alumni_name']);
+            echo e($log['alumni_name']);
             ?>
                                         <?php 
             if (!empty($log['alumni_email'])) {
                 ?>
                                             <div style="font-size:12px; color:#6b7280;"><?php 
-                echo \gc_e($log['alumni_email']);
+                echo e($log['alumni_email']);
                 ?></div>
                                         <?php 
             }
@@ -366,7 +366,7 @@ if (empty($logs)) {
                                 </td>
                                 <td class="details-cell">
                                     <?php 
-        echo \gc_admin_offers_history_render_activity_details($log);
+        echo \App\Support\ViewFormatter::admin_offers_history_render_activity_details($log);
         ?>
                                 </td>
                             </tr>

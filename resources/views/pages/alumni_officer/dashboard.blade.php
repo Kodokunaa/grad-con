@@ -409,7 +409,7 @@
                 <div>
                     <div class="eyebrow">👋 Alumni Officer Panel</div>
                     <h1 class="page-title">Welcome, <?php 
-echo \gc_e($fullname);
+echo e($fullname);
 ?></h1>
                     <p class="page-subtitle">Manage alumni events, monitor recent posts, and keep graduates updated.</p>
                 </div>
@@ -429,7 +429,7 @@ echo \url('');
 if ($error) {
     ?>
             <div class="alert-error"><?php 
-    echo \gc_e($error);
+    echo e($error);
     ?></div>
         <?php 
 }
@@ -505,27 +505,27 @@ if (count($recentEvents) === 0) {
     foreach ($recentEvents as $event) {
         ?>
                                 <?php 
-        [$statusText, $statusClass] = \gc_alumni_officer_dashboard_event_status_label($event['post_start_date'] ?? null, $event['post_end_date'] ?? null);
+        [$statusText, $statusClass] = \App\Support\ViewFormatter::alumni_officer_dashboard_event_status_label($event['post_start_date'] ?? null, $event['post_end_date'] ?? null);
         ?>
                                 <tr>
                                     <td>
                                         <div class="event-title-cell"><?php 
-        echo \gc_e($event['title'] ?? 'Untitled Event');
+        echo e($event['title'] ?? 'Untitled Event');
         ?></div>
                                         <div class="event-meta">Event ID #<?php 
         echo (int) $event['id'];
         ?></div>
                                     </td>
                                     <td><?php 
-        echo \gc_e($event['poster_name'] ?? 'Unknown');
+        echo e($event['poster_name'] ?? 'Unknown');
         ?></td>
                                     <td><?php 
-        echo \gc_e(\gc_alumni_officer_dashboard_format_date($event['created_at'] ?? null));
+        echo e(\App\Support\ViewFormatter::alumni_officer_dashboard_format_date($event['created_at'] ?? null));
         ?></td>
                                     <td><span class="status-pill <?php 
-        echo \gc_e($statusClass);
+        echo e($statusClass);
         ?>"><?php 
-        echo \gc_e($statusText);
+        echo e($statusText);
         ?></span></td>
                                     <td>
                                         <div class="action-group">
@@ -556,4 +556,4 @@ if (count($recentEvents) === 0) {
 </div>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

@@ -1,11 +1,9 @@
 <?php
 
 null;
-if (session_status() === PHP_SESSION_NONE) {
-    \gc_noop();
-}
-$currentUserName = \gc_context()->session['user']['fullname'] ?? 'User';
-$currentUserRole = strtolower(\gc_context()->session['user']['role'] ?? 'employer');
+
+$currentUserName = request()->user()?->fullname ?? 'User';
+$currentUserRole = strtolower(request()->user()?->role ?? 'employer');
 $roleLabels = ['admin' => 'Admin', 'alumni' => 'Alumni', 'employer' => 'Employer', 'alumni_officer' => 'Alumni Officer'];
 $currentUserRoleLabel = $roleLabels[$currentUserRole] ?? ucfirst($currentUserRole);
 ?>

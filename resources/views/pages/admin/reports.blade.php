@@ -47,7 +47,7 @@
 			<form class="month-form" method="get">
 				<label for="month">Employer activity</label>
 				<input id="month" name="month" type="month" value="<?php 
-echo \gc_e($selectedMonth);
+echo e($selectedMonth);
 ?>" onchange="this.form.submit()">
 			</form>
 		</header>
@@ -56,7 +56,7 @@ echo \gc_e($selectedMonth);
 if ($error !== '') {
     ?>
 			<div class="notice" role="alert"><?php 
-    echo \gc_e($error);
+    echo e($error);
     ?></div>
 		<?php 
 }
@@ -82,12 +82,12 @@ echo number_format($report['using_alumni']);
 			<article class="metric-card"><div class="metric-icon" aria-hidden="true"><i class="fas fa-clock"></i></div><p class="metric-label">No. of users who logged in / used the system this month</p><p class="metric-value"><?php 
 echo number_format($report['monthly_active_users']);
 ?></p><p class="metric-note">Users active in <?php 
-echo \gc_e($monthLabel);
+echo e($monthLabel);
 ?>. If login tracking is not enabled, this will use the available user activity fields.</p></article>
 			<article class="metric-card featured"><div class="metric-icon" aria-hidden="true"><i class="fas fa-building"></i></div><p class="metric-label">No. of employers using the system</p><p class="metric-value"><?php 
 echo number_format($report['monthly_employers']);
 ?></p><p class="metric-note">Distinct employers posting vacancies in <?php 
-echo \gc_e($monthLabel);
+echo e($monthLabel);
 ?></p></article>
 			<article class="metric-card"><div class="metric-icon" aria-hidden="true"><i class="fas fa-user-check"></i></div><p class="metric-label">No. of users hired by using the system</p><p class="metric-value"><?php 
 echo number_format($report['hired_alumni']);
@@ -97,4 +97,4 @@ echo number_format($report['hired_alumni']);
 </main>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

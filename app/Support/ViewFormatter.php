@@ -1,36 +1,42 @@
 <?php
 
-use App\Support\PageResponse;
+namespace App\Support;
+
+use PDO;
+
+final class ViewFormatter
+{
+
 
 // Preserved page-specific presentation and domain helpers; uniquely named to avoid collisions.
 
-function gc_admin_admin_archive_format_date($date): string
+    public static function admin_admin_archive_format_date($date): string
 {
     if (empty($date)) {
         return 'Not set';
     }
     $timestamp = strtotime($date);
 
-    return $timestamp ? date('M d, Y h:i A', $timestamp) : \gc_e($date);
+    return $timestamp ? date('M d, Y h:i A', $timestamp) : e($date);
 }
 
-function gc_admin_alumni_list_format_year_range($start, $end): string
+    public static function admin_alumni_list_format_year_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_e($start).' - '.\gc_e($end);
+        return e($start).' - '.e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_e($start).' - Present';
+        return e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_e($end);
+        return e($end);
     }
 
     return 'N/A';
 }
-function gc_admin_alumni_list_format_employment_date($date): string
+    public static function admin_alumni_list_format_employment_date($date): string
 {
     $date = trim((string) ($date ?? ''));
     if ($date === '' || strtotime($date) === false) {
@@ -39,23 +45,23 @@ function gc_admin_alumni_list_format_employment_date($date): string
 
     return date('F-d-Y', strtotime($date));
 }
-function gc_admin_alumni_list_format_date_range($start, $end): string
+    public static function admin_alumni_list_format_date_range($start, $end): string
 {
-    $formattedStart = \gc_admin_alumni_list_format_employment_date($start);
-    $formattedEnd = \gc_admin_alumni_list_format_employment_date($end);
+    $formattedStart = self::admin_alumni_list_format_employment_date($start);
+    $formattedEnd = self::admin_alumni_list_format_employment_date($end);
     if ($formattedStart !== '' && $formattedEnd !== '') {
-        return \gc_e($formattedStart.' to '.$formattedEnd);
+        return e($formattedStart.' to '.$formattedEnd);
     }
     if ($formattedStart !== '' && $formattedEnd === '') {
-        return \gc_e($formattedStart.' to Present').'<br><span class="current-job-badge">Current / Present Job</span>';
+        return e($formattedStart.' to Present').'<br><span class="current-job-badge">Current / Present Job</span>';
     }
     if ($formattedStart === '' && $formattedEnd !== '') {
-        return \gc_e($formattedEnd);
+        return e($formattedEnd);
     }
 
     return 'N/A';
 }
-function gc_admin_alumni_list_normalize_alignment_text(?string $text): string
+    public static function admin_alumni_list_normalize_alignment_text(?string $text): string
 {
     $text = strtolower(trim((string) $text));
     $text = preg_replace('/[^a-z0-9\s\+\#\.]/', ' ', $text);
@@ -63,9 +69,9 @@ function gc_admin_alumni_list_normalize_alignment_text(?string $text): string
 
     return $text;
 }
-function gc_admin_alumni_list_detect_alumni_course_key(string $course): string
+    public static function admin_alumni_list_detect_alumni_course_key(string $course): string
 {
-    $courseText = \gc_admin_alumni_list_normalize_alignment_text($course);
+    $courseText = self::admin_alumni_list_normalize_alignment_text($course);
     if ($courseText === '') {
         return '';
     }
@@ -103,7 +109,7 @@ function gc_admin_alumni_list_detect_alumni_course_key(string $course): string
     $courseAliases = ['bsis' => ['bachelor of science in information systems', 'bachelor of science in information system', 'information systems', 'information system', 'information technology', 'ict'], 'bstm' => ['bachelor of science in tourism management', 'tourism management', 'tourism'], 'blis' => ['bachelor of library and information science', 'library and information science', 'library science'], 'bshm' => ['bachelor of science in hospitality management', 'hospitality management', 'hospitality'], 'bsned' => ['bachelor of special needs education', 'special needs education', 'special education', 'sped'], 'bpa' => ['bachelor of public administration', 'public administration', 'bpa', 'administration']];
     foreach ($courseAliases as $courseKey => $aliases) {
         foreach ($aliases as $alias) {
-            $aliasText = \gc_admin_alumni_list_normalize_alignment_text($alias);
+            $aliasText = self::admin_alumni_list_normalize_alignment_text($alias);
             if ($aliasText !== '' && (strpos($courseText, $aliasText) !== false || strpos($aliasText, $courseText) !== false)) {
                 return $courseKey;
             }
@@ -112,10 +118,10 @@ function gc_admin_alumni_list_detect_alumni_course_key(string $course): string
 
     return '';
 }
-function gc_admin_alumni_list_alignment_keyword_matches(string $text, string $keyword): bool
+    public static function admin_alumni_list_alignment_keyword_matches(string $text, string $keyword): bool
 {
-    $text = \gc_admin_alumni_list_normalize_alignment_text($text);
-    $keyword = \gc_admin_alumni_list_normalize_alignment_text($keyword);
+    $text = self::admin_alumni_list_normalize_alignment_text($text);
+    $keyword = self::admin_alumni_list_normalize_alignment_text($keyword);
     if ($text === '' || $keyword === '') {
         return false;
     }
@@ -123,10 +129,10 @@ function gc_admin_alumni_list_alignment_keyword_matches(string $text, string $ke
 
     return (bool) preg_match($pattern, $text);
 }
-function gc_admin_alumni_list_analyze_course_job_alignment(string $course, string $jobTitle, ?string $jobDescription = ''): array
+    public static function admin_alumni_list_analyze_course_job_alignment(string $course, string $jobTitle, ?string $jobDescription = ''): array
 {
-    $courseText = \gc_admin_alumni_list_normalize_alignment_text($course);
-    $jobText = \gc_admin_alumni_list_normalize_alignment_text($jobTitle.' '.$jobDescription);
+    $courseText = self::admin_alumni_list_normalize_alignment_text($course);
+    $jobText = self::admin_alumni_list_normalize_alignment_text($jobTitle.' '.$jobDescription);
     if ($courseText === '') {
         return ['status' => 'Course Not Set', 'class' => 'badge-neutral', 'score' => 0, 'reason' => 'No course/program found in this alumni profile.'];
     }
@@ -135,11 +141,11 @@ function gc_admin_alumni_list_analyze_course_job_alignment(string $course, strin
     }
     $courseJobMap = ['bsis' => ['it', 'ict', 'information system', 'information systems', 'information technology', 'system analyst', 'systems analyst', 'business analyst', 'mis', 'erp', 'programmer', 'developer', 'web developer', 'software', 'software developer', 'database', 'database administrator', 'data analyst', 'data encoder', 'encoder', 'network', 'network technician', 'system administrator', 'technical support', 'it support', 'helpdesk', 'service desk', 'computer', 'computer operator', 'computer technician', 'cybersecurity', 'qa tester', 'quality assurance', 'technical assistant', 'system support', 'digital services', 'dict', 'ict desk', 'desk attendant', 'computer assistance', 'troubleshooting', 'data management', 'records system', 'office automation', 'web', 'website', 'php', 'mysql', 'html', 'css', 'javascript', 'laravel', 'systems', 'application support', 'tech support'], 'bstm' => ['tourism', 'travel', 'tour', 'tour guide', 'tour coordinator', 'travel agency', 'travel consultant', 'airline', 'flight attendant', 'ticketing', 'reservation', 'booking', 'hotel', 'resort', 'front desk', 'receptionist', 'guest service', 'customer service', 'hospitality', 'concierge', 'event coordinator', 'service crew', 'cruise', 'airport', 'ground staff', 'guest relations'], 'blis' => ['library', 'librarian', 'assistant librarian', 'library assistant', 'archivist', 'archive', 'records officer', 'records management', 'documentation', 'document controller', 'information officer', 'information management', 'knowledge management', 'cataloging', 'cataloguing', 'indexing', 'data management', 'encoder', 'office staff', 'research assistant', 'records clerk', 'filing clerk', 'document management'], 'bshm' => ['hotel', 'hospitality', 'restaurant', 'food service', 'food and beverage', 'f b', 'kitchen', 'chef', 'cook', 'barista', 'front desk', 'guest service', 'housekeeping', 'service crew', 'resort', 'waiter', 'waitress', 'catering', 'banquet', 'receptionist', 'customer service', 'room attendant', 'food attendant', 'beverage', 'culinary'], 'bsed_math' => ['teacher', 'math teacher', 'mathematics teacher', 'math tutor', 'tutor', 'instructor', 'teaching', 'educator', 'academic', 'school', 'trainer', 'learning facilitator', 'faculty', 'education', 'lesson', 'curriculum', 'mathematics', 'math', 'statistics', 'algebra', 'geometry'], 'bsed_science' => ['teacher', 'science teacher', 'biology teacher', 'chemistry teacher', 'physics teacher', 'science tutor', 'tutor', 'instructor', 'teaching', 'educator', 'laboratory', 'lab assistant', 'research assistant', 'academic', 'school', 'trainer', 'learning facilitator', 'faculty', 'education', 'curriculum', 'biology', 'chemistry', 'physics', 'science'], 'bsned' => ['special education', 'sped', 'sped teacher', 'special needs', 'teacher', 'educator', 'tutor', 'instructor', 'teaching', 'learning facilitator', 'school', 'academic', 'shadow teacher', 'child development', 'inclusive education', 'intervention teacher', 'teaching assistant', 'classroom aide', 'therapy assistant', 'learning support'], 'bpa' => ['public administration', 'administrator', 'government', 'civil service', 'public sector', 'public servant', 'office staff', 'administrative officer', 'admin officer', 'public affairs', 'governance', 'policy officer', 'bureaucrat', 'municipal', 'city government', 'provincial government', 'barangay', 'local government', 'sanggunian', 'executive secretary', 'administrative assistant', 'clerk', 'administrative staff', 'public management', 'public service']];
     $courseLabels = ['bsis' => 'BSIS', 'bstm' => 'BSTM', 'blis' => 'BLIS', 'bshm' => 'BSHM', 'bsed_math' => 'BSED Math', 'bsed_science' => 'BSED Science', 'bsned' => 'BSNED', 'bpa' => 'BPA'];
-    $matchedCourseKey = \gc_admin_alumni_list_detect_alumni_course_key($course);
+    $matchedCourseKey = self::admin_alumni_list_detect_alumni_course_key($course);
     if ($matchedCourseKey !== '' && isset($courseJobMap[$matchedCourseKey])) {
         $matchedWords = [];
         foreach ($courseJobMap[$matchedCourseKey] as $keyword) {
-            if (\gc_admin_alumni_list_alignment_keyword_matches($jobText, $keyword)) {
+            if (self::admin_alumni_list_alignment_keyword_matches($jobText, $keyword)) {
                 $matchedWords[] = $keyword;
             }
         }
@@ -156,14 +162,14 @@ function gc_admin_alumni_list_analyze_course_job_alignment(string $course, strin
         return strlen($word) >= 4 && ! in_array($word, ['bachelor', 'science', 'degree', 'major', 'secondary', 'education'], true);
     });
     foreach ($courseWords as $word) {
-        if (\gc_admin_alumni_list_alignment_keyword_matches($jobText, $word)) {
+        if (self::admin_alumni_list_alignment_keyword_matches($jobText, $word)) {
             return ['status' => 'Aligned', 'class' => 'badge-aligned', 'score' => 100, 'reason' => 'The job contains a keyword related to the alumni course/program.'];
         }
     }
 
     return ['status' => 'Not Aligned', 'class' => 'badge-not-aligned', 'score' => 0, 'reason' => 'The saved course/program was not recognized or no matching job keyword was found.'];
 }
-function gc_admin_alumni_list_summarize_job_alignment(string $course, array $jobs): array
+    public static function admin_alumni_list_summarize_job_alignment(string $course, array $jobs): array
 {
     if (empty($jobs)) {
         return ['status' => 'No Employment History', 'class' => 'badge-neutral', 'reason' => 'No employment history has been added yet.'];
@@ -176,53 +182,53 @@ function gc_admin_alumni_list_summarize_job_alignment(string $course, array $job
         }
     }
     $jobToAnalyze = $currentJob ?: $jobs[0];
-    $alignment = \gc_admin_alumni_list_analyze_course_job_alignment($course, $jobToAnalyze['job_title'] ?? '', $jobToAnalyze['job_description'] ?? '');
+    $alignment = self::admin_alumni_list_analyze_course_job_alignment($course, $jobToAnalyze['job_title'] ?? '', $jobToAnalyze['job_description'] ?? '');
     $basis = $currentJob ? 'Current job' : 'Latest job';
 
     return ['status' => $alignment['status'], 'class' => $alignment['class'], 'reason' => $basis.': '.($jobToAnalyze['job_title'] ?? 'N/A').'. '.$alignment['reason']];
 }
 
-function gc_admin_applications_normalize_status($status): string
+    public static function admin_applications_normalize_status($status): string
 {
     $status = strtolower(trim((string) $status));
     $map = ['pending' => 'pending', 'under review' => 'under_review', 'under_review' => 'under_review', 'for interview' => 'interview', 'for_interview' => 'interview', 'interview' => 'interview', 'accepted' => 'accepted', 'hired' => 'hired', 'rejected' => 'rejected', 'cancelled' => 'cancelled', 'canceled' => 'cancelled'];
 
     return $map[$status] ?? 'pending';
 }
-function gc_admin_applications_status_label($status): string
+    public static function admin_applications_status_label($status): string
 {
     $labels = ['pending' => 'Pending', 'under_review' => 'Under Review', 'interview' => 'For Interview', 'accepted' => 'Accepted', 'hired' => 'Hired', 'rejected' => 'Rejected', 'cancelled' => 'Cancelled'];
 
     return $labels[$status] ?? 'Pending';
 }
-function gc_admin_applications_format_year_range($start, $end): string
+    public static function admin_applications_format_year_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_e($start).' - '.\gc_e($end);
+        return e($start).' - '.e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_e($start).' - Present';
+        return e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_e($end);
+        return e($end);
     }
 
     return 'N/A';
 }
-function gc_admin_applications_format_date_range($start, $end): string
+    public static function admin_applications_format_date_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_e(date('F j, Y', strtotime($start))).' to '.\gc_e(date('F j, Y', strtotime($end)));
+        return e(date('F j, Y', strtotime($start))).' to '.e(date('F j, Y', strtotime($end)));
     }
     if ($start !== '' && $end === '') {
-        return \gc_e(date('F j, Y', strtotime($start))).' to Present';
+        return e(date('F j, Y', strtotime($start))).' to Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_e(date('F j, Y', strtotime($end)));
+        return e(date('F j, Y', strtotime($end)));
     }
 
     return 'N/A';
@@ -232,7 +238,7 @@ function gc_admin_applications_format_date_range($start, $end): string
 // Optional email sender
 // ==========================
 
-function gc_admin_events_list_short_text($text, $limit = 320): string
+    public static function admin_events_list_short_text($text, $limit = 320): string
 {
     $text = trim(strip_tags((string) $text));
     if ($text === '') {
@@ -244,7 +250,7 @@ function gc_admin_events_list_short_text($text, $limit = 320): string
 
     return strlen($text) > $limit ? substr($text, 0, $limit).'...' : $text;
 }
-function gc_admin_events_list_initials($name): string
+    public static function admin_events_list_initials($name): string
 {
     $name = trim((string) $name);
     if ($name === '') {
@@ -254,9 +260,9 @@ function gc_admin_events_list_initials($name): string
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_e($first.$last);
+    return e($first.$last);
 }
-function gc_admin_events_list_get_current_user_id(): int
+    public static function admin_events_list_get_current_user_id(): int
 {
     if (! empty(\gc_context()->session['user_id'])) {
         return (int) \gc_context()->session['user_id'];
@@ -267,26 +273,26 @@ function gc_admin_events_list_get_current_user_id(): int
     if (! empty(\gc_context()->session['auth_user']['id'])) {
         return (int) \gc_context()->session['auth_user']['id'];
     }
-    if (! empty(\gc_context()->session['user']['id'])) {
-        return (int) \gc_context()->session['user']['id'];
+    if (! empty(auth()->id())) {
+        return (int) auth()->id();
     }
 
     return 0;
 }
 
-function gc_admin_events_list_format_schedule_date($date): string
+    public static function admin_events_list_format_schedule_date($date): string
 {
     if (! $date) {
         return '';
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_e($date);
+        return e($date);
     }
 
     return date('M d, Y h:i A', $time);
 }
-function gc_admin_events_list_post_status_label($startDate, $endDate): array
+    public static function admin_events_list_post_status_label($startDate, $endDate): array
 {
     $now = time();
     $start = $startDate ? strtotime($startDate) : null;
@@ -300,7 +306,7 @@ function gc_admin_events_list_post_status_label($startDate, $endDate): array
 
     return ['Active', 'status-active'];
 }
-function gc_admin_events_list_event_is_visible_by_schedule($startDate, $endDate): bool
+    public static function admin_events_list_event_is_visible_by_schedule($startDate, $endDate): bool
 {
     $now = time();
     $start = $startDate ? strtotime((string) $startDate) : null;
@@ -316,7 +322,7 @@ function gc_admin_events_list_event_is_visible_by_schedule($startDate, $endDate)
 
     return true;
 }
-function gc_admin_events_list_profile_image_url(?string $image): string
+    public static function admin_events_list_profile_image_url(?string $image): string
 {
     $image = trim((string) $image);
     if ($image === '') {
@@ -334,11 +340,11 @@ function gc_admin_events_list_profile_image_url(?string $image): string
     // Default path used by this system for user profile pictures.
     return \url('').'/uploads/profiles/'.$image;
 }
-function gc_admin_events_list_get_user_profile_column(PDO $pdo): ?string
+    public static function admin_events_list_get_user_profile_column(PDO $pdo): ?string
 {
     return 'profile_picture';
 }
-function gc_admin_events_list_get_current_user_photo(PDO $pdo, int $userId, ?string $profileColumn): string
+    public static function admin_events_list_get_current_user_photo(PDO $pdo, int $userId, ?string $profileColumn): string
 {
     if ($userId <= 0 || ! $profileColumn) {
         return '';
@@ -349,30 +355,28 @@ function gc_admin_events_list_get_current_user_photo(PDO $pdo, int $userId, ?str
 
         return (string) ($stmt->fetchColumn() ?: '');
     } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
+        
 
         return '';
     }
 }
-function gc_admin_events_list_render_avatar(string $name, ?string $profileImage = '', string $class = 'avatar'): string
+    public static function admin_events_list_render_avatar(string $name, ?string $profileImage = '', string $class = 'avatar'): string
 {
-    $url = \gc_admin_events_list_profile_image_url($profileImage);
+    $url = self::admin_events_list_profile_image_url($profileImage);
     if ($url !== '') {
-        return '<div class="'.\gc_e($class).'"><img src="'.\gc_e($url).'" alt="'.\gc_e($name).' profile" onerror="this.style.display=\'none\'; this.parentElement.classList.add(\'avatar-fallback\'); this.parentElement.textContent=\''.\gc_admin_events_list_initials($name).'\';"></div>';
+        return '<div class="'.e($class).'"><img src="'.e($url).'" alt="'.e($name).' profile" onerror="this.style.display=\'none\'; this.parentElement.classList.add(\'avatar-fallback\'); this.parentElement.textContent=\''.self::admin_events_list_initials($name).'\';"></div>';
     }
 
-    return '<div class="'.\gc_e($class).' avatar-fallback">'.\gc_admin_events_list_initials($name).'</div>';
+    return '<div class="'.e($class).' avatar-fallback">'.self::admin_events_list_initials($name).'</div>';
 }
-function gc_admin_events_list_render_comment_text_with_mentions($text): string
+    public static function admin_events_list_render_comment_text_with_mentions($text): string
 {
-    $safe = \gc_e($text ?? '');
+    $safe = e($text ?? '');
     $safe = preg_replace('/@([A-Za-z0-9_ .\-]+)/u', '<span class="mention-text">@$1</span>', $safe);
 
     return nl2br($safe);
 }
-function gc_admin_events_list_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
+    public static function admin_events_list_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
 {
     preg_match_all('/@([A-Za-z0-9_ .\-]+)/u', $comment, $matches);
     if (empty($matches[1])) {
@@ -406,7 +410,7 @@ function gc_admin_events_list_get_mentioned_user_ids(PDO $pdo, string $comment, 
 
     return array_values($mentioned);
 }
-function gc_admin_events_list_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
+    public static function admin_events_list_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
 {
     $stmt = $pdo->prepare('SELECT reaction_type, COUNT(*) AS total FROM post_reactions WHERE post_type=? AND post_id=? GROUP BY reaction_type');
     $stmt->execute([$postType, $postId]);
@@ -422,7 +426,7 @@ function gc_admin_events_list_get_reaction_counts(PDO $pdo, string $postType, in
 
     return $counts;
 }
-function gc_admin_events_list_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
+    public static function admin_events_list_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
 {
     if ($userId <= 0) {
         return '';
@@ -432,7 +436,7 @@ function gc_admin_events_list_get_user_reaction(PDO $pdo, string $postType, int 
 
     return (string) ($stmt->fetchColumn() ?: '');
 }
-function gc_admin_events_list_get_comments(PDO $pdo, string $postType, int $postId, string $profileSelect): array
+    public static function admin_events_list_get_comments(PDO $pdo, string $postType, int $postId, string $profileSelect): array
 {
     $stmt = $pdo->prepare("SELECT c.*, u.fullname, {$profileSelect} AS profile_image\r\n                           FROM post_comments c\r\n                           LEFT JOIN users u ON u.id=c.user_id\r\n                           WHERE c.post_type=? AND c.post_id=?\r\n                           ORDER BY COALESCE(c.parent_comment_id, c.id) ASC, c.parent_comment_id IS NOT NULL ASC, c.id ASC");
     $stmt->execute([$postType, $postId]);
@@ -449,24 +453,24 @@ function gc_admin_events_list_get_comments(PDO $pdo, string $postType, int $post
 
     return $grouped;
 }
-function gc_admin_events_list_comment_total(array $commentData): int
+    public static function admin_events_list_comment_total(array $commentData): int
 {
     return (int) ($commentData['total'] ?? count($commentData));
 }
 
-function gc_admin_offers_history_format_activity_date(string $value): string
+    public static function admin_offers_history_format_activity_date(string $value): string
 {
     if (trim($value) === '') {
         return '';
     }
     $timestamp = strtotime($value);
     if ($timestamp === false) {
-        return \gc_e($value);
+        return e($value);
     }
 
     return date('M j, Y g:i A', $timestamp);
 }
-function gc_admin_offers_history_render_activity_details(array $log): string
+    public static function admin_offers_history_render_activity_details(array $log): string
 {
     if (($log['action'] ?? '') === 'SEARCH_ALUMNI') {
         $filters = ['Course' => $log['course_filter'] ?? 'All courses', 'Batch year' => $log['batch_filter'] ?? 'All years', 'Skills' => $log['skill_search'] ?? 'Any skills', 'Results' => (string) ($log['result_count'] ?? '0')];
@@ -478,7 +482,7 @@ function gc_admin_offers_history_render_activity_details(array $log): string
             $statusText = $statusLabels[$status] ?? ucfirst($status);
             $statusDate = $status === 'accepted' ? $log['accepted_at'] ?? '' : ($status === 'declined' ? $log['declined_at'] ?? '' : '');
             if (! empty($statusDate)) {
-                $statusText .= ' on '.\gc_admin_offers_history_format_activity_date((string) $statusDate);
+                $statusText .= ' on '.self::admin_offers_history_format_activity_date((string) $statusDate);
             }
             $filters['Offer status'] = $statusText;
         }
@@ -493,14 +497,14 @@ function gc_admin_offers_history_render_activity_details(array $log): string
     }
     $html = '<div class="detail-list">';
     foreach ($filters as $label => $value) {
-        $html .= '<div class="detail-item"><span class="detail-label">'.\gc_e($label).'</span><span class="detail-value">'.nl2br(\gc_e($value)).'</span></div>';
+        $html .= '<div class="detail-item"><span class="detail-label">'.e($label).'</span><span class="detail-value">'.nl2br(e($value)).'</span></div>';
     }
 
     return $html.'</div>';
 }
 
 // Helper: Add security log
-function gc_alumni_add_degree_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null): void
+    public static function alumni_add_degree_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null): void
 {
     $ip = \request()->server->all()['REMOTE_ADDR'] ?? null;
     $ua = substr(\request()->server->all()['HTTP_USER_AGENT'] ?? '', 0, 255);
@@ -509,7 +513,7 @@ function gc_alumni_add_degree_add_log(PDO $pdo, int $user_id, string $action, ?s
 }
 
 // Helper: Add security log
-function gc_alumni_employment_history_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null): void
+    public static function alumni_employment_history_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null): void
 {
     $ip = \request()->server->all()['REMOTE_ADDR'] ?? null;
     $ua = substr(\request()->server->all()['HTTP_USER_AGENT'] ?? '', 0, 255);
@@ -517,7 +521,7 @@ function gc_alumni_employment_history_add_log(PDO $pdo, int $user_id, string $ac
     $ins->execute([$user_id, $action, $details, $ip, $ua]);
 }
 // Helper: Format employment dates for display
-function gc_alumni_employment_history_format_employment_date(?string $date): string
+    public static function alumni_employment_history_format_employment_date(?string $date): string
 {
     if (empty($date) || strtotime($date) === false) {
         return '';
@@ -526,7 +530,7 @@ function gc_alumni_employment_history_format_employment_date(?string $date): str
     return date('F-d-Y', strtotime($date));
 }
 // Helper: Get alumni course/program from possible user columns
-function gc_alumni_employment_history_get_alumni_course(array $user): string
+    public static function alumni_employment_history_get_alumni_course(array $user): string
 {
     $possibleCourseFields = ['course', 'program', 'degree_program', 'academic_program', 'course_program', 'strand'];
     foreach ($possibleCourseFields as $field) {
@@ -538,7 +542,7 @@ function gc_alumni_employment_history_get_alumni_course(array $user): string
     return '';
 }
 // Helper: Normalize text for matching
-function gc_alumni_employment_history_normalize_alignment_text(?string $text): string
+    public static function alumni_employment_history_normalize_alignment_text(?string $text): string
 {
     $text = strtolower(trim((string) $text));
     $text = preg_replace('/[^a-z0-9\s\+\#\.]/', ' ', $text);
@@ -549,9 +553,9 @@ function gc_alumni_employment_history_normalize_alignment_text(?string $text): s
 // Helper: Check if text contains any keyword
 
 // Helper: Detect the exact CCC course key saved in the users table
-function gc_alumni_employment_history_detect_alumni_course_key(string $course): string
+    public static function alumni_employment_history_detect_alumni_course_key(string $course): string
 {
-    $courseText = \gc_alumni_employment_history_normalize_alignment_text($course);
+    $courseText = self::alumni_employment_history_normalize_alignment_text($course);
     if ($courseText === '') {
         return '';
     }
@@ -585,7 +589,7 @@ function gc_alumni_employment_history_detect_alumni_course_key(string $course): 
     $courseAliases = ['bsis' => ['bachelor of science in information systems', 'bachelor of science in information system', 'information systems', 'information system', 'information technology', 'ict'], 'bstm' => ['bachelor of science in tourism management', 'tourism management', 'tourism'], 'blis' => ['bachelor of library and information science', 'library and information science', 'library science'], 'bshm' => ['bachelor of science in hospitality management', 'hospitality management', 'hospitality'], 'bsned' => ['bachelor of special needs education', 'special needs education', 'special education', 'sped'], 'bpa' => ['bachelor of public administration', 'public administration', 'bpa', 'administration']];
     foreach ($courseAliases as $courseKey => $aliases) {
         foreach ($aliases as $alias) {
-            $aliasText = \gc_alumni_employment_history_normalize_alignment_text($alias);
+            $aliasText = self::alumni_employment_history_normalize_alignment_text($alias);
             if ($aliasText !== '' && (strpos($courseText, $aliasText) !== false || strpos($aliasText, $courseText) !== false)) {
                 return $courseKey;
             }
@@ -595,10 +599,10 @@ function gc_alumni_employment_history_detect_alumni_course_key(string $course): 
     return '';
 }
 // Helper: Safer whole-word keyword matching. Prevents false positives and improves matching for short terms like IT.
-function gc_alumni_employment_history_alignment_keyword_matches(string $text, string $keyword): bool
+    public static function alumni_employment_history_alignment_keyword_matches(string $text, string $keyword): bool
 {
-    $text = \gc_alumni_employment_history_normalize_alignment_text($text);
-    $keyword = \gc_alumni_employment_history_normalize_alignment_text($keyword);
+    $text = self::alumni_employment_history_normalize_alignment_text($text);
+    $keyword = self::alumni_employment_history_normalize_alignment_text($keyword);
     if ($text === '' || $keyword === '') {
         return false;
     }
@@ -607,10 +611,10 @@ function gc_alumni_employment_history_alignment_keyword_matches(string $text, st
     return (bool) preg_match($pattern, $text);
 }
 // Helper: Course-to-job alignment analyzer
-function gc_alumni_employment_history_analyze_course_job_alignment(string $course, string $jobTitle, ?string $jobDescription = ''): array
+    public static function alumni_employment_history_analyze_course_job_alignment(string $course, string $jobTitle, ?string $jobDescription = ''): array
 {
-    $courseText = \gc_alumni_employment_history_normalize_alignment_text($course);
-    $jobText = \gc_alumni_employment_history_normalize_alignment_text($jobTitle.' '.$jobDescription);
+    $courseText = self::alumni_employment_history_normalize_alignment_text($course);
+    $jobText = self::alumni_employment_history_normalize_alignment_text($jobTitle.' '.$jobDescription);
     if ($courseText === '') {
         return ['status' => 'Course Not Set', 'class' => 'badge-neutral', 'score' => 0, 'reason' => 'No course/program found in your profile.'];
     }
@@ -619,11 +623,11 @@ function gc_alumni_employment_history_analyze_course_job_alignment(string $cours
     }
     $courseJobMap = ['bsis' => ['it', 'ict', 'information system', 'information systems', 'information technology', 'system analyst', 'systems analyst', 'business analyst', 'mis', 'erp', 'programmer', 'developer', 'web developer', 'software', 'software developer', 'database', 'database administrator', 'data analyst', 'data encoder', 'encoder', 'network', 'network technician', 'system administrator', 'technical support', 'it support', 'helpdesk', 'service desk', 'computer', 'computer operator', 'computer technician', 'cybersecurity', 'qa tester', 'quality assurance', 'technical assistant', 'system support', 'digital services', 'dict', 'ict desk', 'desk attendant', 'computer assistance', 'troubleshooting', 'data management', 'records system', 'office automation', 'web', 'website', 'php', 'mysql', 'html', 'css', 'javascript', 'laravel', 'systems', 'application support', 'tech support'], 'bstm' => ['tourism', 'travel', 'tour', 'tour guide', 'tour coordinator', 'travel agency', 'travel consultant', 'airline', 'flight attendant', 'ticketing', 'reservation', 'booking', 'hotel', 'resort', 'front desk', 'receptionist', 'guest service', 'customer service', 'hospitality', 'concierge', 'event coordinator', 'service crew', 'cruise', 'airport', 'ground staff', 'guest relations'], 'blis' => ['library', 'librarian', 'assistant librarian', 'library assistant', 'archivist', 'archive', 'records officer', 'records management', 'documentation', 'document controller', 'information officer', 'information management', 'knowledge management', 'cataloging', 'cataloguing', 'indexing', 'data management', 'encoder', 'office staff', 'research assistant', 'records clerk', 'filing clerk', 'document management'], 'bshm' => ['hotel', 'hospitality', 'restaurant', 'food service', 'food and beverage', 'f b', 'kitchen', 'chef', 'cook', 'barista', 'front desk', 'guest service', 'housekeeping', 'service crew', 'resort', 'waiter', 'waitress', 'catering', 'banquet', 'receptionist', 'customer service', 'room attendant', 'food attendant', 'beverage', 'culinary'], 'bsed_math' => ['teacher', 'math teacher', 'mathematics teacher', 'math tutor', 'tutor', 'instructor', 'teaching', 'educator', 'academic', 'school', 'trainer', 'learning facilitator', 'faculty', 'education', 'lesson', 'curriculum', 'mathematics', 'math', 'statistics', 'algebra', 'geometry'], 'bsed_science' => ['teacher', 'science teacher', 'biology teacher', 'chemistry teacher', 'physics teacher', 'science tutor', 'tutor', 'instructor', 'teaching', 'educator', 'laboratory', 'lab assistant', 'research assistant', 'academic', 'school', 'trainer', 'learning facilitator', 'faculty', 'education', 'curriculum', 'biology', 'chemistry', 'physics', 'science'], 'bsned' => ['special education', 'sped', 'sped teacher', 'special needs', 'teacher', 'educator', 'tutor', 'instructor', 'teaching', 'learning facilitator', 'school', 'academic', 'shadow teacher', 'child development', 'inclusive education', 'intervention teacher', 'teaching assistant', 'classroom aide', 'therapy assistant', 'learning support'], 'bpa' => ['public administration', 'administrator', 'government', 'civil service', 'public sector', 'public servant', 'office staff', 'administrative officer', 'admin officer', 'public affairs', 'governance', 'policy officer', 'bureaucrat', 'municipal', 'city government', 'provincial government', 'barangay', 'local government', 'sanggunian', 'executive secretary', 'administrative assistant', 'clerk', 'administrative staff', 'public management', 'public service']];
     $courseLabels = ['bsis' => 'BSIS', 'bstm' => 'BSTM', 'blis' => 'BLIS', 'bshm' => 'BSHM', 'bsed_math' => 'BSED Math', 'bsed_science' => 'BSED Science', 'bsned' => 'BSNED', 'bpa' => 'BPA'];
-    $matchedCourseKey = \gc_alumni_employment_history_detect_alumni_course_key($course);
+    $matchedCourseKey = self::alumni_employment_history_detect_alumni_course_key($course);
     if ($matchedCourseKey !== '' && isset($courseJobMap[$matchedCourseKey])) {
         $matchedWords = [];
         foreach ($courseJobMap[$matchedCourseKey] as $keyword) {
-            if (\gc_alumni_employment_history_alignment_keyword_matches($jobText, $keyword)) {
+            if (self::alumni_employment_history_alignment_keyword_matches($jobText, $keyword)) {
                 $matchedWords[] = $keyword;
             }
         }
@@ -641,7 +645,7 @@ function gc_alumni_employment_history_analyze_course_job_alignment(string $cours
         return strlen($word) >= 4 && ! in_array($word, ['bachelor', 'science', 'degree', 'major', 'secondary', 'education'], true);
     });
     foreach ($courseWords as $word) {
-        if (\gc_alumni_employment_history_alignment_keyword_matches($jobText, $word)) {
+        if (self::alumni_employment_history_alignment_keyword_matches($jobText, $word)) {
             return ['status' => 'Aligned to Course', 'class' => 'badge-aligned', 'score' => 100, 'reason' => 'The job contains a keyword related to the alumni course/program.'];
         }
     }
@@ -649,7 +653,7 @@ function gc_alumni_employment_history_analyze_course_job_alignment(string $cours
     return ['status' => 'Not Aligned', 'class' => 'badge-not-aligned', 'score' => 0, 'reason' => 'The saved course/program was not recognized or no matching job keyword was found.'];
 }
 // Helper: Update users.employment_status based on current/present job records
-function gc_alumni_employment_history_refresh_employment_status(PDO $pdo, int $user_id): void
+    public static function alumni_employment_history_refresh_employment_status(PDO $pdo, int $user_id): void
 {
     $checkEmployment = $pdo->prepare('SELECT COUNT(*) FROM employment_history WHERE user_id = ? AND end_date IS NULL');
     $checkEmployment->execute([$user_id]);
@@ -657,19 +661,19 @@ function gc_alumni_employment_history_refresh_employment_status(PDO $pdo, int $u
     $updEmployment = $pdo->prepare('UPDATE users SET employment_status=? WHERE id=?');
     $updEmployment->execute([$isEmployed, $user_id]);
 }
-function gc_alumni_feed_format_post_date($date)
+    public static function alumni_feed_format_post_date($date)
 {
     if (! $date) {
         return '';
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_e($date);
+        return e($date);
     }
 
     return date('F d, Y \a\t h:i A', $time);
 }
-function gc_alumni_feed_shorten_text($text, $limit = 120): string
+    public static function alumni_feed_shorten_text($text, $limit = 120): string
 {
     $text = trim(strip_tags((string) ($text ?? '')));
     if ($text === '') {
@@ -681,7 +685,7 @@ function gc_alumni_feed_shorten_text($text, $limit = 120): string
 
     return strlen($text) > $limit ? substr($text, 0, $limit).'...' : $text;
 }
-function gc_alumni_feed_initials($name)
+    public static function alumni_feed_initials($name)
 {
     $name = trim((string) $name);
     if ($name === '') {
@@ -691,14 +695,14 @@ function gc_alumni_feed_initials($name)
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_e($first.$last);
+    return e($first.$last);
 }
 
-function gc_alumni_feed_get_user_profile_column(PDO $pdo): ?string
+    public static function alumni_feed_get_user_profile_column(PDO $pdo): ?string
 {
     return 'profile_picture';
 }
-function gc_alumni_feed_profile_image_url($photo): string
+    public static function alumni_feed_profile_image_url($photo): string
 {
     $photo = trim((string) ($photo ?? ''));
     if ($photo === '') {
@@ -714,24 +718,24 @@ function gc_alumni_feed_profile_image_url($photo): string
 
     return \url('').'/uploads/profiles/'.$cleanPhoto;
 }
-function gc_alumni_feed_avatar_html($name, $photo = null, string $class = 'avatar'): string
+    public static function alumni_feed_avatar_html($name, $photo = null, string $class = 'avatar'): string
 {
-    $url = \gc_alumni_feed_profile_image_url($photo);
-    $safeName = \gc_e($name ?: 'User');
+    $url = self::alumni_feed_profile_image_url($photo);
+    $safeName = e($name ?: 'User');
     if ($url !== '') {
-        return '<div class="'.\gc_e($class).' has-photo"><img src="'.\gc_e($url).'" alt="'.$safeName.' profile photo" onerror="this.style.display=\'none\'; this.parentElement.classList.remove(\'has-photo\'); this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\';"><span class="avatar-fallback" style="display:none;">'.\gc_alumni_feed_initials($name).'</span></div>';
+        return '<div class="'.e($class).' has-photo"><img src="'.e($url).'" alt="'.$safeName.' profile photo" onerror="this.style.display=\'none\'; this.parentElement.classList.remove(\'has-photo\'); this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\';"><span class="avatar-fallback" style="display:none;">'.self::alumni_feed_initials($name).'</span></div>';
     }
 
-    return '<div class="'.\gc_e($class).'"><span class="avatar-fallback">'.\gc_alumni_feed_initials($name).'</span></div>';
+    return '<div class="'.e($class).'"><span class="avatar-fallback">'.self::alumni_feed_initials($name).'</span></div>';
 }
-function gc_alumni_feed_render_comment_text_with_mentions($text): string
+    public static function alumni_feed_render_comment_text_with_mentions($text): string
 {
-    $safe = \gc_e($text ?? '');
+    $safe = e($text ?? '');
     $safe = preg_replace('/@([A-Za-z0-9_ .\-]+)/u', '<span class="mention-text">@$1</span>', $safe);
 
     return nl2br($safe);
 }
-function gc_alumni_feed_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
+    public static function alumni_feed_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
 {
     preg_match_all('/@([A-Za-z0-9_ .\-]+)/u', $comment, $matches);
     if (empty($matches[1])) {
@@ -764,7 +768,7 @@ function gc_alumni_feed_get_mentioned_user_ids(PDO $pdo, string $comment, int $c
 
     return array_values($mentioned);
 }
-function gc_alumni_feed_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
+    public static function alumni_feed_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
 {
     $stmt = $pdo->prepare('SELECT reaction_type, COUNT(*) AS total FROM post_reactions WHERE post_type=? AND post_id=? GROUP BY reaction_type');
     $stmt->execute([$postType, $postId]);
@@ -780,23 +784,23 @@ function gc_alumni_feed_get_reaction_counts(PDO $pdo, string $postType, int $pos
 
     return $counts;
 }
-function gc_alumni_feed_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
+    public static function alumni_feed_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
 {
     $stmt = $pdo->prepare('SELECT reaction_type FROM post_reactions WHERE post_type=? AND post_id=? AND user_id=? LIMIT 1');
     $stmt->execute([$postType, $postId, $userId]);
 
     return (string) ($stmt->fetchColumn() ?: '');
 }
-function gc_alumni_feed_get_comments(PDO $pdo, string $postType, int $postId): array
+    public static function alumni_feed_get_comments(PDO $pdo, string $postType, int $postId): array
 {
-    $profileColumn = \gc_alumni_feed_get_user_profile_column($pdo);
+    $profileColumn = self::alumni_feed_get_user_profile_column($pdo);
     $profileSelect = $profileColumn ? ", u.`{$profileColumn}` AS profile_photo" : ', NULL AS profile_photo';
     $stmt = $pdo->prepare("SELECT c.*, u.fullname {$profileSelect} FROM post_comments c LEFT JOIN users u ON u.id=c.user_id WHERE c.post_type=? AND c.post_id=? ORDER BY c.id ASC");
     $stmt->execute([$postType, $postId]);
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function gc_alumni_feed_render_engagement_html(array $counts, int $commentCount, array $allowedReactions): string
+    public static function alumni_feed_render_engagement_html(array $counts, int $commentCount, array $allowedReactions): string
 {
     ob_start();
     ?>
@@ -812,9 +816,9 @@ function gc_alumni_feed_render_engagement_html(array $counts, int $commentCount,
             if (($counts[$key] ?? 0) > 0) {
                 ?>
                         <span title="<?php
-                echo \gc_e($info['label']);
+                echo e($info['label']);
                 ?>"><?php
-                echo \gc_e($info['emoji']);
+                echo e($info['emoji']);
                 ?></span>
                     <?php
             }
@@ -842,7 +846,7 @@ function gc_alumni_feed_render_engagement_html(array $counts, int $commentCount,
     <?php
     return ob_get_clean();
 }
-function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId): string
+    public static function alumni_feed_render_comments_html(array $comments, int $currentUserId): string
 {
     $children = [];
     $commentMap = [];
@@ -864,25 +868,25 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
         echo $isReply ? 'reply-thread' : 'main-thread';
         ?>">
             <div class="comment-item<?php
-        echo \gc_e($levelClass);
+        echo e($levelClass);
         ?>">
                 <?php
-        echo \gc_alumni_feed_avatar_html($comment['fullname'] ?? 'User', $comment['profile_photo'] ?? '', $isReply ? 'comment-avatar small-avatar reply-avatar' : 'comment-avatar small-avatar');
+        echo self::alumni_feed_avatar_html($comment['fullname'] ?? 'User', $comment['profile_photo'] ?? '', $isReply ? 'comment-avatar small-avatar reply-avatar' : 'comment-avatar small-avatar');
         ?>
                 <div class="comment-content-wrap">
                     <div class="comment-bubble <?php
         echo $isReply ? 'reply-bubble' : '';
         ?>">
                         <div class="comment-name"><?php
-        echo \gc_e($comment['fullname'] ?? 'Unknown User');
+        echo e($comment['fullname'] ?? 'Unknown User');
         ?></div>
                         <div class="comment-text"><?php
-        echo \gc_alumni_feed_render_comment_text_with_mentions($comment['comment'] ?? '');
+        echo self::alumni_feed_render_comment_text_with_mentions($comment['comment'] ?? '');
         ?></div>
                     </div>
                     <div class="comment-tools">
                         <span class="comment-date"><?php
-        echo \gc_e(date('M d, Y h:i A', strtotime($comment['created_at'] ?? 'now')));
+        echo e(date('M d, Y h:i A', strtotime($comment['created_at'] ?? 'now')));
         ?></span>
                         <button type="button" class="reply-toggle-btn" data-reply-box="reply-box-<?php
         echo $commentId;
@@ -893,7 +897,7 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
         echo $commentId;
         ?>" style="display:none;">
                         <input type="hidden" name="post_type" value="<?php
-        echo \gc_e($postType);
+        echo e($postType);
         ?>">
                         <input type="hidden" name="post_id" value="<?php
         echo $postId;
@@ -903,7 +907,7 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
         ?>">
                         <div class="reply-input-row">
                             <input type="text" class="comment-input reply-input" name="comment" placeholder="Reply to <?php
-        echo \gc_e($comment['fullname'] ?? 'this comment');
+        echo e($comment['fullname'] ?? 'this comment');
         ?>..." autocomplete="off">
                             <button class="comment-submit reply-submit" type="submit">Reply</button>
                         </div>
@@ -960,32 +964,32 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
 
 // Helper function to send acceptance notification
 
-function gc_alumni_my_applications_normalize_status($status)
+    public static function alumni_my_applications_normalize_status($status)
 {
     $status = strtolower(trim((string) $status));
     $map = ['pending' => 'pending', 'under review' => 'under_review', 'under_review' => 'under_review', 'for interview' => 'for_interview', 'for_interview' => 'for_interview', 'interview' => 'for_interview', 'accepted' => 'accepted', 'hired' => 'hired', 'rejected' => 'rejected', 'cancelled' => 'cancelled', 'canceled' => 'cancelled'];
 
     return $map[$status] ?? 'pending';
 }
-function gc_alumni_my_applications_get_status_label($status)
+    public static function alumni_my_applications_get_status_label($status)
 {
     $labels = ['pending' => 'Pending', 'under_review' => 'Under Review', 'for_interview' => 'For Interview', 'accepted' => 'Accepted', 'hired' => 'Hired', 'rejected' => 'Rejected', 'cancelled' => 'Cancelled'];
 
     return $labels[$status] ?? 'Pending';
 }
-function gc_alumni_my_applications_get_status_class($status)
+    public static function alumni_my_applications_get_status_class($status)
 {
     $classes = ['pending' => 'status-pending', 'under_review' => 'status-review', 'for_interview' => 'status-interview', 'accepted' => 'status-accepted', 'hired' => 'status-hired', 'rejected' => 'status-rejected', 'cancelled' => 'status-cancelled'];
 
     return $classes[$status] ?? 'status-pending';
 }
-function gc_alumni_my_applications_get_status_note($status)
+    public static function alumni_my_applications_get_status_note($status)
 {
     $notes = ['pending' => 'Your application has been submitted and is waiting for review.', 'under_review' => 'Your application is currently being reviewed by the employer or admin.', 'for_interview' => 'You have been selected for interview. Please wait for interview details.', 'accepted' => 'Congratulations! Your application has been accepted.', 'hired' => 'Congratulations! You have been marked as hired.', 'rejected' => 'Your application was not selected for this position.', 'cancelled' => 'You cancelled this application.'];
 
     return $notes[$status] ?? 'Your application has been submitted.';
 }
-function gc_alumni_my_applications_get_progress_step($status)
+    public static function alumni_my_applications_get_progress_step($status)
 {
     switch ($status) {
         case 'pending':
@@ -1002,39 +1006,39 @@ function gc_alumni_my_applications_get_progress_step($status)
             return 1;
     }
 }
-function gc_alumni_officer_alumni_list_format_year_range($start, $end): string
+    public static function alumni_officer_alumni_list_format_year_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_e($start).' - '.\gc_e($end);
+        return e($start).' - '.e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_e($start).' - Present';
+        return e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_e($end);
+        return e($end);
     }
 
     return 'N/A';
 }
-function gc_alumni_officer_alumni_list_format_date_range($start, $end): string
+    public static function alumni_officer_alumni_list_format_date_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_e($start).' to '.\gc_e($end);
+        return e($start).' to '.e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_e($start).' to Present';
+        return e($start).' to Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_e($end);
+        return e($end);
     }
 
     return 'N/A';
 }
-function gc_alumni_officer_archive_initials($name): string
+    public static function alumni_officer_archive_initials($name): string
 {
     $name = trim((string) $name);
     if ($name === '') {
@@ -1044,27 +1048,27 @@ function gc_alumni_officer_archive_initials($name): string
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_e($first.$last);
+    return e($first.$last);
 }
-function gc_alumni_officer_archive_avatar_html($name, string $class = 'user-avatar'): string
+    public static function alumni_officer_archive_avatar_html($name, string $class = 'user-avatar'): string
 {
-    $safeName = \gc_e($name ?: 'User');
+    $safeName = e($name ?: 'User');
 
-    return '<div class="'.\gc_e($class).'"><span class="avatar-fallback">'.\gc_alumni_officer_archive_initials($name).'</span></div>';
+    return '<div class="'.e($class).'"><span class="avatar-fallback">'.self::alumni_officer_archive_initials($name).'</span></div>';
 }
-function gc_alumni_officer_archive_format_schedule_date($date): string
+    public static function alumni_officer_archive_format_schedule_date($date): string
 {
     if (! $date) {
         return '';
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_e($date);
+        return e($date);
     }
 
     return date('M d, Y h:i A', $time);
 }
-function gc_alumni_officer_archive_post_status_label($startDate, $endDate): array
+    public static function alumni_officer_archive_post_status_label($startDate, $endDate): array
 {
     $now = time();
     $start = $startDate ? strtotime($startDate) : null;
@@ -1079,19 +1083,19 @@ function gc_alumni_officer_archive_post_status_label($startDate, $endDate): arra
     return ['Active', 'status-active'];
 }
 
-function gc_alumni_officer_dashboard_format_date($date): string
+    public static function alumni_officer_dashboard_format_date($date): string
 {
     if (! $date) {
         return 'N/A';
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_e($date);
+        return e($date);
     }
 
     return date('M d, Y', $time);
 }
-function gc_alumni_officer_dashboard_event_status_label($startDate, $endDate): array
+    public static function alumni_officer_dashboard_event_status_label($startDate, $endDate): array
 {
     $now = time();
     $start = $startDate ? strtotime($startDate) : null;
@@ -1106,7 +1110,7 @@ function gc_alumni_officer_dashboard_event_status_label($startDate, $endDate): a
     return ['Active', 'status-active'];
 }
 
-function gc_alumni_officer_events_create_to_mysql_datetime(?string $value): ?string
+    public static function alumni_officer_events_create_to_mysql_datetime(?string $value): ?string
 {
     $value = trim((string) $value);
     if ($value === '') {
@@ -1120,7 +1124,7 @@ function gc_alumni_officer_events_create_to_mysql_datetime(?string $value): ?str
     return date('Y-m-d H:i:s', $time);
 }
 
-function gc_alumni_officer_events_list_short_text($text, $limit = 220): string
+    public static function alumni_officer_events_list_short_text($text, $limit = 220): string
 {
     $text = trim(strip_tags((string) $text));
     if ($text === '') {
@@ -1132,7 +1136,7 @@ function gc_alumni_officer_events_list_short_text($text, $limit = 220): string
 
     return strlen($text) > $limit ? substr($text, 0, $limit).'...' : $text;
 }
-function gc_alumni_officer_events_list_initials($name): string
+    public static function alumni_officer_events_list_initials($name): string
 {
     $name = trim((string) $name);
     if ($name === '') {
@@ -1142,9 +1146,9 @@ function gc_alumni_officer_events_list_initials($name): string
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_e($first.$last);
+    return e($first.$last);
 }
-function gc_alumni_officer_events_list_get_current_user_id(): int
+    public static function alumni_officer_events_list_get_current_user_id(): int
 {
     if (! empty(\gc_context()->session['user_id'])) {
         return (int) \gc_context()->session['user_id'];
@@ -1155,18 +1159,18 @@ function gc_alumni_officer_events_list_get_current_user_id(): int
     if (! empty(\gc_context()->session['auth_user']['id'])) {
         return (int) \gc_context()->session['auth_user']['id'];
     }
-    if (! empty(\gc_context()->session['user']['id'])) {
-        return (int) \gc_context()->session['user']['id'];
+    if (! empty(auth()->id())) {
+        return (int) auth()->id();
     }
 
     return 0;
 }
 
-function gc_alumni_officer_events_list_get_user_profile_column(PDO $pdo): ?string
+    public static function alumni_officer_events_list_get_user_profile_column(PDO $pdo): ?string
 {
     return 'profile_picture';
 }
-function gc_alumni_officer_events_list_profile_image_url($photo): string
+    public static function alumni_officer_events_list_profile_image_url($photo): string
 {
     $photo = trim((string) ($photo ?? ''));
     if ($photo === '') {
@@ -1182,24 +1186,24 @@ function gc_alumni_officer_events_list_profile_image_url($photo): string
 
     return \url('').'/uploads/profiles/'.$cleanPhoto;
 }
-function gc_alumni_officer_events_list_avatar_html($name, $photo = null, string $class = 'user-avatar'): string
+    public static function alumni_officer_events_list_avatar_html($name, $photo = null, string $class = 'user-avatar'): string
 {
-    $url = \gc_alumni_officer_events_list_profile_image_url($photo);
-    $safeName = \gc_e($name ?: 'User');
+    $url = self::alumni_officer_events_list_profile_image_url($photo);
+    $safeName = e($name ?: 'User');
     if ($url !== '') {
-        return '<div class="'.\gc_e($class).' has-photo"><img src="'.\gc_e($url).'" alt="'.$safeName.' profile photo" onerror="this.style.display=\'none\'; this.parentElement.classList.remove(\'has-photo\'); this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\';"><span class="avatar-fallback" style="display:none;">'.\gc_alumni_officer_events_list_initials($name).'</span></div>';
+        return '<div class="'.e($class).' has-photo"><img src="'.e($url).'" alt="'.$safeName.' profile photo" onerror="this.style.display=\'none\'; this.parentElement.classList.remove(\'has-photo\'); this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\';"><span class="avatar-fallback" style="display:none;">'.self::alumni_officer_events_list_initials($name).'</span></div>';
     }
 
-    return '<div class="'.\gc_e($class).'"><span class="avatar-fallback">'.\gc_alumni_officer_events_list_initials($name).'</span></div>';
+    return '<div class="'.e($class).'"><span class="avatar-fallback">'.self::alumni_officer_events_list_initials($name).'</span></div>';
 }
-function gc_alumni_officer_events_list_render_comment_text_with_mentions($text): string
+    public static function alumni_officer_events_list_render_comment_text_with_mentions($text): string
 {
-    $safe = \gc_e($text ?? '');
+    $safe = e($text ?? '');
     $safe = preg_replace('/@([A-Za-z0-9_ .\-]+)/u', '<span class="mention-text">@$1</span>', $safe);
 
     return nl2br($safe);
 }
-function gc_alumni_officer_events_list_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
+    public static function alumni_officer_events_list_get_mentioned_user_ids(PDO $pdo, string $comment, int $currentUserId): array
 {
     preg_match_all('/@([A-Za-z0-9_ .\-]+)/u', $comment, $matches);
     if (empty($matches[1])) {
@@ -1233,19 +1237,19 @@ function gc_alumni_officer_events_list_get_mentioned_user_ids(PDO $pdo, string $
 
     return array_values($mentioned);
 }
-function gc_alumni_officer_events_list_format_schedule_date($date): string
+    public static function alumni_officer_events_list_format_schedule_date($date): string
 {
     if (! $date) {
         return '';
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_e($date);
+        return e($date);
     }
 
     return date('M d, Y h:i A', $time);
 }
-function gc_alumni_officer_events_list_post_status_label($startDate, $endDate): array
+    public static function alumni_officer_events_list_post_status_label($startDate, $endDate): array
 {
     $now = time();
     $start = $startDate ? strtotime($startDate) : null;
@@ -1259,7 +1263,7 @@ function gc_alumni_officer_events_list_post_status_label($startDate, $endDate): 
 
     return ['Active', 'status-active'];
 }
-function gc_alumni_officer_events_list_is_event_visible_on_feed(PDO $pdo, int $eventId): bool
+    public static function alumni_officer_events_list_is_event_visible_on_feed(PDO $pdo, int $eventId): bool
 {
     if ($eventId <= 0) {
         return false;
@@ -1269,7 +1273,7 @@ function gc_alumni_officer_events_list_is_event_visible_on_feed(PDO $pdo, int $e
 
     return (bool) $stmt->fetchColumn();
 }
-function gc_alumni_officer_events_list_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
+    public static function alumni_officer_events_list_get_reaction_counts(PDO $pdo, string $postType, int $postId): array
 {
     $stmt = $pdo->prepare('SELECT reaction_type, COUNT(*) AS total FROM post_reactions WHERE post_type=? AND post_id=? GROUP BY reaction_type');
     $stmt->execute([$postType, $postId]);
@@ -1285,16 +1289,16 @@ function gc_alumni_officer_events_list_get_reaction_counts(PDO $pdo, string $pos
 
     return $counts;
 }
-function gc_alumni_officer_events_list_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
+    public static function alumni_officer_events_list_get_user_reaction(PDO $pdo, string $postType, int $postId, int $userId): string
 {
     $stmt = $pdo->prepare('SELECT reaction_type FROM post_reactions WHERE post_type=? AND post_id=? AND user_id=? LIMIT 1');
     $stmt->execute([$postType, $postId, $userId]);
 
     return (string) ($stmt->fetchColumn() ?: '');
 }
-function gc_alumni_officer_events_list_get_comments(PDO $pdo, string $postType, int $postId): array
+    public static function alumni_officer_events_list_get_comments(PDO $pdo, string $postType, int $postId): array
 {
-    $profileColumn = \gc_alumni_officer_events_list_get_user_profile_column($pdo);
+    $profileColumn = self::alumni_officer_events_list_get_user_profile_column($pdo);
     $profileSelect = $profileColumn ? ", u.`{$profileColumn}` AS profile_photo" : ', NULL AS profile_photo';
     $stmt = $pdo->prepare("SELECT c.*, u.fullname {$profileSelect}\r\n                           FROM post_comments c\r\n                           LEFT JOIN users u ON u.id=c.user_id\r\n                           WHERE c.post_type=? AND c.post_id=?\r\n                           ORDER BY COALESCE(c.parent_comment_id, c.id) ASC, c.parent_comment_id IS NOT NULL ASC, c.id ASC");
     $stmt->execute([$postType, $postId]);
@@ -1312,28 +1316,28 @@ function gc_alumni_officer_events_list_get_comments(PDO $pdo, string $postType, 
     return ['main' => $mainComments, 'replies' => $replies, 'total' => count($mainComments) + array_sum(array_map('count', $replies))];
 }
 
-function gc_employer_alumni_list_log_employer_activity(PDO $pdo, int $employerId, string $action, ?string $details = null, ?int $alumniId = null, ?int $offerId = null, ?string $courseFilter = null, ?string $batchFilter = null, ?string $skillSearch = null, ?int $resultCount = null): void
+    public static function employer_alumni_list_log_employer_activity(PDO $pdo, int $employerId, string $action, ?string $details = null, ?int $alumniId = null, ?int $offerId = null, ?string $courseFilter = null, ?string $batchFilter = null, ?string $skillSearch = null, ?int $resultCount = null): void
 {
     $stmt = $pdo->prepare("INSERT INTO employer_activity_logs (employer_id, alumni_id, offer_id, action, details, course_filter, batch_filter, skill_search, result_count)\r\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([$employerId, $alumniId, $offerId, $action, $details, $courseFilter, $batchFilter, $skillSearch, $resultCount]);
 }
-function gc_employer_alumni_list_format_year_range($start, $end): string
+    public static function employer_alumni_list_format_year_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_e($start).' - '.\gc_e($end);
+        return e($start).' - '.e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_e($start).' - Present';
+        return e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_e($end);
+        return e($end);
     }
 
     return 'N/A';
 }
-function gc_employer_alumni_list_format_employment_date($date): string
+    public static function employer_alumni_list_format_employment_date($date): string
 {
     $date = trim((string) ($date ?? ''));
     if ($date === '' || strtotime($date) === false) {
@@ -1342,23 +1346,23 @@ function gc_employer_alumni_list_format_employment_date($date): string
 
     return date('F-d-Y', strtotime($date));
 }
-function gc_employer_alumni_list_format_date_range($start, $end): string
+    public static function employer_alumni_list_format_date_range($start, $end): string
 {
-    $formattedStart = \gc_employer_alumni_list_format_employment_date($start);
-    $formattedEnd = \gc_employer_alumni_list_format_employment_date($end);
+    $formattedStart = self::employer_alumni_list_format_employment_date($start);
+    $formattedEnd = self::employer_alumni_list_format_employment_date($end);
     if ($formattedStart !== '' && $formattedEnd !== '') {
-        return \gc_e($formattedStart.' to '.$formattedEnd);
+        return e($formattedStart.' to '.$formattedEnd);
     }
     if ($formattedStart !== '' && $formattedEnd === '') {
-        return \gc_e($formattedStart.' to Present').'<br><span class="current-job-badge">Current / Present Job</span>';
+        return e($formattedStart.' to Present').'<br><span class="current-job-badge">Current / Present Job</span>';
     }
     if ($formattedStart === '' && $formattedEnd !== '') {
-        return \gc_e($formattedEnd);
+        return e($formattedEnd);
     }
 
     return 'N/A';
 }
-function gc_employer_alumni_list_normalize_alignment_text(?string $text): string
+    public static function employer_alumni_list_normalize_alignment_text(?string $text): string
 {
     $text = strtolower(trim((string) $text));
     $text = preg_replace('/[^a-z0-9\s\+\#\.]/', ' ', $text);
@@ -1366,9 +1370,9 @@ function gc_employer_alumni_list_normalize_alignment_text(?string $text): string
 
     return $text;
 }
-function gc_employer_alumni_list_detect_alumni_course_key(string $course): string
+    public static function employer_alumni_list_detect_alumni_course_key(string $course): string
 {
-    $courseText = \gc_employer_alumni_list_normalize_alignment_text($course);
+    $courseText = self::employer_alumni_list_normalize_alignment_text($course);
     if ($courseText === '') {
         return '';
     }
@@ -1400,7 +1404,7 @@ function gc_employer_alumni_list_detect_alumni_course_key(string $course): strin
     $courseAliases = ['bsis' => ['bachelor of science in information systems', 'bachelor of science in information system', 'information systems', 'information system', 'information technology', 'ict'], 'bstm' => ['bachelor of science in tourism management', 'tourism management', 'tourism'], 'blis' => ['bachelor of library and information science', 'library and information science', 'library science'], 'bshm' => ['bachelor of science in hospitality management', 'hospitality management', 'hospitality'], 'bsned' => ['bachelor of special needs education', 'special needs education', 'special education', 'sped'], 'bpa' => ['bachelor of public administration', 'public administration', 'bpa', 'administration']];
     foreach ($courseAliases as $courseKey => $aliases) {
         foreach ($aliases as $alias) {
-            $aliasText = \gc_employer_alumni_list_normalize_alignment_text($alias);
+            $aliasText = self::employer_alumni_list_normalize_alignment_text($alias);
             if ($aliasText !== '' && (strpos($courseText, $aliasText) !== false || strpos($aliasText, $courseText) !== false)) {
                 return $courseKey;
             }
@@ -1409,10 +1413,10 @@ function gc_employer_alumni_list_detect_alumni_course_key(string $course): strin
 
     return '';
 }
-function gc_employer_alumni_list_alignment_keyword_matches(string $text, string $keyword): bool
+    public static function employer_alumni_list_alignment_keyword_matches(string $text, string $keyword): bool
 {
-    $text = \gc_employer_alumni_list_normalize_alignment_text($text);
-    $keyword = \gc_employer_alumni_list_normalize_alignment_text($keyword);
+    $text = self::employer_alumni_list_normalize_alignment_text($text);
+    $keyword = self::employer_alumni_list_normalize_alignment_text($keyword);
     if ($text === '' || $keyword === '') {
         return false;
     }
@@ -1420,10 +1424,10 @@ function gc_employer_alumni_list_alignment_keyword_matches(string $text, string 
 
     return (bool) preg_match($pattern, $text);
 }
-function gc_employer_alumni_list_analyze_course_job_alignment(string $course, string $jobTitle, ?string $jobDescription = ''): array
+    public static function employer_alumni_list_analyze_course_job_alignment(string $course, string $jobTitle, ?string $jobDescription = ''): array
 {
-    $courseText = \gc_employer_alumni_list_normalize_alignment_text($course);
-    $jobText = \gc_employer_alumni_list_normalize_alignment_text($jobTitle.' '.$jobDescription);
+    $courseText = self::employer_alumni_list_normalize_alignment_text($course);
+    $jobText = self::employer_alumni_list_normalize_alignment_text($jobTitle.' '.$jobDescription);
     if ($courseText === '') {
         return ['status' => 'Course Not Set', 'class' => 'badge-neutral', 'score' => 0, 'reason' => 'No course/program found in this alumni profile.'];
     }
@@ -1432,11 +1436,11 @@ function gc_employer_alumni_list_analyze_course_job_alignment(string $course, st
     }
     $courseJobMap = ['bsis' => ['it', 'ict', 'information system', 'information systems', 'information technology', 'system analyst', 'systems analyst', 'business analyst', 'mis', 'erp', 'programmer', 'developer', 'web developer', 'software', 'software developer', 'database', 'database administrator', 'data analyst', 'data encoder', 'encoder', 'network', 'network technician', 'system administrator', 'technical support', 'it support', 'helpdesk', 'service desk', 'computer', 'computer operator', 'computer technician', 'cybersecurity', 'qa tester', 'quality assurance', 'technical assistant', 'system support', 'digital services', 'dict', 'ict desk', 'desk attendant', 'computer assistance', 'troubleshooting', 'data management', 'records system', 'office automation', 'web', 'website', 'php', 'mysql', 'html', 'css', 'javascript', 'laravel', 'systems', 'application support', 'tech support'], 'bstm' => ['tourism', 'travel', 'tour', 'tour guide', 'tour coordinator', 'travel agency', 'travel consultant', 'airline', 'flight attendant', 'ticketing', 'reservation', 'booking', 'hotel', 'resort', 'front desk', 'receptionist', 'guest service', 'customer service', 'hospitality', 'concierge', 'event coordinator', 'service crew', 'cruise', 'airport', 'ground staff', 'guest relations'], 'blis' => ['library', 'librarian', 'assistant librarian', 'library assistant', 'archivist', 'archive', 'records officer', 'records management', 'documentation', 'document controller', 'information officer', 'information management', 'knowledge management', 'cataloging', 'cataloguing', 'indexing', 'data management', 'encoder', 'office staff', 'research assistant', 'records clerk', 'filing clerk', 'document management'], 'bshm' => ['hotel', 'hospitality', 'restaurant', 'food service', 'food and beverage', 'f b', 'kitchen', 'chef', 'cook', 'barista', 'front desk', 'guest service', 'housekeeping', 'service crew', 'resort', 'waiter', 'waitress', 'catering', 'banquet', 'receptionist', 'customer service', 'room attendant', 'food attendant', 'beverage', 'culinary'], 'bsed_math' => ['teacher', 'math teacher', 'mathematics teacher', 'math tutor', 'tutor', 'instructor', 'teaching', 'educator', 'academic', 'school', 'trainer', 'learning facilitator', 'faculty', 'education', 'lesson', 'curriculum', 'mathematics', 'math', 'statistics', 'algebra', 'geometry'], 'bsed_science' => ['teacher', 'science teacher', 'biology teacher', 'chemistry teacher', 'physics teacher', 'science tutor', 'tutor', 'instructor', 'teaching', 'educator', 'laboratory', 'lab assistant', 'research assistant', 'academic', 'school', 'trainer', 'learning facilitator', 'faculty', 'education', 'curriculum', 'biology', 'chemistry', 'physics', 'science'], 'bsned' => ['special education', 'sped', 'sped teacher', 'special needs', 'teacher', 'educator', 'tutor', 'instructor', 'teaching', 'learning facilitator', 'school', 'academic', 'shadow teacher', 'child development', 'inclusive education', 'intervention teacher', 'teaching assistant', 'classroom aide', 'therapy assistant', 'learning support'], 'bpa' => ['public administration', 'administrator', 'government', 'civil service', 'public sector', 'public servant', 'office staff', 'administrative officer', 'admin officer', 'public affairs', 'governance', 'policy officer', 'bureaucrat', 'municipal', 'city government', 'provincial government', 'barangay', 'local government', 'sanggunian', 'executive secretary', 'administrative assistant', 'clerk', 'administrative staff', 'public management', 'public service']];
     $courseLabels = ['bsis' => 'BSIS', 'bstm' => 'BSTM', 'blis' => 'BLIS', 'bshm' => 'BSHM', 'bsed_math' => 'BSED Math', 'bsed_science' => 'BSED Science', 'bsned' => 'BSNED', 'bpa' => 'BPA'];
-    $matchedCourseKey = \gc_employer_alumni_list_detect_alumni_course_key($course);
+    $matchedCourseKey = self::employer_alumni_list_detect_alumni_course_key($course);
     if ($matchedCourseKey !== '' && isset($courseJobMap[$matchedCourseKey])) {
         $matchedWords = [];
         foreach ($courseJobMap[$matchedCourseKey] as $keyword) {
-            if (\gc_employer_alumni_list_alignment_keyword_matches($jobText, $keyword)) {
+            if (self::employer_alumni_list_alignment_keyword_matches($jobText, $keyword)) {
                 $matchedWords[] = $keyword;
             }
         }
@@ -1453,14 +1457,14 @@ function gc_employer_alumni_list_analyze_course_job_alignment(string $course, st
         return strlen($word) >= 4 && ! in_array($word, ['bachelor', 'science', 'degree', 'major', 'secondary', 'education'], true);
     });
     foreach ($courseWords as $word) {
-        if (\gc_employer_alumni_list_alignment_keyword_matches($jobText, $word)) {
+        if (self::employer_alumni_list_alignment_keyword_matches($jobText, $word)) {
             return ['status' => 'Aligned', 'class' => 'badge-aligned', 'score' => 100, 'reason' => 'The job contains a keyword related to the alumni course/program.'];
         }
     }
 
     return ['status' => 'Not Aligned', 'class' => 'badge-not-aligned', 'score' => 0, 'reason' => 'The saved course/program was not recognized or no matching job keyword was found.'];
 }
-function gc_employer_alumni_list_summarize_job_alignment(string $course, array $jobs): array
+    public static function employer_alumni_list_summarize_job_alignment(string $course, array $jobs): array
 {
     if (empty($jobs)) {
         return ['status' => 'No Employment History', 'class' => 'badge-neutral', 'reason' => 'No employment history has been added yet.'];
@@ -1473,7 +1477,7 @@ function gc_employer_alumni_list_summarize_job_alignment(string $course, array $
         }
     }
     $jobToAnalyze = $currentJob ?: $jobs[0];
-    $alignment = \gc_employer_alumni_list_analyze_course_job_alignment($course, $jobToAnalyze['job_title'] ?? '', $jobToAnalyze['job_description'] ?? '');
+    $alignment = self::employer_alumni_list_analyze_course_job_alignment($course, $jobToAnalyze['job_title'] ?? '', $jobToAnalyze['job_description'] ?? '');
     $basis = $currentJob ? 'Current job' : 'Latest job';
 
     return ['status' => $alignment['status'], 'class' => $alignment['class'], 'reason' => $basis.': '.($jobToAnalyze['job_title'] ?? 'N/A').'. '.$alignment['reason']];
@@ -1483,53 +1487,53 @@ function gc_employer_alumni_list_summarize_job_alignment(string $course, array $
  * Returns an inline base64 <img> tag for the profile picture, or a fallback initials avatar.
  * Used inside emails so the image is embedded and not dependent on a URL.
  */
-function gc_employer_applications_normalize_status($status): string
+    public static function employer_applications_normalize_status($status): string
 {
     $status = strtolower(trim((string) $status));
     $map = ['pending' => 'pending', 'under review' => 'under_review', 'under_review' => 'under_review', 'for interview' => 'interview', 'for_interview' => 'interview', 'interview' => 'interview', 'accepted' => 'accepted', 'hired' => 'hired', 'rejected' => 'rejected', 'cancelled' => 'cancelled', 'canceled' => 'cancelled'];
 
     return $map[$status] ?? 'pending';
 }
-function gc_employer_applications_status_label($status): string
+    public static function employer_applications_status_label($status): string
 {
     $labels = ['pending' => 'Pending', 'under_review' => 'Under Review', 'interview' => 'For Interview', 'accepted' => 'Accepted', 'hired' => 'Hired', 'rejected' => 'Rejected', 'cancelled' => 'Cancelled'];
 
     return $labels[$status] ?? 'Pending';
 }
-function gc_employer_applications_format_year_range($start, $end): string
+    public static function employer_applications_format_year_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_e($start).' - '.\gc_e($end);
+        return e($start).' - '.e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_e($start).' - Present';
+        return e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_e($end);
+        return e($end);
     }
 
     return 'N/A';
 }
-function gc_employer_applications_format_date_range($start, $end): string
+    public static function employer_applications_format_date_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_e(date('F j, Y', strtotime($start))).' to '.\gc_e(date('F j, Y', strtotime($end)));
+        return e(date('F j, Y', strtotime($start))).' to '.e(date('F j, Y', strtotime($end)));
     }
     if ($start !== '' && $end === '') {
-        return \gc_e(date('F j, Y', strtotime($start))).' to Present';
+        return e(date('F j, Y', strtotime($start))).' to Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_e(date('F j, Y', strtotime($end)));
+        return e(date('F j, Y', strtotime($end)));
     }
 
     return 'N/A';
 }
 
-function gc_employer_dashboard_initials($name): string
+    public static function employer_dashboard_initials($name): string
 {
     $name = trim((string) $name);
     if ($name === '') {
@@ -1539,9 +1543,9 @@ function gc_employer_dashboard_initials($name): string
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_e($first.$last);
+    return e($first.$last);
 }
-function gc_employer_dashboard_offerStatusBadge($status)
+    public static function employer_dashboard_offerStatusBadge($status)
 {
     $status = strtolower(trim((string) $status));
     if ($status === 'accepted') {
@@ -1553,7 +1557,7 @@ function gc_employer_dashboard_offerStatusBadge($status)
 
     return '<span class="status-badge status-pending">Pending</span>';
 }
-function gc_employer_dashboard_statusBadge($status)
+    public static function employer_dashboard_statusBadge($status)
 {
     $status = strtolower(trim((string) $status));
     if ($status === 'accepted') {
@@ -1585,7 +1589,7 @@ function gc_employer_dashboard_statusBadge($status)
  * Split branch text saved in one profile field into dropdown choices.
  * Accepted separators: newline, comma, semicolon, or vertical bar.
  */
-function gc_employer_post_job_parse_branch_locations(?string $branchText): array
+    public static function employer_post_job_parse_branch_locations(?string $branchText): array
 {
     $branchText = trim((string) $branchText);
     if ($branchText === '') {
@@ -1607,7 +1611,7 @@ function gc_employer_post_job_parse_branch_locations(?string $branchText): array
 // ========================
 
 // Helper: Add security log
-function gc_profile_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null)
+    public static function profile_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null)
 {
     $ip = \request()->server->all()['REMOTE_ADDR'] ?? null;
     $ua = substr(\request()->server->all()['HTTP_USER_AGENT'] ?? '', 0, 255);
@@ -1615,7 +1619,7 @@ function gc_profile_add_log(PDO $pdo, int $user_id, string $action, ?string $det
     $ins->execute([$user_id, $action, $details, $ip, $ua]);
 }
 // Helper: Normalize text for course-job alignment
-function gc_profile_normalize_alignment_text(?string $text): string
+    public static function profile_normalize_alignment_text(?string $text): string
 {
     $text = strtolower(trim((string) $text));
     $text = preg_replace('/[^a-z0-9\s\+\#\.]/', ' ', $text);
@@ -1624,10 +1628,10 @@ function gc_profile_normalize_alignment_text(?string $text): string
     return $text;
 }
 // Helper: Check if text contains any keyword
-function gc_profile_contains_any_keyword(string $text, array $keywords): bool
+    public static function profile_contains_any_keyword(string $text, array $keywords): bool
 {
     foreach ($keywords as $keyword) {
-        $keyword = \gc_profile_normalize_alignment_text($keyword);
+        $keyword = self::profile_normalize_alignment_text($keyword);
         if ($keyword !== '' && strpos($text, $keyword) !== false) {
             return true;
         }
@@ -1636,10 +1640,10 @@ function gc_profile_contains_any_keyword(string $text, array $keywords): bool
     return false;
 }
 // Helper: Analyze if alumni job is aligned to course
-function gc_profile_analyze_course_job_alignment(?string $course, ?string $jobTitle, ?string $jobDescription = ''): array
+    public static function profile_analyze_course_job_alignment(?string $course, ?string $jobTitle, ?string $jobDescription = ''): array
 {
-    $courseText = \gc_profile_normalize_alignment_text($course);
-    $jobText = \gc_profile_normalize_alignment_text((string) $jobTitle.' '.(string) $jobDescription);
+    $courseText = self::profile_normalize_alignment_text($course);
+    $jobText = self::profile_normalize_alignment_text((string) $jobTitle.' '.(string) $jobDescription);
     if ($courseText === '') {
         return ['status' => 'Not Aligned', 'value' => 'No', 'class' => 'alignment-not', 'reason' => 'No course/program found in the alumni profile.'];
     }
@@ -1649,15 +1653,17 @@ function gc_profile_analyze_course_job_alignment(?string $course, ?string $jobTi
     $courseJobMap = ['bsis' => ['it', 'ict', 'information system', 'information systems', 'information technology', 'technical support', 'it support', 'helpdesk', 'developer', 'programmer', 'web developer', 'software', 'database', 'network', 'system analyst', 'systems analyst', 'data analyst', 'computer', 'encoder', 'office staff', 'administrative aide', 'administrative assistant', 'admin assistant', 'data entry', 'technical assistant', 'dict', 'digital services', 'computer operator', 'system support', 'desk attendant', 'mis', 'cybersecurity', 'quality assurance', 'qa tester'], 'bachelor of science in information systems' => ['it', 'ict', 'information system', 'information systems', 'information technology', 'technical support', 'it support', 'helpdesk', 'developer', 'programmer', 'web developer', 'software', 'database', 'network', 'system analyst', 'systems analyst', 'data analyst', 'computer', 'encoder', 'office staff', 'administrative aide', 'administrative assistant', 'admin assistant', 'data entry', 'technical assistant', 'dict', 'digital services', 'computer operator', 'system support', 'desk attendant', 'mis', 'cybersecurity', 'quality assurance', 'qa tester'], 'bstm' => ['tourism', 'travel', 'airline', 'ticketing', 'reservation', 'tour guide', 'hotel', 'front desk', 'guest service', 'receptionist', 'customer service', 'travel consultant', 'service crew', 'tour coordinator', 'resort', 'booking', 'flight attendant'], 'bachelor of science in tourism management' => ['tourism', 'travel', 'airline', 'ticketing', 'reservation', 'tour guide', 'hotel', 'front desk', 'guest service', 'receptionist', 'customer service', 'travel consultant', 'service crew', 'tour coordinator', 'resort', 'booking', 'flight attendant'], 'blis' => ['library', 'librarian', 'archivist', 'records officer', 'documentation', 'information officer', 'encoder', 'office staff', 'data management', 'records management', 'cataloging', 'cataloguing', 'document controller', 'research assistant'], 'bachelor of library and information science' => ['library', 'librarian', 'archivist', 'records officer', 'documentation', 'information officer', 'encoder', 'office staff', 'data management', 'records management', 'cataloging', 'cataloguing', 'document controller', 'research assistant'], 'bshm' => ['hotel', 'hospitality', 'restaurant', 'food service', 'kitchen', 'chef', 'cook', 'barista', 'front desk', 'guest service', 'housekeeping', 'service crew', 'resort', 'waiter', 'waitress', 'food and beverage', 'f b', 'catering'], 'bachelor of science in hospitality management' => ['hotel', 'hospitality', 'restaurant', 'food service', 'kitchen', 'chef', 'cook', 'barista', 'front desk', 'guest service', 'housekeeping', 'service crew', 'resort', 'waiter', 'waitress', 'food and beverage', 'f b', 'catering'], 'bsed math' => ['teacher', 'math teacher', 'mathematics teacher', 'tutor', 'instructor', 'teaching', 'educator', 'academic', 'school', 'trainer', 'learning facilitator', 'faculty'], 'bachelor of secondary education major in mathematics' => ['teacher', 'math teacher', 'mathematics teacher', 'tutor', 'instructor', 'teaching', 'educator', 'academic', 'school', 'trainer', 'learning facilitator', 'faculty'], 'bsed science' => ['teacher', 'science teacher', 'tutor', 'instructor', 'laboratory', 'research assistant', 'academic', 'school', 'trainer', 'educator', 'learning facilitator', 'faculty'], 'bachelor of secondary education major in science' => ['teacher', 'science teacher', 'tutor', 'instructor', 'laboratory', 'research assistant', 'academic', 'school', 'trainer', 'educator', 'learning facilitator', 'faculty'], 'bsned' => ['special education', 'sped teacher', 'teacher', 'educator', 'tutor', 'instructor', 'learning facilitator', 'school', 'academic', 'special needs', 'inclusive education', 'shadow teacher'], 'bachelor of special needs education' => ['special education', 'sped teacher', 'teacher', 'educator', 'tutor', 'instructor', 'learning facilitator', 'school', 'academic', 'special needs', 'inclusive education', 'shadow teacher'], 'bsad' => ['agriculture', 'farmer', 'agricultural', 'farm technician', 'agribusiness', 'livestock', 'crop production', 'agri technician', 'food production', 'farm worker', 'agriculturist', 'crop', 'farm', 'soil', 'plant'], 'bachelor of science in agriculture' => ['agriculture', 'farmer', 'agricultural', 'farm technician', 'agribusiness', 'livestock', 'crop production', 'agri technician', 'food production', 'farm worker', 'agriculturist', 'crop', 'farm', 'soil', 'plant'], 'bpa' => ['public administration', 'administrator', 'government', 'civil service', 'public sector', 'public servant', 'office staff', 'administrative officer', 'admin officer', 'public affairs', 'governance', 'policy officer', 'bureaucrat', 'municipal', 'city government', 'provincial government', 'barangay', 'local government', 'sanggunian', 'executive secretary', 'administrative assistant', 'clerk', 'administrative staff', 'public management', 'public service'], 'bachelor of public administration' => ['public administration', 'administrator', 'government', 'civil service', 'public sector', 'public servant', 'office staff', 'administrative officer', 'admin officer', 'public affairs', 'governance', 'policy officer', 'bureaucrat', 'municipal', 'city government', 'provincial government', 'barangay', 'local government', 'sanggunian', 'executive secretary', 'administrative assistant', 'clerk', 'administrative staff', 'public management', 'public service']];
     $matchedCourseKey = '';
     foreach ($courseJobMap as $courseKey => $keywords) {
-        $courseKeyText = \gc_profile_normalize_alignment_text($courseKey);
+        $courseKeyText = self::profile_normalize_alignment_text($courseKey);
         if (strpos($courseText, $courseKeyText) !== false || strpos($courseKeyText, $courseText) !== false) {
             $matchedCourseKey = $courseKey;
             break;
         }
     }
-    if ($matchedCourseKey !== '' && \gc_profile_contains_any_keyword($jobText, $courseJobMap[$matchedCourseKey])) {
+    if ($matchedCourseKey !== '' && self::profile_contains_any_keyword($jobText, $courseJobMap[$matchedCourseKey])) {
         return ['status' => 'Aligned', 'value' => 'Yes', 'class' => 'alignment-yes', 'reason' => 'The current/latest job is related to the alumni course/program.'];
     }
 
     return ['status' => 'Not Aligned', 'value' => 'No', 'class' => 'alignment-not', 'reason' => 'The current/latest job is not related to the alumni course/program.'];
+}
+
 }

@@ -434,7 +434,7 @@
             <div>
                 <div class="eyebrow">📊 Admin Analytics</div>
                 <h1 class="dashboard-title">Welcome back, <?php 
-echo \gc_e($adminName);
+echo e($adminName);
 ?></h1>
                 <div class="dashboard-subtitle">Here is your latest employment overview.</div>
             </div>
@@ -460,13 +460,13 @@ echo \url('');
                     <div class="hero-mini">
                         <div class="hero-mini-label">Employment Rate</div>
                         <div class="hero-mini-value"><?php 
-echo \gc_e($employmentRate);
+echo e($employmentRate);
 ?>%</div>
                     </div>
                     <div class="hero-mini">
                         <div class="hero-mini-label">Alignment Rate</div>
                         <div class="hero-mini-value"><?php 
-echo \gc_e($alignmentRate);
+echo e($alignmentRate);
 ?>%</div>
                     </div>
                 </div>
@@ -769,4 +769,4 @@ function printEmploymentReport() {
 </script>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

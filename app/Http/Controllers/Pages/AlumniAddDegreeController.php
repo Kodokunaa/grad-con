@@ -16,8 +16,8 @@ final class AlumniAddDegreeController extends PageController
             $error = '';
             $degree_options = ['Primary', 'Secondary', 'Tertiary', 'Masteral', 'Doctorate'];
             $education_list = $model->education->map->getAttributes()->all();
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('alumni_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.alumni_sidebar', get_defined_vars());
 
             return $this->pageView('pages.alumni.add_degree', get_defined_vars());
         });

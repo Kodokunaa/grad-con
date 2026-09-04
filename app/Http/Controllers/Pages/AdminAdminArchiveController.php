@@ -11,7 +11,6 @@ final class AdminAdminArchiveController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('admin');
             $message = (string) session('status', '');
             $error = '';
             $archivedEvents = Event::query()->where('is_archived', true)->with(['author', 'comments.author'])->orderByDesc('archived_at')->latest('id')->get()->map(function ($event) {
@@ -24,8 +23,8 @@ final class AdminAdminArchiveController extends PageController
                 })->all();
                 return $row;
             })->all();
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('admin_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.admin_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.admin.admin_archive', get_defined_vars());
         });

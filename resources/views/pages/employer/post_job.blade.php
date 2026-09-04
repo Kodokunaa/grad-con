@@ -283,7 +283,7 @@
 </head>
 <body>
 
-<?php echo \gc_partial('employer_sidebar', \get_defined_vars()); ?>
+<?php echo view('partials.employer_sidebar', \get_defined_vars()); ?>
 
 <div class="content">
 
@@ -354,7 +354,7 @@ echo htmlspecialchars($employer_email);
                         name="job_type"
                         placeholder="Full-time / Part-time / Internship"
                         value="<?php
-echo htmlspecialchars(\gc_context()->post['job_type'] ?? '');
+echo htmlspecialchars(old('job_type', request()->input('job_type')) ?? '');
 ?>"
                         required
                     >
@@ -368,7 +368,7 @@ echo htmlspecialchars(\gc_context()->post['job_type'] ?? '');
                         name="title"
                         placeholder="Enter job title"
                         value="<?php
-echo htmlspecialchars(\gc_context()->post['title'] ?? '');
+echo htmlspecialchars(old('title', request()->input('title')) ?? '');
 ?>"
                         required
                     >
@@ -381,7 +381,7 @@ echo htmlspecialchars(\gc_context()->post['title'] ?? '');
                         class="form-control"
                         name="start_date"
                         value="<?php
-echo htmlspecialchars(\gc_context()->post['start_date'] ?? '');
+echo htmlspecialchars(old('start_date', request()->input('start_date')) ?? '');
 ?>"
                         required
                     >
@@ -394,7 +394,7 @@ echo htmlspecialchars(\gc_context()->post['start_date'] ?? '');
                         class="form-control"
                         name="end_date"
                         value="<?php
-echo htmlspecialchars(\gc_context()->post['end_date'] ?? '');
+echo htmlspecialchars(old('end_date', request()->input('end_date')) ?? '');
 ?>"
                         required
                     >
@@ -478,7 +478,7 @@ if (! empty($employer_branches)) {
                         placeholder="Enter full job description, responsibilities, and qualifications"
                         required
                     ><?php
-echo htmlspecialchars(\gc_context()->post['description'] ?? '');
+echo htmlspecialchars(old('description', request()->input('description')) ?? '');
 ?></textarea>
                 </div>
 
@@ -489,7 +489,7 @@ echo htmlspecialchars(\gc_context()->post['description'] ?? '');
                             name="is_open"
                             id="is_open"
                             <?php
-echo isset(\gc_context()->post['is_open']) || \request()->server->all()['REQUEST_METHOD'] !== 'POST' ? 'checked' : '';
+echo old('is_open', request()->input('is_open')) !== null || \request()->server->all()['REQUEST_METHOD'] !== 'POST' ? 'checked' : '';
 ?>
                         >
                         <label for="is_open">Open for applications</label>

@@ -13,9 +13,8 @@ final class EmployerDashboardController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('employer');
-            $eid = (int) (\gc_context()->session['user']['id'] ?? 0);
-            $fullname = \gc_context()->session['user']['fullname'] ?? 'Employer';
+            $eid = (int) (request()->user()?->id ?? 0);
+            $fullname = request()->user()?->fullname ?? 'Employer';
             $jobsCount = 0;
             $openJobsCount = 0;
             $closedJobsCount = 0;
@@ -60,8 +59,8 @@ final class EmployerDashboardController extends PageController
                 $row['fullname'] = $offer->alumni?->fullname;
                 $row['email'] = $offer->alumni?->email;
                 return $row;
-            })->all();            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('employer_sidebar', \get_defined_vars());
+            })->all();            echo view('partials.header', \get_defined_vars());
+            echo view('partials.employer_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.employer.dashboard', get_defined_vars());
         });

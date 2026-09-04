@@ -22,8 +22,8 @@ final class MigrationTest extends TestCase
 
     public function test_shared_html_escaping_helper_preserves_legacy_behavior(): void
     {
-        $this->assertSame('&lt;tag title=&quot;test&quot;&gt;&#039;&amp;', gc_e('<tag title="test">\'&'));
-        $this->assertSame('', gc_e(null));
+        $this->assertSame('&lt;tag title=&quot;test&quot;&gt;&#039;&amp;', e('<tag title="test">\'&'));
+        $this->assertSame('', e(null));
     }
 
     public function test_portable_installation_defaults_and_readiness_check(): void

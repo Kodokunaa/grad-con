@@ -11,7 +11,6 @@ final class AdminOffersHistoryController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('admin');
             $error = '';
             $logs = [];
             $employerCount = 0;
@@ -32,8 +31,8 @@ final class AdminOffersHistoryController extends PageController
             $offerCount = $logModels->where('action', 'JOB_OFFER_SENT')->count();
             $employerCount = $logModels->pluck('employer_id')->filter()->unique()->count();
             $alumniCount = $logModels->pluck('alumni_id')->filter()->unique()->count();
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('admin_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.admin_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.admin.offers_history', get_defined_vars());
         });

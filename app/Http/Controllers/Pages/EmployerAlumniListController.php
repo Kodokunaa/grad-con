@@ -26,8 +26,8 @@ final class EmployerAlumniListController extends PageController
             $degreesByUser = $models->mapWithKeys(fn ($user) => [$user->id => $user->degrees->map->getAttributes()->all()])->all();
             $courseOptions = $models->pluck('course')->filter()->unique()->sort()->values()->all();
             $batchOptions = $models->pluck('batch_year')->filter()->unique()->sort()->values()->all();
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('employer_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.employer_sidebar', get_defined_vars());
 
             return $this->pageView('pages.employer.alumni_list', get_defined_vars());
         });

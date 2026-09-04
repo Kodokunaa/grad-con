@@ -443,4 +443,4 @@ echo \url('');
 </div>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

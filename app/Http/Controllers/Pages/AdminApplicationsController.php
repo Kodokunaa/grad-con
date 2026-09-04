@@ -22,8 +22,8 @@ final class AdminApplicationsController extends PageController
             $applications = $models->map(fn ($a) => array_merge($a->getAttributes(), $a->alumni->getAttributes(), ['application_id' => $a->id, 'alumni_id' => $a->alumni_id, 'resume' => null, 'resume_path' => null, 'cv' => null, 'cv_file' => null, 'file' => null, 'attachment' => null]))->all();
             $educationByUser = $models->pluck('alumni')->unique('id')->mapWithKeys(fn ($u) => [$u->id => $u->education->map->getAttributes()->all()])->all();
             $employmentByUser = $models->pluck('alumni')->unique('id')->mapWithKeys(fn ($u) => [$u->id => $u->employmentHistory->map->getAttributes()->all()])->all();
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('admin_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.admin_sidebar', get_defined_vars());
 
             return $this->pageView('pages.admin.applications', get_defined_vars());
         });

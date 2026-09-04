@@ -12,11 +12,10 @@ final class AlumniDashboardController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('alumni');
-            $fullname = \gc_context()->session['user']['fullname'] ?? 'User';
-            $alumni_id = (int) (\gc_context()->session['user']['id'] ?? 0);
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('alumni_sidebar', \get_defined_vars());
+            $fullname = request()->user()?->fullname ?? 'User';
+            $alumni_id = (int) (request()->user()?->id ?? 0);
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.alumni_sidebar', \get_defined_vars());
             $totalApplications = 0;
             $pendingApplications = 0;
             $rejectedApplications = 0;

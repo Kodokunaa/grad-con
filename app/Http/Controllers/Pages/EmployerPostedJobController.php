@@ -11,8 +11,7 @@ final class EmployerPostedJobController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('employer');
-            $employer_id = (int) (\gc_context()->session['user']['id'] ?? 0);
+            $employer_id = (int) (request()->user()?->id ?? 0);
             $today = date('Y-m-d');
             $error = '';
             $posted_jobs = [];

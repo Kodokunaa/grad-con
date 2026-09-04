@@ -15,7 +15,6 @@ final class AccountAccess
             return redirect()->guest(route('login'));
         }
         Auth::setUser($user);
-        gc_context()->session = array_replace(gc_context()->session, ['user' => gc_user(), 'alumni_user' => gc_user()]);
         if (! $user->is_active || ($user->role === 'alumni' && $user->status !== 'approved')) {
             Auth::logout();
             $request->session()->invalidate();

@@ -15,8 +15,8 @@ final class AdminPendingAlumniController extends PageController
             $error = '';
             $pendingUsers = User::query()->where('role', 'alumni')->where('status', 'pending')
                 ->orderBy('id')->get(['id', 'fullname', 'username', 'email', 'course', 'batch_year', 'status'])->toArray();
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('admin_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.admin_sidebar', get_defined_vars());
 
             return $this->pageView('pages.admin.pending_alumni', get_defined_vars());
         });

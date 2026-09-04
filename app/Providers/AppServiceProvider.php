@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Support\PageContext;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\RateLimiter;
@@ -13,7 +12,6 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->scoped(PageContext::class);
     }
 
     public function boot(): void

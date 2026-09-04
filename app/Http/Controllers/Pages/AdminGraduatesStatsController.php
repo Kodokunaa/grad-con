@@ -11,7 +11,6 @@ final class AdminGraduatesStatsController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () use ($request) {
-            \gc_require_role('admin');
             $view = $request->query('view', 'batch');
             if (! in_array($view, ['batch', 'department'], true)) {
                 $view = 'batch';
@@ -23,8 +22,8 @@ final class AdminGraduatesStatsController extends PageController
             $departments = (clone $base)->whereNotNull('course')->where('course', '<>', '')
                 ->select('course', DB::raw('COUNT(*) as total'))->groupBy('course')
                 ->orderByDesc('total')->orderBy('course')->get()->map(fn ($row) => (array) $row)->all();
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('admin_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.admin_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.admin.graduates_stats', get_defined_vars());
         });

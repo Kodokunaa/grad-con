@@ -276,7 +276,7 @@ if ($error) {
                         class="form-control-custom"
                         placeholder="Enter company name"
                         value="<?php
-        echo htmlspecialchars(\gc_context()->post['company_name'] ?? '');
+        echo htmlspecialchars(old('company_name', request()->input('company_name')) ?? '');
         ?>"
                         required
                     >
@@ -290,7 +290,7 @@ if ($error) {
                         class="form-control-custom"
                         placeholder="Enter job title"
                         value="<?php
-        echo htmlspecialchars(\gc_context()->post['job_title'] ?? '');
+        echo htmlspecialchars(old('job_title', request()->input('job_title')) ?? '');
         ?>"
                         required
                     >
@@ -304,7 +304,7 @@ if ($error) {
                         class="form-control-custom"
                         placeholder="Full-time, Part-time, Contract"
                         value="<?php
-        echo htmlspecialchars(\gc_context()->post['employment_type'] ?? '');
+        echo htmlspecialchars(old('employment_type', request()->input('employment_type')) ?? '');
         ?>"
                     >
                 </div>
@@ -317,7 +317,7 @@ if ($error) {
                         class="form-control-custom"
                         placeholder="Enter work location"
                         value="<?php
-        echo htmlspecialchars(\gc_context()->post['location'] ?? '');
+        echo htmlspecialchars(old('location', request()->input('location')) ?? '');
         ?>"
                     >
                 </div>
@@ -329,7 +329,7 @@ if ($error) {
                         name="start_date"
                         class="form-control-custom"
                         value="<?php
-        echo htmlspecialchars(\gc_context()->post['start_date'] ?? '');
+        echo htmlspecialchars(old('start_date', request()->input('start_date')) ?? '');
         ?>"
                         required
                     >
@@ -342,7 +342,7 @@ if ($error) {
                         name="end_date"
                         class="form-control-custom"
                         value="<?php
-        echo htmlspecialchars(\gc_context()->post['end_date'] ?? '');
+        echo htmlspecialchars(old('end_date', request()->input('end_date')) ?? '');
         ?>"
                     >
                 </div>
@@ -354,7 +354,7 @@ if ($error) {
                         class="form-textarea-custom"
                         placeholder="Optional job description"
                     ><?php
-        echo htmlspecialchars(\gc_context()->post['job_description'] ?? '');
+        echo htmlspecialchars(old('job_description', request()->input('job_description')) ?? '');
         ?></textarea>
                 </div>
 
@@ -424,8 +424,8 @@ if (count($employment_list) === 0) {
                                     <?php
         $start = $emp['start_date'] ?? '';
         $end = $emp['end_date'] ?? '';
-        $formattedStart = \gc_alumni_employment_history_format_employment_date($start);
-        $formattedEnd = \gc_alumni_employment_history_format_employment_date($end);
+        $formattedStart = \App\Support\ViewFormatter::alumni_employment_history_format_employment_date($start);
+        $formattedEnd = \App\Support\ViewFormatter::alumni_employment_history_format_employment_date($end);
         if ($formattedStart !== '' && $formattedEnd !== '') {
             echo htmlspecialchars($formattedStart.' to '.$formattedEnd);
         } elseif ($formattedStart !== '' && $formattedEnd === '') {
@@ -441,7 +441,7 @@ if (count($employment_list) === 0) {
         ?></td>
                                 <td>
                                     <?php
-        $alignment = \gc_alumni_employment_history_analyze_course_job_alignment($alumniCourse, $emp['job_title'] ?? '', $emp['job_description'] ?? '');
+        $alignment = \App\Support\ViewFormatter::alumni_employment_history_analyze_course_job_alignment($alumniCourse, $emp['job_title'] ?? '', $emp['job_description'] ?? '');
         ?>
                                     <span class="alignment-badge <?php
         echo htmlspecialchars($alignment['class']);
@@ -480,6 +480,6 @@ if (count($employment_list) === 0) {
 </div>
 
 <?php
-        echo \gc_partial('footer', \get_defined_vars());
+        echo view('partials.footer', \get_defined_vars());
 ?>  
 

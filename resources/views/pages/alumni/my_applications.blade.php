@@ -507,11 +507,11 @@ if (count($apps) === 0) {
     foreach ($apps as $a) {
         ?>
                 <?php 
-        $status = \gc_alumni_my_applications_normalize_status($a['status'] ?? 'pending');
-        $statusLabel = \gc_alumni_my_applications_get_status_label($status);
-        $statusClass = \gc_alumni_my_applications_get_status_class($status);
-        $statusNote = \gc_alumni_my_applications_get_status_note($status);
-        $progressStep = \gc_alumni_my_applications_get_progress_step($status);
+        $status = \App\Support\ViewFormatter::alumni_my_applications_normalize_status($a['status'] ?? 'pending');
+        $statusLabel = \App\Support\ViewFormatter::alumni_my_applications_get_status_label($status);
+        $statusClass = \App\Support\ViewFormatter::alumni_my_applications_get_status_class($status);
+        $statusNote = \App\Support\ViewFormatter::alumni_my_applications_get_status_note($status);
+        $progressStep = \App\Support\ViewFormatter::alumni_my_applications_get_progress_step($status);
         $isFinalRejected = $status === 'rejected';
         $isFinalCancelled = $status === 'cancelled';
         $isFinalAccepted = $status === 'accepted';
@@ -805,4 +805,4 @@ if (count($apps) === 0) {
 </script>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

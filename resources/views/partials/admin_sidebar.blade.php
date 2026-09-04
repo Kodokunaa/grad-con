@@ -19,9 +19,6 @@ try {
         ->where('status', 'pending')
         ->count();
 } catch (\Throwable $e) {
-    if ($e instanceof \App\Support\PageResponse) {
-        throw $e;
-    }
     $pendingCount = 0;
 }
 ?>

@@ -11,7 +11,6 @@ final class AlumniJobsController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () use ($request) {
-            \gc_require_role('alumni');
             $alumni_id = (int) $request->user()->id;
             $alumni = (array) DB::table('users')->select('fullname', 'course')->where('id', $alumni_id)->where('role', 'alumni')->first();
             $alumniCourse = trim($alumni['course'] ?? '');
@@ -27,8 +26,8 @@ final class AlumniJobsController extends PageController
                 });
             }
             $jobs = $query->orderByDesc('id')->get()->map(fn ($row) => (array) $row)->all();
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('alumni_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.alumni_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.alumni.jobs', get_defined_vars());
         });

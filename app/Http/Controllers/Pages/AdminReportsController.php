@@ -13,8 +13,7 @@ final class AdminReportsController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('admin');
-            $selectedMonth = trim((string) (\gc_context()->query['month'] ?? date('Y-m')));
+            $selectedMonth = trim((string) (request()->query('month') ?? date('Y-m')));
             if (! preg_match('/^\d{4}-\d{2}$/', $selectedMonth) || ! strtotime($selectedMonth.'-01')) {
                 $selectedMonth = date('Y-m');
             }
@@ -32,8 +31,8 @@ final class AdminReportsController extends PageController
             $report['monthly_active_users'] = User::query()->whereBetween('created_at', [$monthStart, $monthEnd])->where('created_at', '<', $monthEnd)->count();
             $report['monthly_employers'] = Job::query()->whereHas('poster', fn ($query) => $query->where('role', 'employer'))->where('created_at', '>=', $monthStart)->where('created_at', '<', $monthEnd)->distinct('posted_by')->count('posted_by');
             $monthLabel = date('F Y', strtotime($selectedMonth.'-01'));
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('admin_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.admin_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.admin.reports', get_defined_vars());
         });

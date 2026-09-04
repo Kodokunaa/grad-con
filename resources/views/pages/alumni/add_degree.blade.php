@@ -210,7 +210,7 @@ if ($error) {
                         class="form-control-custom"
                         placeholder="e.g. City College of Calapan"
                         value="<?php 
-echo htmlspecialchars(\gc_context()->post['school_name'] ?? '');
+echo htmlspecialchars(old('school_name', request()->input('school_name')) ?? '');
 ?>"
                         required
                     >
@@ -226,7 +226,7 @@ foreach ($degree_options as $option) {
                             <option value="<?php 
     echo htmlspecialchars($option);
     ?>" <?php 
-    echo (\gc_context()->post['degree'] ?? '') === $option ? 'selected' : '';
+    echo (old('degree', request()->input('degree')) ?? '') === $option ? 'selected' : '';
     ?>>
                                 <?php 
     echo htmlspecialchars($option);
@@ -247,7 +247,7 @@ foreach ($degree_options as $option) {
                         placeholder="e.g. 2016"
                         maxlength="4"
                         value="<?php 
-echo htmlspecialchars(\gc_context()->post['start_year'] ?? '');
+echo htmlspecialchars(old('start_year', request()->input('start_year')) ?? '');
 ?>"
                     >
                 </div>
@@ -261,7 +261,7 @@ echo htmlspecialchars(\gc_context()->post['start_year'] ?? '');
                         placeholder="e.g. 2022"
                         maxlength="4"
                         value="<?php 
-echo htmlspecialchars(\gc_context()->post['end_year'] ?? '');
+echo htmlspecialchars(old('end_year', request()->input('end_year')) ?? '');
 ?>"
                     >
                 </div>
@@ -361,4 +361,4 @@ document.getElementById("educationForm").addEventListener("submit", function(e) 
 </script>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

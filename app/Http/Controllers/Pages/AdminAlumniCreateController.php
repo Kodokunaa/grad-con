@@ -19,8 +19,8 @@ final class AdminAlumniCreateController extends PageController
                 User::forceCreate(['fullname' => $data['fullname'], 'username' => $data['student_id'], 'password' => $data['password'], 'email' => ($data['email'] ?? '') ?: null, 'course' => ($data['course'] ?? '') ?: null, 'batch_year' => ($data['batch_year'] ?? '') ?: null, 'role' => 'alumni', 'is_active' => true, 'status' => 'approved']);
                 $msg = 'Alumni account created!';
             }
-            echo \gc_partial('header', get_defined_vars());
-            echo \gc_partial('admin_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.admin_sidebar', get_defined_vars());
             return $this->pageView('pages.admin.alumni_create', get_defined_vars());
         });
     }

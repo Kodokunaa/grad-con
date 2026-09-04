@@ -92,46 +92,46 @@ if (empty($archivedEvents)) {
     foreach ($archivedEvents as $event) {
         ?>
                     <?php
-        [$statusText, $statusClass] = \gc_alumni_officer_archive_post_status_label($event['post_start_date'] ?? null, $event['post_end_date'] ?? null);
+        [$statusText, $statusClass] = \App\Support\ViewFormatter::alumni_officer_archive_post_status_label($event['post_start_date'] ?? null, $event['post_end_date'] ?? null);
         ?>
                     <div class="event-post">
                         <div class="post-header">
                             <div class="poster-info">
                                 <?php
-        echo \gc_alumni_officer_archive_avatar_html($event['fullname'] ?? 'Unknown', 'user-avatar poster-avatar');
+        echo \App\Support\ViewFormatter::alumni_officer_archive_avatar_html($event['fullname'] ?? 'Unknown', 'user-avatar poster-avatar');
         ?>
                                 <div>
                                     <h4 class="poster-name"><?php
-        echo \gc_e($event['fullname'] ?? 'Unknown');
+        echo e($event['fullname'] ?? 'Unknown');
         ?></h4>
                                     <div class="post-meta">Archived on <?php
-        echo \gc_e(! empty($event['archived_at']) ? $event['archived_at'] : 'Unknown');
+        echo e(! empty($event['archived_at']) ? $event['archived_at'] : 'Unknown');
         ?></div>
                                 </div>
                             </div>
                             <div class="post-badges-right">
                                 <div class="post-id-badge">Archived Event</div>
                                 <div class="status-pill <?php
-        echo \gc_e($statusClass);
+        echo e($statusClass);
         ?>"><?php
-        echo \gc_e($statusText);
+        echo e($statusText);
         ?></div>
                             </div>
                         </div>
 
                         <div class="post-content">
                             <h2 class="event-title"><?php
-        echo \gc_e($event['title'] ?? 'Untitled event');
+        echo e($event['title'] ?? 'Untitled event');
         ?></h2>
                             <div class="event-text"><?php
-        echo nl2br(\gc_e($event['content'] ?? 'No description provided.'));
+        echo nl2br(e($event['content'] ?? 'No description provided.'));
         ?></div>
                             <div class="schedule-line">
                                 <span>🟢 Start: <?php
-        echo \gc_e(! empty($event['post_start_date']) ? \gc_alumni_officer_archive_format_schedule_date($event['post_start_date']) : 'Immediately');
+        echo e(! empty($event['post_start_date']) ? \App\Support\ViewFormatter::alumni_officer_archive_format_schedule_date($event['post_start_date']) : 'Immediately');
         ?></span>
                                 <span>🔴 End: <?php
-        echo \gc_e(! empty($event['post_end_date']) ? \gc_alumni_officer_archive_format_schedule_date($event['post_end_date']) : 'No end date');
+        echo e(! empty($event['post_end_date']) ? \App\Support\ViewFormatter::alumni_officer_archive_format_schedule_date($event['post_end_date']) : 'No end date');
         ?></span>
                             </div>
                         </div>
@@ -143,7 +143,7 @@ if (empty($archivedEvents)) {
                                 <img src="<?php
             echo \url('');
             ?>/uploads/events/<?php
-            echo \gc_e($event['image']);
+            echo e($event['image']);
             ?>" class="event-image" alt="Archived event image" onclick="openImageLightbox(this.src)">
                             </div>
                         <?php
@@ -183,19 +183,19 @@ if (empty($archivedEvents)) {
                 ?>
                                         <div class="comment-item">
                                             <?php
-                echo \gc_alumni_officer_archive_avatar_html($comment['fullname'] ?? 'User', 'user-avatar comment-avatar');
+                echo \App\Support\ViewFormatter::alumni_officer_archive_avatar_html($comment['fullname'] ?? 'User', 'user-avatar comment-avatar');
                 ?>
                                             <div class="comment-bubble">
                                                 <div class="comment-top">
                                                     <div class="comment-name"><?php
-                echo \gc_e($comment['fullname'] ?? 'Unknown');
+                echo e($comment['fullname'] ?? 'Unknown');
                 ?></div>
                                                     <div class="comment-date"><?php
-                echo \gc_e(! empty($comment['created_at']) ? date('M d, Y', strtotime($comment['created_at'])) : '');
+                echo e(! empty($comment['created_at']) ? date('M d, Y', strtotime($comment['created_at'])) : '');
                 ?></div>
                                                 </div>
                                                 <div class="comment-text"><?php
-                echo nl2br(\gc_e($comment['comment'] ?? ''));
+                echo nl2br(e($comment['comment'] ?? ''));
                 ?></div>
                                             </div>
                                         </div>
@@ -257,4 +257,4 @@ document.addEventListener('keydown', function (event) {
 </script>
 
 <?php
-            echo \gc_partial('footer', \get_defined_vars());
+            echo view('partials.footer', \get_defined_vars());

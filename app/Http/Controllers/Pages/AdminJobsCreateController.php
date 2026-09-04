@@ -13,8 +13,8 @@ final class AdminJobsCreateController extends PageController
             $msg = session('status', '');
             $error = '';
             $mail_notice = '';
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('admin_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.admin_sidebar', get_defined_vars());
 
             return $this->pageView('pages.admin.jobs_create', get_defined_vars());
         });

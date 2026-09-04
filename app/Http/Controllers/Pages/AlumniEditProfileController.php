@@ -13,8 +13,8 @@ final class AlumniEditProfileController extends PageController
             $user = $request->user()->only(['fullname', 'email', 'course', 'batch_year', 'employment_status', 'job_aligned']);
             $msg = session('status', '');
             $error = '';
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('navbar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.navbar', get_defined_vars());
 
             return $this->pageView('pages.alumni.edit_profile', get_defined_vars());
         });

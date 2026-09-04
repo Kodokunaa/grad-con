@@ -18,7 +18,7 @@ final class UpdateAccountProfileController extends Controller
         $data['has_multiple_branches'] = $request->boolean('has_multiple_branches');
         if ($user->role === 'alumni') {
             $data['age'] = $request->filled('birthdate') ? $request->date('birthdate')->age : null;
-            $data['job_aligned'] = $data['employment_status'] === 'Employed' ? gc_profile_analyze_course_job_alignment((string) $user->course, (string) $user->employmentHistory()->latest('start_date')->value('job_title'), (string) $user->employmentHistory()->latest('start_date')->value('job_description'))['value'] : null;
+            $data['job_aligned'] = $data['employment_status'] === 'Employed' ? \App\Support\ViewFormatter::profile_analyze_course_job_alignment((string) $user->course, (string) $user->employmentHistory()->latest('start_date')->value('job_title'), (string) $user->employmentHistory()->latest('start_date')->value('job_description'))['value'] : null;
             $data['has_multiple_branches'] = 0;
             $data['branch_location'] = null;
         } elseif ($user->role === 'employer') {

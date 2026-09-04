@@ -11,7 +11,6 @@ final class AdminAlumniListController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('admin');
             $msg = '';
             $error = '';
             $alumniModels = User::query()->where('role', 'alumni')->where('is_active', true)
@@ -35,8 +34,8 @@ final class AdminAlumniListController extends PageController
             $batchOptions = array_values(array_unique($batchOptions));
             sort($courseOptions, SORT_NATURAL | SORT_FLAG_CASE);
             sort($batchOptions, SORT_NATURAL | SORT_FLAG_CASE);
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('admin_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.admin_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.admin.alumni_list', get_defined_vars());
         });

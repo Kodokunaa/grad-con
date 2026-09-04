@@ -22,8 +22,8 @@ final class AdminJobsNotifyController extends PageController
                 ->orderBy('fullname')->get()->toArray();
             $msg = session('status', '');
             $error = '';
-            echo gc_partial('header', get_defined_vars());
-            echo gc_partial('admin_sidebar', get_defined_vars());
+            echo view('partials.header', get_defined_vars());
+            echo view('partials.admin_sidebar', get_defined_vars());
 
             return $this->pageView('pages.admin.jobs_notify', get_defined_vars());
         });

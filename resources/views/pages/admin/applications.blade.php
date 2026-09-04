@@ -588,12 +588,12 @@ tbody tr:hover{
             <h2 class="page-title">Applications</h2>
             <p class="page-subtitle">
                 Job: <strong><?php 
-echo \gc_e($job['title']);
+echo e($job['title']);
 ?></strong>
             </p>
             <p class="page-subtitle">
                 Posted by: <strong><?php 
-echo \gc_e($job['poster_name']);
+echo e($job['poster_name']);
 ?></strong>
                 <?php 
 if ($isEmployerPosted) {
@@ -618,7 +618,7 @@ echo \url('');
 if ($msg) {
     ?>
         <div class="alert-box alert-success"><?php 
-    echo \gc_e($msg);
+    echo e($msg);
     ?></div>
     <?php 
 }
@@ -628,7 +628,7 @@ if ($msg) {
 if ($error) {
     ?>
         <div class="alert-box alert-error"><?php 
-    echo \gc_e($error);
+    echo e($error);
     ?></div>
     <?php 
 }
@@ -676,7 +676,7 @@ if (!empty($applications)) {
     foreach ($applications as $row) {
         ?>
                         <?php 
-        $status = \gc_admin_applications_normalize_status($row['status'] ?? 'pending');
+        $status = \App\Support\ViewFormatter::admin_applications_normalize_status($row['status'] ?? 'pending');
         $badgeClass = 'badge-pending';
         if ($status === 'accepted') {
             $badgeClass = 'badge-accepted';
@@ -722,29 +722,29 @@ if (!empty($applications)) {
         echo (int) $row['application_id'];
         ?>">
                                     <?php 
-        echo \gc_e($row['fullname']);
+        echo e($row['fullname']);
         ?>
                                 </a>
                             </td>
 
                             <td><?php 
-        echo \gc_e($row['email']);
+        echo e($row['email']);
         ?></td>
                             <td><?php 
-        echo \gc_e($row['course'] ?? 'N/A');
+        echo e($row['course'] ?? 'N/A');
         ?></td>
 
                             <td>
                                 <div class="small-text" style="max-width:260px; white-space:pre-line;">
                                     <?php 
-        echo \gc_e($row['message'] ?? 'No message');
+        echo e($row['message'] ?? 'No message');
         ?>
                                 </div>
                             </td>
 
                             <td>
                                 <?php 
-        echo !empty($row['created_at']) ? \gc_e(date("M d, Y h:i A", strtotime($row['created_at']))) : 'N/A';
+        echo !empty($row['created_at']) ? e(date("M d, Y h:i A", strtotime($row['created_at']))) : 'N/A';
         ?>
                             </td>
 
@@ -753,7 +753,7 @@ if (!empty($applications)) {
         echo $badgeClass;
         ?>">
                                     <?php 
-        echo \gc_e(\gc_admin_applications_status_label($status));
+        echo e(\App\Support\ViewFormatter::admin_applications_status_label($status));
         ?>
                                 </span>
                             </td>
@@ -787,16 +787,16 @@ if (!empty($applications)) {
                                                 type="button"
                                                 class="btn btn-cancel-reason open-cancel-reason-btn"
                                                 data-applicant-name="<?php 
-                echo \gc_e($row['fullname']);
+                echo e($row['fullname']);
                 ?>"
                                                 data-job-title="<?php 
-                echo \gc_e($job['title']);
+                echo e($job['title']);
                 ?>"
                                                 data-cancel-reason="<?php 
-                echo \gc_e($cancelReason);
+                echo e($cancelReason);
                 ?>"
                                                 data-cancelled-at="<?php 
-                echo \gc_e($cancelledAt !== '' ? date('F d, Y h:i A', strtotime($cancelledAt)) : 'N/A');
+                echo e($cancelledAt !== '' ? date('F d, Y h:i A', strtotime($cancelledAt)) : 'N/A');
                 ?>">
                                                 View Cancel Reason
                                             </button>
@@ -824,10 +824,10 @@ if (!empty($applications)) {
                 echo (int) $row['application_id'];
                 ?>"
                                                     data-applicant-name="<?php 
-                echo \gc_e($row['fullname']);
+                echo e($row['fullname']);
                 ?>"
                                                     data-job-title="<?php 
-                echo \gc_e($job['title']);
+                echo e($job['title']);
                 ?>">
                                                     Accept
                                                 </button>
@@ -865,10 +865,10 @@ if (!empty($applications)) {
                 echo (int) $row['application_id'];
                 ?>"
                                                     data-applicant-name="<?php 
-                echo \gc_e($row['fullname']);
+                echo e($row['fullname']);
                 ?>"
                                                     data-job-title="<?php 
-                echo \gc_e($job['title']);
+                echo e($job['title']);
                 ?>">
                                                     Accept
                                                 </button>
@@ -936,7 +936,7 @@ foreach ($applications as $row) {
         ?>
                     <img
                         src="<?php 
-        echo \gc_e(\url('') . '/uploads/profiles/' . rawurlencode($row['profile_picture']));
+        echo e(\url('') . '/uploads/profiles/' . rawurlencode($row['profile_picture']));
         ?>"
                         alt="Profile Picture"
                         class="snapshot-profile-pic">
@@ -951,7 +951,7 @@ foreach ($applications as $row) {
                 <div class="snapshot-profile-info">
                     <div class="snapshot-label">Fullname</div>
                     <div class="snapshot-value"><?php 
-    echo \gc_e($row['fullname'] ?? 'N/A');
+    echo e($row['fullname'] ?? 'N/A');
     ?></div>
                 </div>
             </div>
@@ -960,7 +960,7 @@ foreach ($applications as $row) {
                 <div class="snapshot-item">
                     <div class="snapshot-label">Email</div>
                     <div class="snapshot-value"><?php 
-    echo \gc_e($row['email'] ?? 'N/A');
+    echo e($row['email'] ?? 'N/A');
     ?></div>
                 </div>
 
@@ -968,7 +968,7 @@ foreach ($applications as $row) {
                     <div class="snapshot-label">Course / Batch</div>
                     <div class="snapshot-value">
                         <?php 
-    echo \gc_e(($row['course'] ?? 'N/A') . (!empty($row['batch_year']) ? ' / ' . $row['batch_year'] : ''));
+    echo e(($row['course'] ?? 'N/A') . (!empty($row['batch_year']) ? ' / ' . $row['batch_year'] : ''));
     ?>
                     </div>
                 </div>
@@ -976,14 +976,14 @@ foreach ($applications as $row) {
                 <div class="snapshot-item">
                     <div class="snapshot-label">Age</div>
                     <div class="snapshot-value"><?php 
-    echo \gc_e($row['age'] ?? 'N/A');
+    echo e($row['age'] ?? 'N/A');
     ?></div>
                 </div>
 
                 <div class="snapshot-item">
                     <div class="snapshot-label">Address</div>
                     <div class="snapshot-value"><?php 
-    echo \gc_e($row['address'] ?? 'N/A');
+    echo e($row['address'] ?? 'N/A');
     ?></div>
                 </div>
 
@@ -994,7 +994,7 @@ foreach ($applications as $row) {
                     <div class="snapshot-item full-width" style="background:#fff7ed;border-color:#fed7aa;">
                         <div class="snapshot-label" style="color:#9a3412;">Cancel Reason</div>
                         <div class="snapshot-value" style="color:#7c2d12;"><?php 
-        echo \gc_e($row['cancel_reason']);
+        echo e($row['cancel_reason']);
         ?></div>
                     </div>
                 <?php 
@@ -1004,28 +1004,28 @@ foreach ($applications as $row) {
                 <div class="snapshot-item full-width">
                     <div class="snapshot-label">Career Objective</div>
                     <div class="snapshot-value"><?php 
-    echo \gc_e($row['career_objective'] ?? 'N/A');
+    echo e($row['career_objective'] ?? 'N/A');
     ?></div>
                 </div>
 
                 <div class="snapshot-item full-width">
                     <div class="snapshot-label">Skills</div>
                     <div class="snapshot-value"><?php 
-    echo \gc_e($row['skills'] ?? 'N/A');
+    echo e($row['skills'] ?? 'N/A');
     ?></div>
                 </div>
 
                 <div class="snapshot-item full-width">
                     <div class="snapshot-label">Trainings</div>
                     <div class="snapshot-value"><?php 
-    echo \gc_e($row['trainings'] ?? 'N/A');
+    echo e($row['trainings'] ?? 'N/A');
     ?></div>
                 </div>
 
                 <div class="snapshot-item full-width">
                     <div class="snapshot-label">Work Experience</div>
                     <div class="snapshot-value"><?php 
-    echo \gc_e($row['work_experience'] ?? 'N/A');
+    echo e($row['work_experience'] ?? 'N/A');
     ?></div>
                 </div>
             </div>
@@ -1055,13 +1055,13 @@ foreach ($applications as $row) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_e($edu['school_name']);
+            echo e($edu['school_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_e($edu['degree']);
+            echo e($edu['degree']);
             ?></td>
                                             <td><?php 
-            echo \gc_admin_applications_format_year_range($edu['start_year'] ?? '', $edu['end_year'] ?? '');
+            echo \App\Support\ViewFormatter::admin_applications_format_year_range($edu['start_year'] ?? '', $edu['end_year'] ?? '');
             ?></td>
                                         </tr>
                                     <?php 
@@ -1104,22 +1104,22 @@ foreach ($applications as $row) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_e($jobHist['company_name']);
+            echo e($jobHist['company_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_e($jobHist['job_title']);
+            echo e($jobHist['job_title']);
             ?></td>
                                             <td><?php 
-            echo \gc_e($jobHist['employment_type'] ?? '');
+            echo e($jobHist['employment_type'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_e($jobHist['location'] ?? '');
+            echo e($jobHist['location'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_admin_applications_format_date_range($jobHist['start_date'] ?? '', $jobHist['end_date'] ?? '');
+            echo \App\Support\ViewFormatter::admin_applications_format_date_range($jobHist['start_date'] ?? '', $jobHist['end_date'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_e($jobHist['job_description'] ?? '');
+            echo e($jobHist['job_description'] ?? '');
             ?></td>
                                         </tr>
                                     <?php 
@@ -1397,4 +1397,4 @@ foreach ($applications as $row) {
 </script>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

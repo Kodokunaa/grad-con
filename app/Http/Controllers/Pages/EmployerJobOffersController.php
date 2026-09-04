@@ -11,8 +11,7 @@ final class EmployerJobOffersController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('employer');
-            $id = (int) \gc_context()->session['user']['id'];
+            $id = (int) request()->user()?->id;
             $error = '';
             $msg = '';
             $offers = JobOffer::query()->with('alumni')->where('employer_id', $id)->latest('created_at')->get()->map(function ($offer) {
@@ -30,8 +29,8 @@ final class EmployerJobOffersController extends PageController
                     $stats[$offer['status']]++;
                 }
             }
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('employer_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.employer_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.employer.job_offers', get_defined_vars());
         });

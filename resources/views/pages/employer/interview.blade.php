@@ -217,7 +217,7 @@ td {
 </head>
 <body>
 
-<?php echo \gc_partial('employer_sidebar', \get_defined_vars()); ?>
+<?php echo view('partials.employer_sidebar', \get_defined_vars()); ?>
 
 <div class="content">
 
@@ -228,7 +228,7 @@ td {
 if ($success) {
     ?>
         <div class="alert alert-success"><?php
-    echo \gc_e($success);
+    echo e($success);
     ?></div>
     <?php
 }
@@ -238,7 +238,7 @@ if ($success) {
 if ($error) {
     ?>
         <div class="alert alert-error"><?php
-    echo \gc_e($error);
+    echo e($error);
     ?></div>
     <?php
 }
@@ -249,21 +249,21 @@ if ($error) {
             <div class="info-box">
                 <div class="info-label">Applicant</div>
                 <div class="info-value"><?php
-echo \gc_e($application['fullname']);
+echo e($application['fullname']);
 ?></div>
             </div>
 
             <div class="info-box">
                 <div class="info-label">Email</div>
                 <div class="info-value"><?php
-echo \gc_e($application['email']);
+echo e($application['email']);
 ?></div>
             </div>
 
             <div class="info-box">
                 <div class="info-label">Job</div>
                 <div class="info-value"><?php
-echo \gc_e($application['job_title']);
+echo e($application['job_title']);
 ?></div>
             </div>
 
@@ -271,7 +271,7 @@ echo \gc_e($application['job_title']);
                 <div class="info-label">Company</div>
                 <div class="info-value">
                     <?php
-echo \gc_e($application['employer_company'] ?: $application['company']);
+echo e($application['employer_company'] ?: $application['company']);
 ?>
                 </div>
             </div>
@@ -298,7 +298,7 @@ if ($offer_id > 0) {
                     type="date" 
                     name="interview_date" 
                     value="<?php
-echo \gc_e($interview['interview_date'] ?? '');
+echo e($interview['interview_date'] ?? '');
 ?>" 
                     required>
             </div>
@@ -309,7 +309,7 @@ echo \gc_e($interview['interview_date'] ?? '');
                     type="time" 
                     name="interview_time" 
                     value="<?php
-echo \gc_e($interview['interview_time'] ?? '');
+echo e($interview['interview_time'] ?? '');
 ?>" 
                     required>
             </div>
@@ -321,7 +321,7 @@ echo \gc_e($interview['interview_time'] ?? '');
                     name="location" 
                     placeholder="Example: CCC Room 101 or Google Meet link"
                     value="<?php
-echo \gc_e($interview['location'] ?? '');
+echo e($interview['location'] ?? '');
 ?>" 
                     required>
             </div>
@@ -329,7 +329,7 @@ echo \gc_e($interview['location'] ?? '');
             <div class="form-group">
                 <label>Message</label>
                 <textarea name="message" placeholder="Write your interview message here..."><?php
-echo \gc_e($interview['message'] ?? 'Good day! We are inviting you for an interview. Please see the interview details below. Thank you.');
+echo e($interview['message'] ?? 'Good day! We are inviting you for an interview. Please see the interview details below. Thank you.');
 ?></textarea>
             </div>
 
@@ -358,22 +358,22 @@ if ($interview) {
                 <tbody>
                     <tr>
                         <td><?php
-    echo \gc_e($application['fullname']);
+    echo e($application['fullname']);
     ?></td>
                         <td><?php
-    echo \gc_e($application['job_title']);
+    echo e($application['job_title']);
     ?></td>
                         <td>
                             <?php
-    echo \gc_e(date('M d, Y', strtotime($interview['interview_date'])));
+    echo e(date('M d, Y', strtotime($interview['interview_date'])));
     ?>
                             <br>
                             <?php
-    echo \gc_e(date('h:i A', strtotime($interview['interview_time'])));
+    echo e(date('h:i A', strtotime($interview['interview_time'])));
     ?>
                         </td>
                         <td><span class="badge"><?php
-    echo \gc_e($interview['status']);
+    echo e($interview['status']);
     ?></span></td>
                         <td>
                             <?php

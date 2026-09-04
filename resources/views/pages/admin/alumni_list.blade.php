@@ -800,7 +800,7 @@ echo \url('');
 if ($msg) {
     ?>
         <div class="alert-box alert-success-custom"><?php 
-    echo \gc_e($msg);
+    echo e($msg);
     ?></div>
     <?php 
 }
@@ -810,7 +810,7 @@ if ($msg) {
 if ($error) {
     ?>
         <div class="alert-box alert-danger-custom"><?php 
-    echo \gc_e($error);
+    echo e($error);
     ?></div>
     <?php 
 }
@@ -827,9 +827,9 @@ if ($error) {
 foreach ($courseOptions as $course) {
     ?>
                         <option value="<?php 
-    echo \gc_e($course);
+    echo e($course);
     ?>"><?php 
-    echo \gc_e($course);
+    echo e($course);
     ?></option>
                     <?php 
 }
@@ -845,9 +845,9 @@ foreach ($courseOptions as $course) {
 foreach ($batchOptions as $batch) {
     ?>
                         <option value="<?php 
-    echo \gc_e($batch);
+    echo e($batch);
     ?>"><?php 
-    echo \gc_e($batch);
+    echo e($batch);
     ?></option>
                     <?php 
 }
@@ -900,24 +900,24 @@ foreach ($alumni as $a) {
     echo (int) $a['id'];
     ?>">
                                 <?php 
-    echo \gc_e($a['fullname']);
+    echo e($a['fullname']);
     ?>
                             </a>
                         </td>
                         <td><?php 
-    echo \gc_e($a['username']);
+    echo e($a['username']);
     ?></td>
                         <td><?php 
-    echo \gc_e($a['email'] ?? '');
+    echo e($a['email'] ?? '');
     ?></td>
                         <td><?php 
-    echo \gc_e($a['course'] ?? '');
+    echo e($a['course'] ?? '');
     ?></td>
                         <td><?php 
-    echo \gc_e($a['batch_year'] ?? '');
+    echo e($a['batch_year'] ?? '');
     ?></td>
                         <td><?php 
-    echo \gc_e($a['skills'] ?? '');
+    echo e($a['skills'] ?? '');
     ?></td>
                         <td>
                             <a class="edit-btn" href="<?php 
@@ -953,13 +953,13 @@ foreach ($alumni as $a) {
     if (!empty($a['profile_picture'])) {
         ?>
                         <img src="<?php 
-        echo \gc_e(\url('') . '/uploads/profiles/' . rawurlencode($a['profile_picture']));
+        echo e(\url('') . '/uploads/profiles/' . rawurlencode($a['profile_picture']));
         ?>" alt="Profile Photo">
                     <?php 
     } else {
         ?>
                         <div class="alumni-profile-initials"><?php 
-        echo \gc_e(strtoupper(substr($a['fullname'] ?? 'A', 0, 1)));
+        echo e(strtoupper(substr($a['fullname'] ?? 'A', 0, 1)));
         ?></div>
                     <?php 
     }
@@ -967,92 +967,92 @@ foreach ($alumni as $a) {
                 </div>
                 <div class="alumni-profile-details">
                     <div class="alumni-profile-name"><?php 
-    echo \gc_e($a['fullname']);
+    echo e($a['fullname']);
     ?></div>
                     <div class="alumni-profile-subtitle">Alumni Profile Snapshot</div>
                     <div class="alumni-profile-meta">
                         <span>Username: <?php 
-    echo \gc_e($a['username']);
+    echo e($a['username']);
     ?></span>
                         <span>Course: <?php 
-    echo \gc_e($a['course'] ?? '');
+    echo e($a['course'] ?? '');
     ?></span>
                         <span>Batch: <?php 
-    echo \gc_e($a['batch_year'] ?? '');
+    echo e($a['batch_year'] ?? '');
     ?></span>
                     </div>
                 </div>
             </div>
             <div class="snapshot-grid">
                 <div class="snapshot-item"><div class="snapshot-label">Fullname</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['fullname']);
+    echo e($a['fullname']);
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Username</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['username']);
+    echo e($a['username']);
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Email</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['email'] ?? '');
+    echo e($a['email'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Course</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['course'] ?? '');
+    echo e($a['course'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Batch</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['batch_year'] ?? '');
+    echo e($a['batch_year'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Birthdate</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['birthdate'] ?? '');
+    echo e($a['birthdate'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Age</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['age'] ?? '');
+    echo e($a['age'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Gender</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['gender'] ?? '');
+    echo e($a['gender'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Civil Status</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['civil_status'] ?? '');
+    echo e($a['civil_status'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Contact Number</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['contact_number'] ?? '');
+    echo e($a['contact_number'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Address</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['address'] ?? '');
+    echo e($a['address'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Indigenous Tribe</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['indigenous_tribe'] ?? '');
+    echo e($a['indigenous_tribe'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Disability</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['special_needs'] ?? '');
+    echo e($a['special_needs'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Employment Status</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['employment_status'] ?? '');
+    echo e($a['employment_status'] ?? '');
     ?></div></div>
                 <?php 
-    $summaryAlignment = \gc_admin_alumni_list_summarize_job_alignment($a['course'] ?? '', $jobs);
+    $summaryAlignment = \App\Support\ViewFormatter::admin_alumni_list_summarize_job_alignment($a['course'] ?? '', $jobs);
     ?>
                 <div class="snapshot-item">
                     <div class="snapshot-label">Job Alignment</div>
                     <div class="snapshot-value">
                         <span class="alignment-badge <?php 
-    echo \gc_e($summaryAlignment['class']);
+    echo e($summaryAlignment['class']);
     ?>"><?php 
-    echo \gc_e($summaryAlignment['status']);
+    echo e($summaryAlignment['status']);
     ?></span>
                         <div class="details-empty"><?php 
-    echo \gc_e($summaryAlignment['reason']);
+    echo e($summaryAlignment['reason']);
     ?></div>
                     </div>
                 </div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Career Objective</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['career_objective'] ?? '');
+    echo e($a['career_objective'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Skills</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['skills'] ?? '');
+    echo e($a['skills'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Work Experience</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['work_experience'] ?? '');
+    echo e($a['work_experience'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Trainings</div><div class="snapshot-value"><?php 
-    echo \gc_e($a['trainings'] ?? '');
+    echo e($a['trainings'] ?? '');
     ?></div></div>
             </div>
 
@@ -1081,13 +1081,13 @@ foreach ($alumni as $a) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_e($edu['school_name']);
+            echo e($edu['school_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_e($edu['degree']);
+            echo e($edu['degree']);
             ?></td>
                                             <td><?php 
-            echo \gc_admin_alumni_list_format_year_range($edu['start_year'] ?? '', $edu['end_year'] ?? '');
+            echo \App\Support\ViewFormatter::admin_alumni_list_format_year_range($edu['start_year'] ?? '', $edu['end_year'] ?? '');
             ?></td>
                                         </tr>
                                     <?php 
@@ -1128,20 +1128,20 @@ foreach ($alumni as $a) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_e($deg['degree_name']);
+            echo e($deg['degree_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_e($deg['school_name'] ?? '');
+            echo e($deg['school_name'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_e($deg['year_graduated'] ?? '');
+            echo e($deg['year_graduated'] ?? '');
             ?></td>
                                             <td>
                                                 <?php 
             if (!empty($deg['diploma_file'])) {
                 ?>
                                                     <a href="<?php 
-                echo \gc_e(\url('') . '/uploads/diplomas/' . rawurlencode($deg['diploma_file']));
+                echo e(\url('') . '/uploads/diplomas/' . rawurlencode($deg['diploma_file']));
                 ?>" target="_blank">View Diploma</a>
                                                 <?php 
             } else {
@@ -1171,7 +1171,7 @@ foreach ($alumni as $a) {
     if ($employmentHistoryError !== '') {
         ?>
                         <div class="details-empty"><?php 
-        echo \gc_e($employmentHistoryError);
+        echo e($employmentHistoryError);
         ?></div>
                     <?php 
     } elseif (empty($jobs)) {
@@ -1200,38 +1200,38 @@ foreach ($alumni as $a) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_e($job['company_name']);
+            echo e($job['company_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_e($job['job_title']);
+            echo e($job['job_title']);
             ?></td>
                                             <td><?php 
-            echo \gc_e($job['employment_type'] ?? '');
+            echo e($job['employment_type'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_e($job['location'] ?? '');
+            echo e($job['location'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_admin_alumni_list_format_date_range($job['start_date'] ?? '', $job['end_date'] ?? '');
+            echo \App\Support\ViewFormatter::admin_alumni_list_format_date_range($job['start_date'] ?? '', $job['end_date'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_e($job['job_description'] ?? '');
+            echo e($job['job_description'] ?? '');
             ?></td>
                                             <td>
                                                 <?php 
-            $jobAlignment = \gc_admin_alumni_list_analyze_course_job_alignment($a['course'] ?? '', $job['job_title'] ?? '', $job['job_description'] ?? '');
+            $jobAlignment = \App\Support\ViewFormatter::admin_alumni_list_analyze_course_job_alignment($a['course'] ?? '', $job['job_title'] ?? '', $job['job_description'] ?? '');
             ?>
                                                 <span class="alignment-badge <?php 
-            echo \gc_e($jobAlignment['class']);
+            echo e($jobAlignment['class']);
             ?>"><?php 
-            echo \gc_e($jobAlignment['status']);
+            echo e($jobAlignment['status']);
             ?></span>
                                                 <div class="details-empty"><?php 
-            echo \gc_e($jobAlignment['reason']);
+            echo e($jobAlignment['reason']);
             ?></div>
                                             </td>
                                             <td><?php 
-            echo \gc_e($job['created_at'] ?? '');
+            echo e($job['created_at'] ?? '');
             ?></td>
                                         </tr>
                                     <?php 
@@ -1271,10 +1271,10 @@ foreach ($alumni as $a) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_e($cert['certificate_name']);
+            echo e($cert['certificate_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_e($cert['issue_date'] ?? '');
+            echo e($cert['issue_date'] ?? '');
             ?></td>
                                             <td>
                                                 <?php 
@@ -1282,10 +1282,10 @@ foreach ($alumni as $a) {
                 ?>
                                                     <div class="certificate-preview-wrap">
                                                         <a href="<?php 
-                echo \gc_e(\url('') . '/uploads/certificates/' . rawurlencode($cert['certificate_image']));
+                echo e(\url('') . '/uploads/certificates/' . rawurlencode($cert['certificate_image']));
                 ?>" target="_blank">
                                                             <img class="cert-preview" src="<?php 
-                echo \gc_e(\url('') . '/uploads/certificates/' . rawurlencode($cert['certificate_image']));
+                echo e(\url('') . '/uploads/certificates/' . rawurlencode($cert['certificate_image']));
                 ?>" alt="Certificate Preview">
                                                         </a>
                                                     </div>
@@ -1471,4 +1471,4 @@ $(function () {
 </script>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());

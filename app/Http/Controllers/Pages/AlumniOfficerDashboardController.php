@@ -11,9 +11,8 @@ final class AlumniOfficerDashboardController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('alumni_officer');
-            $officer_id = (int) (\gc_context()->session['user']['id'] ?? 0);
-            $fullname = \gc_context()->session['user']['fullname'] ?? \gc_context()->session['user']['username'] ?? 'Alumni Officer';
+            $officer_id = (int) (request()->user()?->id ?? 0);
+            $fullname = request()->user()?->fullname ?? request()->user()?->username ?? 'Alumni Officer';
             $totalEvents = 0;
             $activeEvents = 0;
             $scheduledEvents = 0;
@@ -28,8 +27,8 @@ final class AlumniOfficerDashboardController extends PageController
 
                 return $row;
             })->all();
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('alumni_officer_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.alumni_officer_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.alumni_officer.dashboard', get_defined_vars());
         });

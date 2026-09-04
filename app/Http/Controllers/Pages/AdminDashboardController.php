@@ -12,7 +12,6 @@ final class AdminDashboardController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('admin');
             $totalJobs = 0;
             $totalEmployers = 0;
             $employedCount = 0;
@@ -36,9 +35,9 @@ final class AdminDashboardController extends PageController
             $employmentTotals = [$employedCount, $unemployedCount];
             $alignmentLabels = ['Aligned', 'Not Aligned'];
             $alignmentTotals = [$alignedCount, $notAlignedCount];
-            $adminName = \gc_context()->session['user']['fullname'] ?? 'System Admin';
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('admin_sidebar', \get_defined_vars());
+            $adminName = request()->user()?->fullname ?? 'System Admin';
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.admin_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.admin.dashboard', get_defined_vars());
         });

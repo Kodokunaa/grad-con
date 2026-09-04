@@ -331,7 +331,7 @@
 if ($msg) {
     ?>
             <div class="alert-box alert-success-custom"><?php
-    echo \gc_e($msg);
+    echo e($msg);
     ?></div>
         <?php
 }
@@ -341,7 +341,7 @@ if ($msg) {
 if ($error) {
     ?>
             <div class="alert-box alert-danger-custom"><?php
-    echo \gc_e($error);
+    echo e($error);
     ?></div>
         <?php
 }
@@ -366,7 +366,7 @@ if ($error) {
                             name="title"
                             class="form-control-custom"
                             value="<?php
-        echo \gc_e(\gc_context()->post['title'] ?? '');
+        echo e(old('title', request()->input('title')) ?? '');
         ?>"
                             placeholder="Enter event title"
                             required
@@ -382,7 +382,7 @@ if ($error) {
                             placeholder="Write the event announcement, details, requirements, or reminders..."
                             required
                         ><?php
-        echo \gc_e(\gc_context()->post['content'] ?? '');
+        echo e(old('content', request()->input('content')) ?? '');
         ?></textarea>
                     </div>
 
@@ -400,7 +400,7 @@ if ($error) {
                                     name="post_start_date"
                                     class="form-control-custom"
                                     value="<?php
-        echo \gc_e(\gc_context()->post['post_start_date'] ?? '');
+        echo e(old('post_start_date', request()->input('post_start_date')) ?? '');
         ?>"
                                 >
                                 <div class="helper-text">The post becomes visible to alumni on this date and time.</div>
@@ -413,7 +413,7 @@ if ($error) {
                                     name="post_end_date"
                                     class="form-control-custom"
                                     value="<?php
-        echo \gc_e(\gc_context()->post['post_end_date'] ?? '');
+        echo e(old('post_end_date', request()->input('post_end_date')) ?? '');
         ?>"
                                 >
                                 <div class="helper-text">The post will no longer appear in alumni feed after this date and time.</div>
@@ -445,4 +445,4 @@ if ($error) {
 </div>
 
 <?php
-        echo \gc_partial('footer', \get_defined_vars());
+        echo view('partials.footer', \get_defined_vars());

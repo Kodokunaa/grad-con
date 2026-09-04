@@ -11,15 +11,14 @@ final class AdminTrainingsListController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            \gc_require_role('admin');
             $trainings = Training::query()->with('author')->latest('id')->get()->map(function ($training) {
                 $row = $training->toArray();
                 $row['fullname'] = $training->author?->fullname;
 
                 return $row;
             })->all();
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('admin_sidebar', \get_defined_vars());
+            echo view('partials.header', \get_defined_vars());
+            echo view('partials.admin_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.admin.trainings_list', get_defined_vars());
         });

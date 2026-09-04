@@ -574,7 +574,7 @@ echo htmlspecialchars($alumni["trainings"] ?? "");
                     name="message"
                     rows="4"
                 ><?php 
-echo htmlspecialchars(\gc_context()->post["message"] ?? "");
+echo htmlspecialchars(old('message', request()->input('message')) ?? "");
 ?></textarea>
             </div>
 
@@ -587,7 +587,7 @@ echo htmlspecialchars(\gc_context()->post["message"] ?? "");
                             name="agree_terms"
                             value="1"
                             <?php 
-echo isset(\gc_context()->post['agree_terms']) ? 'checked' : '';
+echo old('agree_terms', request()->input('agree_terms')) !== null ? 'checked' : '';
 ?>
                             required
                         >
@@ -631,7 +631,7 @@ echo \url('');
 </div>
 
 <?php 
-echo \gc_partial('footer', \get_defined_vars());
+echo view('partials.footer', \get_defined_vars());
 ?>
 
 <script>

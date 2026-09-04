@@ -5,12 +5,12 @@
 <?php
 if (session('status')) {
     ?><div class="alert alert-success"><?php
-    echo \gc_e(session('status'));
+    echo e(session('status'));
     ?></div><?php
 }
 if ($errors->any()) {
     ?><div class="alert alert-danger"><?php
-    echo \gc_e($errors->first());
+    echo e($errors->first());
     ?></div><?php
 }
 ?>

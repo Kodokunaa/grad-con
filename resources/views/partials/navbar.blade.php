@@ -11,7 +11,7 @@ echo \url('');
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
         <?php 
-if (isset(\gc_context()->session['user'])) {
+if (auth()->check()) {
     ?>
           <li class="nav-item">
             <a class="nav-link" href="<?php 
