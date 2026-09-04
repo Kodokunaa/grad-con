@@ -261,7 +261,7 @@ echo \url('');
 if ($error) {
     ?>
         <div class="alert-box alert-error"><?php 
-    echo \gc_employer_posted_job_e($error);
+    echo \gc_e($error);
     ?></div>
     <?php 
 }
@@ -320,32 +320,32 @@ if (!empty($posted_jobs)) {
 
                             <td>
                                 <div class="job-title"><?php 
-        echo \gc_employer_posted_job_e($job['title']);
+        echo \gc_e($job['title']);
         ?></div>
                                 <div class="small-text">
                                     <?php 
-        echo \gc_employer_posted_job_e($job['employer_company'] ?: $job['company']);
+        echo \gc_e($job['employer_company'] ?: $job['company']);
         ?>
                                 </div>
                             </td>
 
                             <td><?php 
-        echo \gc_employer_posted_job_e($job['job_type'] ?: 'N/A');
+        echo \gc_e($job['job_type'] ?: 'N/A');
         ?></td>
 
                             <td><?php 
-        echo \gc_employer_posted_job_e($job['location'] ?: 'N/A');
+        echo \gc_e($job['location'] ?: 'N/A');
         ?></td>
 
                             <td>
                                 <?php 
-        echo !empty($job['start_date']) ? \gc_employer_posted_job_e(date("F j, Y", strtotime($job['start_date']))) : 'N/A';
+        echo !empty($job['start_date']) ? \gc_e(date("F j, Y", strtotime($job['start_date']))) : 'N/A';
         ?>
                             </td>
 
                             <td>
                                 <?php 
-        echo !empty($job['end_date']) ? \gc_employer_posted_job_e(date("F j, Y", strtotime($job['end_date']))) : 'N/A';
+        echo !empty($job['end_date']) ? \gc_e(date("F j, Y", strtotime($job['end_date']))) : 'N/A';
         ?>
                             </td>
 
@@ -354,7 +354,7 @@ if (!empty($posted_jobs)) {
         echo $scheduleClass;
         ?>">
                                     <?php 
-        echo \gc_employer_posted_job_e($scheduleStatus);
+        echo \gc_e($scheduleStatus);
         ?>
                                 </span>
                             </td>

@@ -20,6 +20,12 @@ final class MigrationTest extends TestCase
 
     private array $createdFiles = [];
 
+    public function test_shared_html_escaping_helper_preserves_legacy_behavior(): void
+    {
+        $this->assertSame('&lt;tag title=&quot;test&quot;&gt;&#039;&amp;', gc_e('<tag title="test">\'&'));
+        $this->assertSame('', gc_e(null));
+    }
+
     protected function tearDown(): void
     {
         foreach ($this->createdFiles as $path) {

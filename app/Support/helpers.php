@@ -15,6 +15,10 @@ function gc_user(): array
 {
     return auth()->user()?->makeHidden(['password', 'remember_token'])->toArray() ?? [];
 }
+function gc_e(mixed $value): string
+{
+    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
+}
 function gc_header(string $header, bool $replace = true, int $code = 0): void
 {
     gc_context()->header($header, $replace, $code);

@@ -331,7 +331,7 @@
 if ($msg) {
     ?>
             <div class="alert-box alert-success-custom"><?php 
-    echo \gc_admin_events_create_e($msg);
+    echo \gc_e($msg);
     ?></div>
         <?php 
 }
@@ -341,7 +341,7 @@ if ($msg) {
 if ($error) {
     ?>
             <div class="alert-box alert-danger-custom"><?php 
-    echo \gc_admin_events_create_e($error);
+    echo \gc_e($error);
     ?></div>
         <?php 
 }
@@ -365,7 +365,7 @@ if ($error) {
                             name="title"
                             class="form-control-custom"
                             value="<?php 
-echo \gc_admin_events_create_e(\gc_context()->post['title'] ?? '');
+echo \gc_e(\gc_context()->post['title'] ?? '');
 ?>"
                             placeholder="Enter event title"
                             required
@@ -381,7 +381,7 @@ echo \gc_admin_events_create_e(\gc_context()->post['title'] ?? '');
                             placeholder="Write the event announcement, details, requirements, or reminders..."
                             required
                         ><?php 
-echo \gc_admin_events_create_e(\gc_context()->post['content'] ?? '');
+echo \gc_e(\gc_context()->post['content'] ?? '');
 ?></textarea>
                     </div>
 
@@ -399,7 +399,7 @@ echo \gc_admin_events_create_e(\gc_context()->post['content'] ?? '');
                                     name="post_start_date"
                                     class="form-control-custom"
                                     value="<?php 
-echo \gc_admin_events_create_e(\gc_context()->post['post_start_date'] ?? '');
+echo \gc_e(\gc_context()->post['post_start_date'] ?? '');
 ?>"
                                 >
                                 <div class="helper-text">The post becomes visible to alumni on this date and time.</div>
@@ -412,7 +412,7 @@ echo \gc_admin_events_create_e(\gc_context()->post['post_start_date'] ?? '');
                                     name="post_end_date"
                                     class="form-control-custom"
                                     value="<?php 
-echo \gc_admin_events_create_e(\gc_context()->post['post_end_date'] ?? '');
+echo \gc_e(\gc_context()->post['post_end_date'] ?? '');
 ?>"
                                 >
                                 <div class="helper-text">The post will no longer appear in alumni feed after this date and time.</div>

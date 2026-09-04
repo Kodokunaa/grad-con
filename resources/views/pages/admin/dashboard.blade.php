@@ -434,7 +434,7 @@
             <div>
                 <div class="eyebrow">📊 Admin Analytics</div>
                 <h1 class="dashboard-title">Welcome back, <?php 
-echo \gc_admin_dashboard_e($adminName);
+echo \gc_e($adminName);
 ?></h1>
                 <div class="dashboard-subtitle">Here is your latest employment overview.</div>
             </div>
@@ -460,13 +460,13 @@ echo \url('');
                     <div class="hero-mini">
                         <div class="hero-mini-label">Employment Rate</div>
                         <div class="hero-mini-value"><?php 
-echo \gc_admin_dashboard_e($employmentRate);
+echo \gc_e($employmentRate);
 ?>%</div>
                     </div>
                     <div class="hero-mini">
                         <div class="hero-mini-label">Alignment Rate</div>
                         <div class="hero-mini-value"><?php 
-echo \gc_admin_dashboard_e($alignmentRate);
+echo \gc_e($alignmentRate);
 ?>%</div>
                     </div>
                 </div>

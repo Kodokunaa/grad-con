@@ -167,7 +167,7 @@ if (count($feed) === 0) {
         $reactionEmoji = $userReaction && isset($allowedReactions[$userReaction]) ? $allowedReactions[$userReaction]['emoji'] : '👍';
         ?>
                 <div class="post-card" data-post-key="<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>">
                     <div class="post-header">
                         <div class="post-user">
@@ -176,10 +176,10 @@ if (count($feed) === 0) {
         ?>
                             <div class="user-meta">
                                 <div class="poster-name"><?php 
-        echo \gc_alumni_feed_e($item['poster']);
+        echo \gc_e($item['poster']);
         ?></div>
                                 <div class="poster-date"><?php 
-        echo \gc_alumni_feed_e(\gc_alumni_feed_format_post_date($item['created_at']));
+        echo \gc_e(\gc_alumni_feed_format_post_date($item['created_at']));
         ?></div>
                             </div>
                         </div>
@@ -194,7 +194,7 @@ if (count($feed) === 0) {
             ?>
                                 <span class="badge-pill badge-training">Training</span>
                                 <span class="badge-pill badge-course"><?php 
-            echo \gc_alumni_feed_e($item['target_course']);
+            echo \gc_e($item['target_course']);
             ?></span>
                             <?php 
         }
@@ -204,7 +204,7 @@ if (count($feed) === 0) {
 
                     <div class="post-body">
                         <div class="post-title"><?php 
-        echo \gc_alumni_feed_e($item['title']);
+        echo \gc_e($item['title']);
         ?></div>
 
                         <?php 
@@ -212,10 +212,10 @@ if (count($feed) === 0) {
             ?>
                             <div class="training-meta">
                                 <span>📅 <?php 
-            echo \gc_alumni_feed_e($item['training_date'] ?: 'Not set');
+            echo \gc_e($item['training_date'] ?: 'Not set');
             ?></span>
                                 <span>📍 <?php 
-            echo \gc_alumni_feed_e($item['location'] ?: 'No location specified');
+            echo \gc_e($item['location'] ?: 'No location specified');
             ?></span>
                             </div>
                         <?php 
@@ -223,10 +223,10 @@ if (count($feed) === 0) {
             ?>
                             <div class="training-meta">
                                 <span>🟢 Start: <?php 
-            echo \gc_alumni_feed_e($item['post_start_date'] ? \gc_alumni_feed_format_post_date($item['post_start_date']) : 'Immediately');
+            echo \gc_e($item['post_start_date'] ? \gc_alumni_feed_format_post_date($item['post_start_date']) : 'Immediately');
             ?></span>
                                 <span>🔴 End: <?php 
-            echo \gc_alumni_feed_e($item['post_end_date'] ? \gc_alumni_feed_format_post_date($item['post_end_date']) : 'No end date');
+            echo \gc_e($item['post_end_date'] ? \gc_alumni_feed_format_post_date($item['post_end_date']) : 'No end date');
             ?></span>
                             </div>
                         <?php 
@@ -238,9 +238,9 @@ if (count($feed) === 0) {
             ?>
                             <div class="post-image-wrap">
                                 <img class="post-image" src="<?php 
-            echo \url('') . $imageFolder . \gc_alumni_feed_e($item['image']);
+            echo \url('') . $imageFolder . \gc_e($item['image']);
             ?>" alt="<?php 
-            echo \gc_alumni_feed_e($postType);
+            echo \gc_e($postType);
             ?> image">
                             </div>
                         <?php 
@@ -248,12 +248,12 @@ if (count($feed) === 0) {
         ?>
 
                         <div class="post-content"><?php 
-        echo nl2br(\gc_alumni_feed_e($item['content']));
+        echo nl2br(\gc_e($item['content']));
         ?></div>
                     </div>
 
                     <div class="engagement-row" id="engagement-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>">
                         <?php 
         echo \gc_alumni_feed_render_engagement_html($counts, count($comments), $allowedReactions);
@@ -267,18 +267,18 @@ if (count($feed) === 0) {
         foreach ($allowedReactions as $reactionKey => $reactionInfo) {
             ?>
                                     <button type="button" class="reaction-option" data-post-type="<?php 
-            echo \gc_alumni_feed_e($postType);
+            echo \gc_e($postType);
             ?>" data-post-id="<?php 
             echo $postId;
             ?>" data-post-key="<?php 
-            echo \gc_alumni_feed_e($postKey);
+            echo \gc_e($postKey);
             ?>" data-reaction="<?php 
-            echo \gc_alumni_feed_e($reactionKey);
+            echo \gc_e($reactionKey);
             ?>" title="<?php 
-            echo \gc_alumni_feed_e($reactionInfo['label']);
+            echo \gc_e($reactionInfo['label']);
             ?>">
                                         <?php 
-            echo \gc_alumni_feed_e($reactionInfo['emoji']);
+            echo \gc_e($reactionInfo['emoji']);
             ?>
                                     </button>
                                 <?php 
@@ -287,42 +287,42 @@ if (count($feed) === 0) {
                             </div>
 
                             <button type="button" class="post-action reaction-main-btn <?php 
-        echo $userReaction ? 'active-' . \gc_alumni_feed_e($userReaction) : '';
+        echo $userReaction ? 'active-' . \gc_e($userReaction) : '';
         ?>" id="reaction-btn-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>" data-post-type="<?php 
-        echo \gc_alumni_feed_e($postType);
+        echo \gc_e($postType);
         ?>" data-post-id="<?php 
         echo $postId;
         ?>" data-post-key="<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>" data-reaction="<?php 
-        echo \gc_alumni_feed_e($userReaction ?: 'like');
+        echo \gc_e($userReaction ?: 'like');
         ?>">
                                 <span class="reaction-btn-emoji"><?php 
-        echo \gc_alumni_feed_e($reactionEmoji);
+        echo \gc_e($reactionEmoji);
         ?></span>
                                 <span class="reaction-btn-label"><?php 
-        echo \gc_alumni_feed_e($reactionLabel);
+        echo \gc_e($reactionLabel);
         ?></span>
                             </button>
                         </div>
 
                         <button class="post-action comment-focus-btn" type="button" data-comments-section="comments-section-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>" data-comment-input="comment-input-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>">💬 Comment</button>
                     </div>
 
                     <div class="comments-section collapsed" id="comments-section-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>">
                         <div class="comments-preview">
                             <button type="button" class="view-comments-btn" data-comments-section="comments-section-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>" data-comment-input="comment-input-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>">
                                 <?php 
         echo count($comments) > 0 ? 'View all ' . number_format(count($comments)) . ' comment' . (count($comments) === 1 ? '' : 's') : 'Write a comment';
@@ -332,27 +332,27 @@ if (count($feed) === 0) {
 
                         <div class="comments-body">
                             <form class="comment-form ajax-comment-form" data-post-key="<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>">
                                 <?php 
         echo \gc_alumni_feed_avatar_html($currentFullname, $currentUserPhoto, 'comment-avatar');
         ?>
                                 <div class="comment-input-wrap">
                                     <input type="hidden" name="post_type" value="<?php 
-        echo \gc_alumni_feed_e($postType);
+        echo \gc_e($postType);
         ?>">
                                     <input type="hidden" name="post_id" value="<?php 
         echo $postId;
         ?>">
                                     <input type="text" class="comment-input" id="comment-input-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>" name="comment" placeholder="Write a comment..." autocomplete="off">
                                     <button class="comment-submit" type="submit">Post</button>
                                 </div>
                             </form>
 
                             <div id="comments-<?php 
-        echo \gc_alumni_feed_e($postKey);
+        echo \gc_e($postKey);
         ?>">
                                 <?php 
         echo \gc_alumni_feed_render_comments_html($comments, $user_id);
@@ -382,13 +382,13 @@ if (!empty($sidebarJobs)) {
         ?>
                             <div class="job-ad-card">
                                 <div class="job-ad-title"><?php 
-        echo \gc_alumni_feed_e($job['title'] ?? 'Job opening');
+        echo \gc_e($job['title'] ?? 'Job opening');
         ?></div>
                                 <div class="job-ad-meta"><?php 
-        echo \gc_alumni_feed_e(($job['employer_company'] ?? 'Company') . (!empty($job['location']) ? ' • ' . $job['location'] : ''));
+        echo \gc_e(($job['employer_company'] ?? 'Company') . (!empty($job['location']) ? ' • ' . $job['location'] : ''));
         ?></div>
                                 <div class="job-ad-desc"><?php 
-        echo \gc_alumni_feed_e(\gc_alumni_feed_shorten_text($job['description'] ?? '', 110));
+        echo \gc_e(\gc_alumni_feed_shorten_text($job['description'] ?? '', 110));
         ?></div>
                                 <a class="job-ad-btn" href="<?php 
         echo \url('');

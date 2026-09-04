@@ -409,7 +409,7 @@
                 <div>
                     <div class="eyebrow">👋 Alumni Officer Panel</div>
                     <h1 class="page-title">Welcome, <?php 
-echo \gc_alumni_officer_dashboard_e($fullname);
+echo \gc_e($fullname);
 ?></h1>
                     <p class="page-subtitle">Manage alumni events, monitor recent posts, and keep graduates updated.</p>
                 </div>
@@ -429,7 +429,7 @@ echo \url('');
 if ($error) {
     ?>
             <div class="alert-error"><?php 
-    echo \gc_alumni_officer_dashboard_e($error);
+    echo \gc_e($error);
     ?></div>
         <?php 
 }
@@ -510,22 +510,22 @@ if (count($recentEvents) === 0) {
                                 <tr>
                                     <td>
                                         <div class="event-title-cell"><?php 
-        echo \gc_alumni_officer_dashboard_e($event['title'] ?? 'Untitled Event');
+        echo \gc_e($event['title'] ?? 'Untitled Event');
         ?></div>
                                         <div class="event-meta">Event ID #<?php 
         echo (int) $event['id'];
         ?></div>
                                     </td>
                                     <td><?php 
-        echo \gc_alumni_officer_dashboard_e($event['poster_name'] ?? 'Unknown');
+        echo \gc_e($event['poster_name'] ?? 'Unknown');
         ?></td>
                                     <td><?php 
-        echo \gc_alumni_officer_dashboard_e(\gc_alumni_officer_dashboard_format_date($event['created_at'] ?? null));
+        echo \gc_e(\gc_alumni_officer_dashboard_format_date($event['created_at'] ?? null));
         ?></td>
                                     <td><span class="status-pill <?php 
-        echo \gc_alumni_officer_dashboard_e($statusClass);
+        echo \gc_e($statusClass);
         ?>"><?php 
-        echo \gc_alumni_officer_dashboard_e($statusText);
+        echo \gc_e($statusText);
         ?></span></td>
                                     <td>
                                         <div class="action-group">

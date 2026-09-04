@@ -15,7 +15,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Mail and queues | In progress | Laravel queued delivery and reset notification | Remove PHPMailer-style setup, consolidate mail templates, harden queued attachments, document/verify worker and SMTP deployment |
 | Views and frontend | In progress | Shared public-authentication document layout and logout modal regression coverage | Auth asset extraction; authenticated layouts/components/assets; remove response rewriting and duplicated inline CSS/JavaScript |
 | Middleware and responses | In progress | Idempotent CSRF/asset/modal augmentation, native auth CSRF, non-fatal audit records, upload validation, security headers | Remove HTML regex rewriting and query-action interception after native forms/routes are complete |
-| Duplicate helpers | Not started | Initial duplicates identified | Consolidate role-prefixed helpers, formatting, alignment, schema, and email functions |
+| Duplicate helpers | In progress | Consolidated 20 identical role-prefixed HTML escaping helpers into `gc_e()` | Consolidate formatting, alignment, schema, activity-log, social-feed, and email helpers |
 | Configuration and portability | In progress | Laravel root, environment templates, MySQL migration path | Set application timezone, verify clean-device install, document extensions and queue/mail requirements |
 | Redundant files | In progress | Obsolete conversion tools, route dump, starter welcome view, and two blank views removed | Remove starter tests, empty directories, build cache, and migration runtime after final verification |
 | Tests | In progress | Authentication, roles, routing, policy, upload, and primary workflow coverage | Remaining mutation, validation, mail-worker, migration-upgrade, browser, and clean-device coverage |
@@ -74,3 +74,20 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - Replace destructive GET query interception with explicit mutation routes and confirmation components.
 - Remove response-body regular-expression rewriting after the remaining views use shared layouts and components.
 - Move audit recording to a dedicated service or event listener with operational failure monitoring.
+
+## Current duplicate helpers checkpoint
+
+### Done
+
+- Replaced 20 identical role-prefixed HTML escaping functions with one shared `gc_e()` helper.
+- Updated all PHP helper and Blade callers to use the shared implementation.
+- Preserved the existing null handling, string conversion, quote escaping, and UTF-8 behavior.
+
+### Still needs fixing
+
+- Consolidate repeated year, employment-date, and date-range formatting helpers.
+- Extract the three copies of course/job alignment analysis into a domain service.
+- Replace repeated PDO table/column checks with migrations and schema-backed code.
+- Consolidate duplicate activity/security logging functions.
+- Consolidate the admin, alumni, and officer social-feed functions.
+- Replace repeated application, interview, job-offer, and snapshot email helpers with dedicated Mailables or Notifications.

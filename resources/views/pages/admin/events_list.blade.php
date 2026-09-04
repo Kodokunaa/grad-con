@@ -1125,7 +1125,7 @@ if (!empty(\gc_context()->query['deleted'])) {
 if ($msg) {
     ?>
             <div class="alert-box alert-success-custom"><?php 
-    echo \gc_admin_events_list_e($msg);
+    echo \gc_e($msg);
     ?></div>
         <?php 
 }
@@ -1135,7 +1135,7 @@ if ($msg) {
 if ($error) {
     ?>
             <div class="alert-box alert-danger-custom"><?php 
-    echo \gc_admin_events_list_e($error);
+    echo \gc_e($error);
     ?></div>
         <?php 
 }
@@ -1178,9 +1178,9 @@ if (!$events) {
                 <article class="event-post" data-event-id="<?php 
         echo $eventId;
         ?>" data-search="<?php 
-        echo \gc_admin_events_list_e($searchText);
+        echo \gc_e($searchText);
         ?>" data-status="<?php 
-        echo \gc_admin_events_list_e($statusValue);
+        echo \gc_e($statusValue);
         ?>">
                     <div class="post-header">
                         <div class="poster-info">
@@ -1189,7 +1189,7 @@ if (!$events) {
         ?>
                             <div>
                                 <h4 class="poster-name"><?php 
-        echo \gc_admin_events_list_e($postedBy);
+        echo \gc_e($postedBy);
         ?></h4>
                                 <div class="post-meta">
                                     Posted an alumni event • Event ID #<?php 
@@ -1199,7 +1199,7 @@ if (!$events) {
         if (!empty($event['created_at'])) {
             ?>
                                         • <?php 
-            echo \gc_admin_events_list_e(\gc_admin_events_list_format_schedule_date($event['created_at']));
+            echo \gc_e(\gc_admin_events_list_format_schedule_date($event['created_at']));
             ?>
                                     <?php 
         }
@@ -1211,27 +1211,27 @@ if (!$events) {
                         <div class="post-badges-right">
                             <div class="post-id-badge">Event</div>
                             <div class="status-pill <?php 
-        echo \gc_admin_events_list_e($statusClass);
+        echo \gc_e($statusClass);
         ?>"><?php 
-        echo \gc_admin_events_list_e($statusText);
+        echo \gc_e($statusText);
         ?></div>
                         </div>
                     </div>
 
                     <div class="post-content">
                         <h2 class="event-title"><?php 
-        echo \gc_admin_events_list_e($event["title"]);
+        echo \gc_e($event["title"]);
         ?></h2>
                         <div class="event-text"><?php 
-        echo nl2br(\gc_admin_events_list_e(\gc_admin_events_list_short_text($event["content"], 360)));
+        echo nl2br(\gc_e(\gc_admin_events_list_short_text($event["content"], 360)));
         ?></div>
 
                         <div class="schedule-line">
                             <span>🟢 Start: <?php 
-        echo \gc_admin_events_list_e(!empty($event['post_start_date']) ? \gc_admin_events_list_format_schedule_date($event['post_start_date']) : 'Immediately');
+        echo \gc_e(!empty($event['post_start_date']) ? \gc_admin_events_list_format_schedule_date($event['post_start_date']) : 'Immediately');
         ?></span>
                             <span>🔴 End: <?php 
-        echo \gc_admin_events_list_e(!empty($event['post_end_date']) ? \gc_admin_events_list_format_schedule_date($event['post_end_date']) : 'No end date');
+        echo \gc_e(!empty($event['post_end_date']) ? \gc_admin_events_list_format_schedule_date($event['post_end_date']) : 'No end date');
         ?></span>
                         </div>
                     </div>
@@ -1243,7 +1243,7 @@ if (!$events) {
                             <img src="<?php 
             echo \url('');
             ?>/uploads/events/<?php 
-            echo \gc_admin_events_list_e($event["image"]);
+            echo \gc_e($event["image"]);
             ?>" class="event-image" alt="Event Image">
                         <?php 
         } else {
@@ -1270,9 +1270,9 @@ if (!$events) {
                 if (($counts[$key] ?? 0) > 0) {
                     ?>
                                             <span title="<?php 
-                    echo \gc_admin_events_list_e($info['label']);
+                    echo \gc_e($info['label']);
                     ?>"><?php 
-                    echo \gc_admin_events_list_e($info['emoji']);
+                    echo \gc_e($info['emoji']);
                     ?></span>
                                         <?php 
                 }
@@ -1319,14 +1319,14 @@ if (!$events) {
         foreach ($allowedReactions as $reactionKey => $reactionInfo) {
             ?>
                                     <button type="submit" name="reaction_type" value="<?php 
-            echo \gc_admin_events_list_e($reactionKey);
+            echo \gc_e($reactionKey);
             ?>" class="reaction-option" title="<?php 
-            echo \gc_admin_events_list_e($reactionInfo['label']);
+            echo \gc_e($reactionInfo['label']);
             ?>" data-reaction="<?php 
-            echo \gc_admin_events_list_e($reactionKey);
+            echo \gc_e($reactionKey);
             ?>">
                                         <?php 
-            echo \gc_admin_events_list_e($reactionInfo['emoji']);
+            echo \gc_e($reactionInfo['emoji']);
             ?>
                                     </button>
                                 <?php 
@@ -1335,16 +1335,16 @@ if (!$events) {
                             </div>
 
                             <button type="submit" name="reaction_type" value="<?php 
-        echo \gc_admin_events_list_e($userReaction ?: 'like');
+        echo \gc_e($userReaction ?: 'like');
         ?>" class="btn-action btn-like reaction-main-btn <?php 
-        echo $userReaction ? 'active-' . \gc_admin_events_list_e($userReaction) : '';
+        echo $userReaction ? 'active-' . \gc_e($userReaction) : '';
         ?>" data-current-reaction="<?php 
-        echo \gc_admin_events_list_e($userReaction ?: 'like');
+        echo \gc_e($userReaction ?: 'like');
         ?>">
                                 <span class="main-reaction-emoji"><?php 
-        echo \gc_admin_events_list_e($reactionEmoji);
+        echo \gc_e($reactionEmoji);
         ?></span> <span class="main-reaction-label"><?php 
-        echo \gc_admin_events_list_e($reactionLabel);
+        echo \gc_e($reactionLabel);
         ?></span>
                             </button>
                         </form>
@@ -1404,7 +1404,7 @@ if (!$events) {
                                 <button type="button"
                                         class="view-comments-btn"
                                         onclick="toggleCommentsBox('<?php 
-            echo \gc_admin_events_list_e($commentsBoxId);
+            echo \gc_e($commentsBoxId);
             ?>', this)"
                                         data-open-text="Hide comments"
                                         data-closed-text="View all <?php 
@@ -1430,7 +1430,7 @@ if (!$events) {
                             </div>
 
                             <div class="comments-collapse" id="<?php 
-            echo \gc_admin_events_list_e($commentsBoxId);
+            echo \gc_e($commentsBoxId);
             ?>">
                                 <div class="comments-list">
                                     <?php 
@@ -1451,10 +1451,10 @@ if (!$events) {
                                                     <div class="comment-bubble">
                                                         <div class="comment-top">
                                                             <div class="comment-name"><?php 
-                echo \gc_admin_events_list_e($commentName);
+                echo \gc_e($commentName);
                 ?></div>
                                                             <div class="comment-date"><?php 
-                echo \gc_admin_events_list_e(date('M d, Y h:i A', strtotime($comment['created_at'] ?? 'now')));
+                echo \gc_e(date('M d, Y h:i A', strtotime($comment['created_at'] ?? 'now')));
                 ?></div>
                                                         </div>
                                                         <div class="comment-text"><?php 
@@ -1464,7 +1464,7 @@ if (!$events) {
 
                                                     <div class="comment-tools">
                                                         <button type="button" class="comment-reply-btn" onclick="toggleReplyBox('<?php 
-                echo \gc_admin_events_list_e($replyBoxId);
+                echo \gc_e($replyBoxId);
                 ?>')">Reply</button>
                                                         <form method="POST" action="" class="comment-delete-form" onsubmit="return confirm('Delete this comment and its replies?');">
                                                             <input type="hidden" name="comment_id" value="<?php 
@@ -1475,7 +1475,7 @@ if (!$events) {
                                                     </div>
 
                                                     <form method="POST" action="" class="reply-form" id="<?php 
-                echo \gc_admin_events_list_e($replyBoxId);
+                echo \gc_e($replyBoxId);
                 ?>">
                                                         <input type="hidden" name="event_id" value="<?php 
                 echo $eventId;
@@ -1513,10 +1513,10 @@ if (!$events) {
                                                                         <div class="comment-bubble reply-bubble">
                                                                             <div class="comment-top">
                                                                                 <div class="comment-name"><?php 
-                        echo \gc_admin_events_list_e($replyName);
+                        echo \gc_e($replyName);
                         ?></div>
                                                                                 <div class="comment-date"><?php 
-                        echo \gc_admin_events_list_e(date('M d, Y h:i A', strtotime($reply['created_at'] ?? 'now')));
+                        echo \gc_e(date('M d, Y h:i A', strtotime($reply['created_at'] ?? 'now')));
                         ?></div>
                                                                             </div>
                                                                             <div class="comment-text"><?php 
@@ -1529,9 +1529,9 @@ if (!$events) {
                         ?>
                                                                         <div class="comment-tools">
                                                                             <button type="button" class="comment-reply-btn" onclick="toggleReplyBox('<?php 
-                        echo \gc_admin_events_list_e($replyReplyBoxId);
+                        echo \gc_e($replyReplyBoxId);
                         ?>', '@<?php 
-                        echo \gc_admin_events_list_e($replyName);
+                        echo \gc_e($replyName);
                         ?> ')">Reply</button>
                                                                             <form method="POST" action="" class="comment-delete-form" onsubmit="return confirm('Delete this reply?');">
                                                                                 <input type="hidden" name="comment_id" value="<?php 
@@ -1542,7 +1542,7 @@ if (!$events) {
                                                                         </div>
 
                                                                         <form method="POST" action="" class="reply-form" id="<?php 
-                        echo \gc_admin_events_list_e($replyReplyBoxId);
+                        echo \gc_e($replyReplyBoxId);
                         ?>">
                                                                             <input type="hidden" name="event_id" value="<?php 
                         echo $eventId;
@@ -1587,10 +1587,10 @@ if (!$events) {
                                         <div class="comment-bubble">
                                             <div class="comment-top">
                                                 <div class="comment-name"><?php 
-            echo \gc_admin_events_list_e($previewCommentName);
+            echo \gc_e($previewCommentName);
             ?></div>
                                                 <div class="comment-date"><?php 
-            echo \gc_admin_events_list_e(date('M d, Y h:i A', strtotime($previewComment['created_at'] ?? 'now')));
+            echo \gc_e(date('M d, Y h:i A', strtotime($previewComment['created_at'] ?? 'now')));
             ?></div>
                                             </div>
                                             <div class="comment-text"><?php 

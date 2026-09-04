@@ -4,10 +4,6 @@ use App\Mail\PageMailer;
 use App\Support\PageResponse;
 
 // Preserved page-specific presentation and domain helpers; uniquely named to avoid collisions.
-function gc_admin_admin_archive_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_admin_admin_archive_ensure_archive_column(PDO $pdo, string $column, string $definition): void
 {
     $check = $pdo->prepare('SHOW COLUMNS FROM events LIKE ?');
@@ -23,13 +19,9 @@ function gc_admin_admin_archive_format_date($date): string
     }
     $timestamp = strtotime($date);
 
-    return $timestamp ? date('M d, Y h:i A', $timestamp) : \gc_admin_admin_archive_e($date);
+    return $timestamp ? date('M d, Y h:i A', $timestamp) : \gc_e($date);
 }
 
-function gc_admin_alumni_list_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_admin_alumni_list_column_exists(PDO $pdo, string $table, string $column): bool
 {
     try {
@@ -65,13 +57,13 @@ function gc_admin_alumni_list_format_year_range($start, $end): string
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_admin_alumni_list_e($start).' - '.\gc_admin_alumni_list_e($end);
+        return \gc_e($start).' - '.\gc_e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_admin_alumni_list_e($start).' - Present';
+        return \gc_e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_admin_alumni_list_e($end);
+        return \gc_e($end);
     }
 
     return 'N/A';
@@ -90,13 +82,13 @@ function gc_admin_alumni_list_format_date_range($start, $end): string
     $formattedStart = \gc_admin_alumni_list_format_employment_date($start);
     $formattedEnd = \gc_admin_alumni_list_format_employment_date($end);
     if ($formattedStart !== '' && $formattedEnd !== '') {
-        return \gc_admin_alumni_list_e($formattedStart.' to '.$formattedEnd);
+        return \gc_e($formattedStart.' to '.$formattedEnd);
     }
     if ($formattedStart !== '' && $formattedEnd === '') {
-        return \gc_admin_alumni_list_e($formattedStart.' to Present').'<br><span class="current-job-badge">Current / Present Job</span>';
+        return \gc_e($formattedStart.' to Present').'<br><span class="current-job-badge">Current / Present Job</span>';
     }
     if ($formattedStart === '' && $formattedEnd !== '') {
-        return \gc_admin_alumni_list_e($formattedEnd);
+        return \gc_e($formattedEnd);
     }
 
     return 'N/A';
@@ -228,10 +220,6 @@ function gc_admin_alumni_list_summarize_job_alignment(string $course, array $job
     return ['status' => $alignment['status'], 'class' => $alignment['class'], 'reason' => $basis.': '.($jobToAnalyze['job_title'] ?? 'N/A').'. '.$alignment['reason']];
 }
 
-function gc_admin_applications_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_admin_applications_normalize_status($status): string
 {
     $status = strtolower(trim((string) $status));
@@ -250,13 +238,13 @@ function gc_admin_applications_format_year_range($start, $end): string
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_admin_applications_e($start).' - '.\gc_admin_applications_e($end);
+        return \gc_e($start).' - '.\gc_e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_admin_applications_e($start).' - Present';
+        return \gc_e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_admin_applications_e($end);
+        return \gc_e($end);
     }
 
     return 'N/A';
@@ -266,13 +254,13 @@ function gc_admin_applications_format_date_range($start, $end): string
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_admin_applications_e(date('F j, Y', strtotime($start))).' to '.\gc_admin_applications_e(date('F j, Y', strtotime($end)));
+        return \gc_e(date('F j, Y', strtotime($start))).' to '.\gc_e(date('F j, Y', strtotime($end)));
     }
     if ($start !== '' && $end === '') {
-        return \gc_admin_applications_e(date('F j, Y', strtotime($start))).' to Present';
+        return \gc_e(date('F j, Y', strtotime($start))).' to Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_admin_applications_e(date('F j, Y', strtotime($end)));
+        return \gc_e(date('F j, Y', strtotime($end)));
     }
 
     return 'N/A';
@@ -297,11 +285,11 @@ function gc_admin_applications_sendAdminApplicantEmail(array $application, strin
             return ['success' => false, 'message' => 'Applicant email is missing.'];
         }
         $mail->addAddress($alumni_email, $alumni_name);
-        $safeAlumniName = \gc_admin_applications_e($alumni_name);
-        $safeJobTitle = \gc_admin_applications_e($job_title);
-        $safeCompanyName = \gc_admin_applications_e($company_name);
-        $safeSenderName = \gc_admin_applications_e($sender_name);
-        $safeCustomMessage = nl2br(\gc_admin_applications_e($customMessage));
+        $safeAlumniName = \gc_e($alumni_name);
+        $safeJobTitle = \gc_e($job_title);
+        $safeCompanyName = \gc_e($company_name);
+        $safeSenderName = \gc_e($sender_name);
+        $safeCustomMessage = nl2br(\gc_e($customMessage));
         if ($action === 'accept') {
             $subject = "Congratulations! You are hired - {$job_title}";
             $headline = 'Congratulations! 🎉';
@@ -339,14 +327,6 @@ function gc_admin_applications_sendAdminApplicantEmail(array $application, strin
     }
 }
 
-function gc_admin_dashboard_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
-function gc_admin_events_create_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_admin_events_create_column_exists(PDO $pdo, string $table, string $column): bool
 {
     $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
@@ -355,10 +335,6 @@ function gc_admin_events_create_column_exists(PDO $pdo, string $table, string $c
     return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-function gc_admin_events_list_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_admin_events_list_short_text($text, $limit = 320): string
 {
     $text = trim(strip_tags((string) $text));
@@ -381,7 +357,7 @@ function gc_admin_events_list_initials($name): string
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_admin_events_list_e($first.$last);
+    return \gc_e($first.$last);
 }
 function gc_admin_events_list_get_current_user_id(): int
 {
@@ -421,7 +397,7 @@ function gc_admin_events_list_format_schedule_date($date): string
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_admin_events_list_e($date);
+        return \gc_e($date);
     }
 
     return date('M d, Y h:i A', $time);
@@ -507,14 +483,14 @@ function gc_admin_events_list_render_avatar(string $name, ?string $profileImage 
 {
     $url = \gc_admin_events_list_profile_image_url($profileImage);
     if ($url !== '') {
-        return '<div class="'.\gc_admin_events_list_e($class).'"><img src="'.\gc_admin_events_list_e($url).'" alt="'.\gc_admin_events_list_e($name).' profile" onerror="this.style.display=\'none\'; this.parentElement.classList.add(\'avatar-fallback\'); this.parentElement.textContent=\''.\gc_admin_events_list_initials($name).'\';"></div>';
+        return '<div class="'.\gc_e($class).'"><img src="'.\gc_e($url).'" alt="'.\gc_e($name).' profile" onerror="this.style.display=\'none\'; this.parentElement.classList.add(\'avatar-fallback\'); this.parentElement.textContent=\''.\gc_admin_events_list_initials($name).'\';"></div>';
     }
 
-    return '<div class="'.\gc_admin_events_list_e($class).' avatar-fallback">'.\gc_admin_events_list_initials($name).'</div>';
+    return '<div class="'.\gc_e($class).' avatar-fallback">'.\gc_admin_events_list_initials($name).'</div>';
 }
 function gc_admin_events_list_render_comment_text_with_mentions($text): string
 {
-    $safe = \gc_admin_events_list_e($text ?? '');
+    $safe = \gc_e($text ?? '');
     $safe = preg_replace('/@([A-Za-z0-9_ .\-]+)/u', '<span class="mention-text">@$1</span>', $safe);
 
     return nl2br($safe);
@@ -601,10 +577,6 @@ function gc_admin_events_list_comment_total(array $commentData): int
     return (int) ($commentData['total'] ?? count($commentData));
 }
 
-function gc_admin_interview_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_admin_interview_sendInterviewEmail(array $application, string $date, string $time, string $location, string $message): array
 {
     try {
@@ -618,7 +590,7 @@ function gc_admin_interview_sendInterviewEmail(array $application, string $date,
         $formattedTime = date('h:i A', strtotime($time));
         $mail->addAddress($alumni_email, $alumni_name);
         $mail->Subject = 'Interview Schedule - '.$job_title;
-        $mail->Body = "\r\n        <html>\r\n        <body style='font-family: Arial, sans-serif; background:#f8fafc; padding:20px;'>\r\n            <div style='max-width:600px; margin:auto; background:white; border-radius:12px; padding:25px; border:1px solid #e5e7eb;'>\r\n                <h2 style='color:#f97316;'>Interview Invitation</h2>\r\n\r\n                <p>Dear <strong>".\gc_admin_interview_e($alumni_name)."</strong>,</p>\r\n\r\n                <p>You are invited for an interview for the position of \r\n                <strong>".\gc_admin_interview_e($job_title).'</strong> at <strong>'.\gc_admin_interview_e($company)."</strong>.</p>\r\n\r\n                <div style='background:#fff7ed; padding:15px; border-radius:10px; margin:20px 0;'>\r\n                    <p><strong>Date:</strong> ".\gc_admin_interview_e($formattedDate)."</p>\r\n                    <p><strong>Time:</strong> ".\gc_admin_interview_e($formattedTime)."</p>\r\n                    <p><strong>Location / Meeting Link:</strong> ".\gc_admin_interview_e($location)."</p>\r\n                </div>\r\n\r\n                <p><strong>Message:</strong></p>\r\n                <p>".nl2br(\gc_admin_interview_e($message))."</p>\r\n\r\n                <p>Thank you and good luck.</p>\r\n\r\n                <p style='margin-top:25px; color:#6b7280; font-size:12px;'>\r\n                    This is an automated email from GradConn.\r\n                </p>\r\n            </div>\r\n        </body>\r\n        </html>";
+        $mail->Body = "\r\n        <html>\r\n        <body style='font-family: Arial, sans-serif; background:#f8fafc; padding:20px;'>\r\n            <div style='max-width:600px; margin:auto; background:white; border-radius:12px; padding:25px; border:1px solid #e5e7eb;'>\r\n                <h2 style='color:#f97316;'>Interview Invitation</h2>\r\n\r\n                <p>Dear <strong>".\gc_e($alumni_name)."</strong>,</p>\r\n\r\n                <p>You are invited for an interview for the position of \r\n                <strong>".\gc_e($job_title).'</strong> at <strong>'.\gc_e($company)."</strong>.</p>\r\n\r\n                <div style='background:#fff7ed; padding:15px; border-radius:10px; margin:20px 0;'>\r\n                    <p><strong>Date:</strong> ".\gc_e($formattedDate)."</p>\r\n                    <p><strong>Time:</strong> ".\gc_e($formattedTime)."</p>\r\n                    <p><strong>Location / Meeting Link:</strong> ".\gc_e($location)."</p>\r\n                </div>\r\n\r\n                <p><strong>Message:</strong></p>\r\n                <p>".nl2br(\gc_e($message))."</p>\r\n\r\n                <p>Thank you and good luck.</p>\r\n\r\n                <p style='margin-top:25px; color:#6b7280; font-size:12px;'>\r\n                    This is an automated email from GradConn.\r\n                </p>\r\n            </div>\r\n        </body>\r\n        </html>";
         $mail->AltBody = "Dear {$alumni_name},\n\n"."You are invited for an interview for the position of {$job_title}.\n\n"."Date: {$formattedDate}\n"."Time: {$formattedTime}\n"."Location: {$location}\n\n"."Message:\n{$message}\n\n".'Thank you.';
         $mail->send();
 
@@ -632,10 +604,6 @@ function gc_admin_interview_sendInterviewEmail(array $application, string $date,
     }
 }
 
-function gc_admin_offers_history_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_admin_offers_history_format_activity_date(string $value): string
 {
     if (trim($value) === '') {
@@ -643,7 +611,7 @@ function gc_admin_offers_history_format_activity_date(string $value): string
     }
     $timestamp = strtotime($value);
     if ($timestamp === false) {
-        return \gc_admin_offers_history_e($value);
+        return \gc_e($value);
     }
 
     return date('M j, Y g:i A', $timestamp);
@@ -675,7 +643,7 @@ function gc_admin_offers_history_render_activity_details(array $log): string
     }
     $html = '<div class="detail-list">';
     foreach ($filters as $label => $value) {
-        $html .= '<div class="detail-item"><span class="detail-label">'.\gc_admin_offers_history_e($label).'</span><span class="detail-value">'.nl2br(\gc_admin_offers_history_e($value)).'</span></div>';
+        $html .= '<div class="detail-item"><span class="detail-label">'.\gc_e($label).'</span><span class="detail-value">'.nl2br(\gc_e($value)).'</span></div>';
     }
 
     return $html.'</div>';
@@ -700,11 +668,6 @@ function gc_admin_offers_history_create_employer_activity_logs_table(PDO $pdo): 
     if (! \gc_admin_offers_history_table_exists($pdo, 'employer_activity_logs')) {
         \gc_context()->schemaChange($pdo, "CREATE TABLE IF NOT EXISTS employer_activity_logs (\r\n                id INT AUTO_INCREMENT PRIMARY KEY,\r\n                employer_id INT NOT NULL,\r\n                alumni_id INT NULL,\r\n                offer_id INT NULL,\r\n                action VARCHAR(100) NOT NULL,\r\n                details TEXT NULL,\r\n                course_filter VARCHAR(100) NULL,\r\n                batch_filter VARCHAR(100) NULL,\r\n                skill_search VARCHAR(255) NULL,\r\n                result_count INT NULL,\r\n                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n                INDEX idx_employer_id (employer_id),\r\n                INDEX idx_alumni_id (alumni_id),\r\n                INDEX idx_offer_id (offer_id)\r\n            )");
     }
-}
-
-function gc_admin_reports_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
 // Helper: Add security log
@@ -875,10 +838,6 @@ function gc_alumni_employment_history_refresh_employment_status(PDO $pdo, int $u
     $updEmployment = $pdo->prepare('UPDATE users SET employment_status=? WHERE id=?');
     $updEmployment->execute([$isEmployed, $user_id]);
 }
-function gc_alumni_feed_e($str)
-{
-    return htmlspecialchars((string) ($str ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_alumni_feed_format_post_date($date)
 {
     if (! $date) {
@@ -886,7 +845,7 @@ function gc_alumni_feed_format_post_date($date)
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_alumni_feed_e($date);
+        return \gc_e($date);
     }
 
     return date('F d, Y \a\t h:i A', $time);
@@ -913,7 +872,7 @@ function gc_alumni_feed_initials($name)
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_alumni_feed_e($first.$last);
+    return \gc_e($first.$last);
 }
 function gc_alumni_feed_column_exists(PDO $pdo, string $table, string $column): bool
 {
@@ -965,16 +924,16 @@ function gc_alumni_feed_profile_image_url($photo): string
 function gc_alumni_feed_avatar_html($name, $photo = null, string $class = 'avatar'): string
 {
     $url = \gc_alumni_feed_profile_image_url($photo);
-    $safeName = \gc_alumni_feed_e($name ?: 'User');
+    $safeName = \gc_e($name ?: 'User');
     if ($url !== '') {
-        return '<div class="'.\gc_alumni_feed_e($class).' has-photo"><img src="'.\gc_alumni_feed_e($url).'" alt="'.$safeName.' profile photo" onerror="this.style.display=\'none\'; this.parentElement.classList.remove(\'has-photo\'); this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\';"><span class="avatar-fallback" style="display:none;">'.\gc_alumni_feed_initials($name).'</span></div>';
+        return '<div class="'.\gc_e($class).' has-photo"><img src="'.\gc_e($url).'" alt="'.$safeName.' profile photo" onerror="this.style.display=\'none\'; this.parentElement.classList.remove(\'has-photo\'); this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\';"><span class="avatar-fallback" style="display:none;">'.\gc_alumni_feed_initials($name).'</span></div>';
     }
 
-    return '<div class="'.\gc_alumni_feed_e($class).'"><span class="avatar-fallback">'.\gc_alumni_feed_initials($name).'</span></div>';
+    return '<div class="'.\gc_e($class).'"><span class="avatar-fallback">'.\gc_alumni_feed_initials($name).'</span></div>';
 }
 function gc_alumni_feed_render_comment_text_with_mentions($text): string
 {
-    $safe = \gc_alumni_feed_e($text ?? '');
+    $safe = \gc_e($text ?? '');
     $safe = preg_replace('/@([A-Za-z0-9_ .\-]+)/u', '<span class="mention-text">@$1</span>', $safe);
 
     return nl2br($safe);
@@ -1060,9 +1019,9 @@ function gc_alumni_feed_render_engagement_html(array $counts, int $commentCount,
             if (($counts[$key] ?? 0) > 0) {
                 ?>
                         <span title="<?php
-                echo \gc_alumni_feed_e($info['label']);
+                echo \gc_e($info['label']);
                 ?>"><?php
-                echo \gc_alumni_feed_e($info['emoji']);
+                echo \gc_e($info['emoji']);
                 ?></span>
                     <?php
             }
@@ -1112,7 +1071,7 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
         echo $isReply ? 'reply-thread' : 'main-thread';
         ?>">
             <div class="comment-item<?php
-        echo \gc_alumni_feed_e($levelClass);
+        echo \gc_e($levelClass);
         ?>">
                 <?php
         echo \gc_alumni_feed_avatar_html($comment['fullname'] ?? 'User', $comment['profile_photo'] ?? '', $isReply ? 'comment-avatar small-avatar reply-avatar' : 'comment-avatar small-avatar');
@@ -1122,7 +1081,7 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
         echo $isReply ? 'reply-bubble' : '';
         ?>">
                         <div class="comment-name"><?php
-        echo \gc_alumni_feed_e($comment['fullname'] ?? 'Unknown User');
+        echo \gc_e($comment['fullname'] ?? 'Unknown User');
         ?></div>
                         <div class="comment-text"><?php
         echo \gc_alumni_feed_render_comment_text_with_mentions($comment['comment'] ?? '');
@@ -1130,7 +1089,7 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
                     </div>
                     <div class="comment-tools">
                         <span class="comment-date"><?php
-        echo \gc_alumni_feed_e(date('M d, Y h:i A', strtotime($comment['created_at'] ?? 'now')));
+        echo \gc_e(date('M d, Y h:i A', strtotime($comment['created_at'] ?? 'now')));
         ?></span>
                         <button type="button" class="reply-toggle-btn" data-reply-box="reply-box-<?php
         echo $commentId;
@@ -1141,7 +1100,7 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
         echo $commentId;
         ?>" style="display:none;">
                         <input type="hidden" name="post_type" value="<?php
-        echo \gc_alumni_feed_e($postType);
+        echo \gc_e($postType);
         ?>">
                         <input type="hidden" name="post_id" value="<?php
         echo $postId;
@@ -1151,7 +1110,7 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
         ?>">
                         <div class="reply-input-row">
                             <input type="text" class="comment-input reply-input" name="comment" placeholder="Reply to <?php
-        echo \gc_alumni_feed_e($comment['fullname'] ?? 'this comment');
+        echo \gc_e($comment['fullname'] ?? 'this comment');
         ?>..." autocomplete="off">
                             <button class="comment-submit reply-submit" type="submit">Reply</button>
                         </div>
@@ -1284,22 +1243,18 @@ function gc_alumni_my_applications_get_progress_step($status)
             return 1;
     }
 }
-function gc_alumni_officer_alumni_list_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_alumni_officer_alumni_list_format_year_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_alumni_officer_alumni_list_e($start).' - '.\gc_alumni_officer_alumni_list_e($end);
+        return \gc_e($start).' - '.\gc_e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_alumni_officer_alumni_list_e($start).' - Present';
+        return \gc_e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_alumni_officer_alumni_list_e($end);
+        return \gc_e($end);
     }
 
     return 'N/A';
@@ -1309,20 +1264,16 @@ function gc_alumni_officer_alumni_list_format_date_range($start, $end): string
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_alumni_officer_alumni_list_e($start).' to '.\gc_alumni_officer_alumni_list_e($end);
+        return \gc_e($start).' to '.\gc_e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_alumni_officer_alumni_list_e($start).' to Present';
+        return \gc_e($start).' to Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_alumni_officer_alumni_list_e($end);
+        return \gc_e($end);
     }
 
     return 'N/A';
-}
-function gc_alumni_officer_archive_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 function gc_alumni_officer_archive_initials($name): string
 {
@@ -1334,13 +1285,13 @@ function gc_alumni_officer_archive_initials($name): string
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_alumni_officer_archive_e($first.$last);
+    return \gc_e($first.$last);
 }
 function gc_alumni_officer_archive_avatar_html($name, string $class = 'user-avatar'): string
 {
-    $safeName = \gc_alumni_officer_archive_e($name ?: 'User');
+    $safeName = \gc_e($name ?: 'User');
 
-    return '<div class="'.\gc_alumni_officer_archive_e($class).'"><span class="avatar-fallback">'.\gc_alumni_officer_archive_initials($name).'</span></div>';
+    return '<div class="'.\gc_e($class).'"><span class="avatar-fallback">'.\gc_alumni_officer_archive_initials($name).'</span></div>';
 }
 function gc_alumni_officer_archive_format_schedule_date($date): string
 {
@@ -1349,7 +1300,7 @@ function gc_alumni_officer_archive_format_schedule_date($date): string
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_alumni_officer_archive_e($date);
+        return \gc_e($date);
     }
 
     return date('M d, Y h:i A', $time);
@@ -1387,10 +1338,6 @@ function gc_alumni_officer_archive_ensure_column(PDO $pdo, string $table, string
         }
     }
 }
-function gc_alumni_officer_dashboard_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_alumni_officer_dashboard_format_date($date): string
 {
     if (! $date) {
@@ -1398,7 +1345,7 @@ function gc_alumni_officer_dashboard_format_date($date): string
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_alumni_officer_dashboard_e($date);
+        return \gc_e($date);
     }
 
     return date('M d, Y', $time);
@@ -1416,10 +1363,6 @@ function gc_alumni_officer_dashboard_event_status_label($startDate, $endDate): a
     }
 
     return ['Active', 'status-active'];
-}
-function gc_alumni_officer_events_create_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
 }
 function gc_alumni_officer_events_create_column_exists(PDO $pdo, string $table, string $column): bool
 {
@@ -1442,10 +1385,6 @@ function gc_alumni_officer_events_create_to_mysql_datetime(?string $value): ?str
     return date('Y-m-d H:i:s', $time);
 }
 
-function gc_alumni_officer_events_list_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_alumni_officer_events_list_short_text($text, $limit = 220): string
 {
     $text = trim(strip_tags((string) $text));
@@ -1468,7 +1407,7 @@ function gc_alumni_officer_events_list_initials($name): string
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_alumni_officer_events_list_e($first.$last);
+    return \gc_e($first.$last);
 }
 function gc_alumni_officer_events_list_get_current_user_id(): int
 {
@@ -1543,16 +1482,16 @@ function gc_alumni_officer_events_list_profile_image_url($photo): string
 function gc_alumni_officer_events_list_avatar_html($name, $photo = null, string $class = 'user-avatar'): string
 {
     $url = \gc_alumni_officer_events_list_profile_image_url($photo);
-    $safeName = \gc_alumni_officer_events_list_e($name ?: 'User');
+    $safeName = \gc_e($name ?: 'User');
     if ($url !== '') {
-        return '<div class="'.\gc_alumni_officer_events_list_e($class).' has-photo"><img src="'.\gc_alumni_officer_events_list_e($url).'" alt="'.$safeName.' profile photo" onerror="this.style.display=\'none\'; this.parentElement.classList.remove(\'has-photo\'); this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\';"><span class="avatar-fallback" style="display:none;">'.\gc_alumni_officer_events_list_initials($name).'</span></div>';
+        return '<div class="'.\gc_e($class).' has-photo"><img src="'.\gc_e($url).'" alt="'.$safeName.' profile photo" onerror="this.style.display=\'none\'; this.parentElement.classList.remove(\'has-photo\'); this.parentElement.querySelector(\'.avatar-fallback\').style.display=\'flex\';"><span class="avatar-fallback" style="display:none;">'.\gc_alumni_officer_events_list_initials($name).'</span></div>';
     }
 
-    return '<div class="'.\gc_alumni_officer_events_list_e($class).'"><span class="avatar-fallback">'.\gc_alumni_officer_events_list_initials($name).'</span></div>';
+    return '<div class="'.\gc_e($class).'"><span class="avatar-fallback">'.\gc_alumni_officer_events_list_initials($name).'</span></div>';
 }
 function gc_alumni_officer_events_list_render_comment_text_with_mentions($text): string
 {
-    $safe = \gc_alumni_officer_events_list_e($text ?? '');
+    $safe = \gc_e($text ?? '');
     $safe = preg_replace('/@([A-Za-z0-9_ .\-]+)/u', '<span class="mention-text">@$1</span>', $safe);
 
     return nl2br($safe);
@@ -1598,7 +1537,7 @@ function gc_alumni_officer_events_list_format_schedule_date($date): string
     }
     $time = strtotime($date);
     if (! $time) {
-        return \gc_alumni_officer_events_list_e($date);
+        return \gc_e($date);
     }
 
     return date('M d, Y h:i A', $time);
@@ -1669,10 +1608,6 @@ function gc_alumni_officer_events_list_get_comments(PDO $pdo, string $postType, 
 
     return ['main' => $mainComments, 'replies' => $replies, 'total' => count($mainComments) + array_sum(array_map('count', $replies))];
 }
-function gc_employer_alumni_list_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_employer_alumni_list_column_exists(PDO $pdo, string $table, string $column): bool
 {
     try {
@@ -1720,13 +1655,13 @@ function gc_employer_alumni_list_format_year_range($start, $end): string
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_employer_alumni_list_e($start).' - '.\gc_employer_alumni_list_e($end);
+        return \gc_e($start).' - '.\gc_e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_employer_alumni_list_e($start).' - Present';
+        return \gc_e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_employer_alumni_list_e($end);
+        return \gc_e($end);
     }
 
     return 'N/A';
@@ -1745,13 +1680,13 @@ function gc_employer_alumni_list_format_date_range($start, $end): string
     $formattedStart = \gc_employer_alumni_list_format_employment_date($start);
     $formattedEnd = \gc_employer_alumni_list_format_employment_date($end);
     if ($formattedStart !== '' && $formattedEnd !== '') {
-        return \gc_employer_alumni_list_e($formattedStart.' to '.$formattedEnd);
+        return \gc_e($formattedStart.' to '.$formattedEnd);
     }
     if ($formattedStart !== '' && $formattedEnd === '') {
-        return \gc_employer_alumni_list_e($formattedStart.' to Present').'<br><span class="current-job-badge">Current / Present Job</span>';
+        return \gc_e($formattedStart.' to Present').'<br><span class="current-job-badge">Current / Present Job</span>';
     }
     if ($formattedStart === '' && $formattedEnd !== '') {
-        return \gc_employer_alumni_list_e($formattedEnd);
+        return \gc_e($formattedEnd);
     }
 
     return 'N/A';
@@ -1880,7 +1815,7 @@ function gc_employer_alumni_list_build_email_value($value): string
 {
     $value = trim((string) ($value ?? ''));
 
-    return $value !== '' ? \gc_employer_alumni_list_e($value) : 'N/A';
+    return $value !== '' ? \gc_e($value) : 'N/A';
 }
 /**
  * Returns an inline base64 <img> tag for the profile picture, or a fallback initials avatar.
@@ -1979,7 +1914,7 @@ function gc_employer_alumni_list_build_alumni_snapshot_email_html(array $alumni,
     }
     $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Employment History</h3>';
     if ($employmentHistoryError !== '') {
-        $html .= '<p style="color:#6b7280;">'.\gc_employer_alumni_list_e($employmentHistoryError).'</p>';
+        $html .= '<p style="color:#6b7280;">'.\gc_e($employmentHistoryError).'</p>';
     } elseif (empty($jobs)) {
         $html .= '<p style="color:#6b7280;">No employment history found.</p>';
     } else {
@@ -1998,7 +1933,7 @@ function gc_employer_alumni_list_build_alumni_snapshot_email_html(array $alumni,
                 <td style="border:1px solid #e5e7eb;">'.\gc_employer_alumni_list_format_date_range($job['start_date'] ?? '', $job['end_date'] ?? '').'</td>
             </tr>';
             if (! empty($job['job_description'])) {
-                $html .= '<tr><td colspan="4" style="border:1px solid #e5e7eb; color:#374151;"><strong>Description:</strong><br>'.nl2br(\gc_employer_alumni_list_e($job['job_description'])).'</td></tr>';
+                $html .= '<tr><td colspan="4" style="border:1px solid #e5e7eb; color:#374151;"><strong>Description:</strong><br>'.nl2br(\gc_e($job['job_description'])).'</td></tr>';
             }
         }
         $html .= '</table>';
@@ -2035,10 +1970,10 @@ function gc_employer_alumni_list_build_alumni_snapshot_email_html(array $alumni,
 }
 function gc_employer_alumni_list_build_professional_email_html(string $alumniName, string $employerName, string $subject, string $message): string
 {
-    $safeAlumniName = \gc_employer_alumni_list_e($alumniName ?: 'Alumni');
-    $safeEmployerName = \gc_employer_alumni_list_e($employerName ?: 'Employer');
-    $safeSubject = \gc_employer_alumni_list_e($subject ?: 'Message from Employer');
-    $safeMessage = nl2br(\gc_employer_alumni_list_e($message));
+    $safeAlumniName = \gc_e($alumniName ?: 'Alumni');
+    $safeEmployerName = \gc_e($employerName ?: 'Employer');
+    $safeSubject = \gc_e($subject ?: 'Message from Employer');
+    $safeMessage = nl2br(\gc_e($message));
 
     return '
 <!DOCTYPE html>
@@ -2078,10 +2013,10 @@ function gc_employer_alumni_list_build_professional_email_text(string $alumniNam
 }
 function gc_employer_alumni_list_build_job_offer_email_html(string $alumniName, string $employerName, string $subject, string $message, string $acceptLink, string $declineLink): string
 {
-    $safeAlumniName = \gc_employer_alumni_list_e($alumniName ?: 'Alumni');
-    $safeEmployerName = \gc_employer_alumni_list_e($employerName ?: 'Employer');
-    $safeSubject = \gc_employer_alumni_list_e($subject ?: 'Job Offer');
-    $safeMessage = nl2br(\gc_employer_alumni_list_e($message));
+    $safeAlumniName = \gc_e($alumniName ?: 'Alumni');
+    $safeEmployerName = \gc_e($employerName ?: 'Employer');
+    $safeSubject = \gc_e($subject ?: 'Job Offer');
+    $safeMessage = nl2br(\gc_e($message));
 
     return '
 <!DOCTYPE html>
@@ -2122,10 +2057,6 @@ function gc_employer_alumni_list_build_alumni_snapshot_email_text(array $alumni,
 {
     return "Alumni Profile Snapshot\n\n".'Full Name: '.($alumni['fullname'] ?? 'N/A')."\n".'Email: '.($alumni['email'] ?? 'N/A')."\n".'Course: '.($alumni['course'] ?? 'N/A')."\n".'Batch Year: '.($alumni['batch_year'] ?? 'N/A')."\n".'Contact Number: '.($alumni['contact_number'] ?? 'N/A')."\n".'Employment Status: '.($alumni['employment_status'] ?? 'N/A')."\n".'Skills: '.($alumni['skills'] ?? 'N/A')."\n".'Career Objective: '.($alumni['career_objective'] ?? 'N/A')."\n".'Job Alignment: '.($summaryAlignment['status'] ?? 'N/A').' - '.($summaryAlignment['reason'] ?? '')."\n";
 }
-function gc_employer_applications_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_employer_applications_normalize_status($status): string
 {
     $status = strtolower(trim((string) $status));
@@ -2144,13 +2075,13 @@ function gc_employer_applications_format_year_range($start, $end): string
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_employer_applications_e($start).' - '.\gc_employer_applications_e($end);
+        return \gc_e($start).' - '.\gc_e($end);
     }
     if ($start !== '' && $end === '') {
-        return \gc_employer_applications_e($start).' - Present';
+        return \gc_e($start).' - Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_employer_applications_e($end);
+        return \gc_e($end);
     }
 
     return 'N/A';
@@ -2160,13 +2091,13 @@ function gc_employer_applications_format_date_range($start, $end): string
     $start = trim((string) ($start ?? ''));
     $end = trim((string) ($end ?? ''));
     if ($start !== '' && $end !== '') {
-        return \gc_employer_applications_e(date('F j, Y', strtotime($start))).' to '.\gc_employer_applications_e(date('F j, Y', strtotime($end)));
+        return \gc_e(date('F j, Y', strtotime($start))).' to '.\gc_e(date('F j, Y', strtotime($end)));
     }
     if ($start !== '' && $end === '') {
-        return \gc_employer_applications_e(date('F j, Y', strtotime($start))).' to Present';
+        return \gc_e(date('F j, Y', strtotime($start))).' to Present';
     }
     if ($start === '' && $end !== '') {
-        return \gc_employer_applications_e(date('F j, Y', strtotime($end)));
+        return \gc_e(date('F j, Y', strtotime($end)));
     }
 
     return 'N/A';
@@ -2185,11 +2116,11 @@ function gc_employer_applications_sendApplicantEmail(array $application, string 
             return ['success' => false, 'message' => 'Applicant email is missing.'];
         }
         $mail->addAddress($alumni_email, $alumni_name);
-        $safeAlumniName = \gc_employer_applications_e($alumni_name);
-        $safeJobTitle = \gc_employer_applications_e($job_title);
-        $safeCompanyName = \gc_employer_applications_e($company_name);
-        $safeEmployerName = \gc_employer_applications_e($employer_name);
-        $safeCustomMessage = nl2br(\gc_employer_applications_e($customMessage));
+        $safeAlumniName = \gc_e($alumni_name);
+        $safeJobTitle = \gc_e($job_title);
+        $safeCompanyName = \gc_e($company_name);
+        $safeEmployerName = \gc_e($employer_name);
+        $safeCustomMessage = nl2br(\gc_e($customMessage));
         if ($action === 'accept') {
             $subject = "Congratulations! You are hired - {$job_title}";
             $headline = 'Congratulations! 🎉';
@@ -2220,10 +2151,6 @@ function gc_employer_applications_sendApplicantEmail(array $application, string 
         return ['success' => false, 'message' => \gc_public_error($e)];
     }
 }
-function gc_employer_dashboard_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 function gc_employer_dashboard_initials($name): string
 {
     $name = trim((string) $name);
@@ -2234,7 +2161,7 @@ function gc_employer_dashboard_initials($name): string
     $first = strtoupper(substr($parts[0] ?? 'U', 0, 1));
     $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
-    return \gc_employer_dashboard_e($first.$last);
+    return \gc_e($first.$last);
 }
 function gc_employer_dashboard_offerStatusBadge($status)
 {
@@ -2266,10 +2193,6 @@ function gc_employer_dashboard_statusBadge($status)
 
     return '<span class="status-badge status-pending">Pending</span>';
 }
-function gc_employer_interview_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
 /* Send email function */
 function gc_employer_interview_sendInterviewEmail(array $application, string $date, string $time, string $location, string $message): array
 {
@@ -2284,7 +2207,7 @@ function gc_employer_interview_sendInterviewEmail(array $application, string $da
         $formattedTime = date('h:i A', strtotime($time));
         $mail->addAddress($alumni_email, $alumni_name);
         $mail->Subject = 'Interview Schedule - '.$job_title;
-        $mail->Body = "\r\n            <html>\r\n            <body style='font-family: Arial, sans-serif; background:#f8fafc; padding:20px;'>\r\n                <div style='max-width:600px; margin:auto; background:white; border-radius:12px; padding:25px; border:1px solid #e5e7eb;'>\r\n                    <h2 style='color:#f97316;'>Interview Invitation</h2>\r\n\r\n                    <p>Dear <strong>".\gc_employer_interview_e($alumni_name)."</strong>,</p>\r\n\r\n                    <p>You are invited for an interview for the position of \r\n                    <strong>".\gc_employer_interview_e($job_title).'</strong> at <strong>'.\gc_employer_interview_e($company)."</strong>.</p>\r\n\r\n                    <div style='background:#fff7ed; padding:15px; border-radius:10px; margin:20px 0;'>\r\n                        <p><strong>Date:</strong> ".\gc_employer_interview_e($formattedDate)."</p>\r\n                        <p><strong>Time:</strong> ".\gc_employer_interview_e($formattedTime)."</p>\r\n                        <p><strong>Location:</strong> ".\gc_employer_interview_e($location)."</p>\r\n                    </div>\r\n\r\n                    <p><strong>Message:</strong></p>\r\n                    <p>".nl2br(\gc_employer_interview_e($message))."</p>\r\n\r\n                    <p>Thank you and good luck.</p>\r\n\r\n                    <p style='margin-top:25px; color:#6b7280; font-size:12px;'>\r\n                        This is an automated email from GradConn.\r\n                    </p>\r\n                </div>\r\n            </body>\r\n            </html>\r\n        ";
+        $mail->Body = "\r\n            <html>\r\n            <body style='font-family: Arial, sans-serif; background:#f8fafc; padding:20px;'>\r\n                <div style='max-width:600px; margin:auto; background:white; border-radius:12px; padding:25px; border:1px solid #e5e7eb;'>\r\n                    <h2 style='color:#f97316;'>Interview Invitation</h2>\r\n\r\n                    <p>Dear <strong>".\gc_e($alumni_name)."</strong>,</p>\r\n\r\n                    <p>You are invited for an interview for the position of \r\n                    <strong>".\gc_e($job_title).'</strong> at <strong>'.\gc_e($company)."</strong>.</p>\r\n\r\n                    <div style='background:#fff7ed; padding:15px; border-radius:10px; margin:20px 0;'>\r\n                        <p><strong>Date:</strong> ".\gc_e($formattedDate)."</p>\r\n                        <p><strong>Time:</strong> ".\gc_e($formattedTime)."</p>\r\n                        <p><strong>Location:</strong> ".\gc_e($location)."</p>\r\n                    </div>\r\n\r\n                    <p><strong>Message:</strong></p>\r\n                    <p>".nl2br(\gc_e($message))."</p>\r\n\r\n                    <p>Thank you and good luck.</p>\r\n\r\n                    <p style='margin-top:25px; color:#6b7280; font-size:12px;'>\r\n                        This is an automated email from GradConn.\r\n                    </p>\r\n                </div>\r\n            </body>\r\n            </html>\r\n        ";
         $mail->AltBody = "Dear {$alumni_name},\n\n"."You are invited for an interview for the position of {$job_title}.\n\n"."Date: {$formattedDate}\n"."Time: {$formattedTime}\n"."Location: {$location}\n\n"."Message:\n{$message}\n\n".'Thank you.';
         $mail->send();
 
@@ -2355,11 +2278,6 @@ function gc_employer_post_job_parse_branch_locations(?string $branchText): array
 
     return $branches;
 }
-function gc_employer_posted_job_e($value): string
-{
-    return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
-}
-
 // ========================
 // ENSURE EMPLOYER PROFILE COLUMNS EXIST
 // ========================

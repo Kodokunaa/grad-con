@@ -48,7 +48,7 @@ final class AlumniFeedController extends PageController
                 if ($ex instanceof PageResponse) {
                     throw $ex;
                 }
-                \gc_finish('Database setup error: '.\gc_alumni_feed_e(\gc_public_error($ex)));
+                \gc_finish('Database setup error: '.\gc_e(\gc_public_error($ex)));
             }
             $allowedReactions = ['like' => ['emoji' => '👍', 'label' => 'Like'], 'love' => ['emoji' => '❤️', 'label' => 'Love'], 'haha' => ['emoji' => '😂', 'label' => 'Haha'], 'angry' => ['emoji' => '😡', 'label' => 'Angry']];
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST' && isset(\gc_context()->post['ajax_action'])) {

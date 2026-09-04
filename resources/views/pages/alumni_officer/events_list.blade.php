@@ -270,14 +270,14 @@ echo \url('');
             <?php 
 if ($msg) {
     ?><div class="alert-box alert-success-custom"><?php 
-    echo \gc_alumni_officer_events_list_e($msg);
+    echo \gc_e($msg);
     ?></div><?php 
 }
 ?>
             <?php 
 if ($error) {
     ?><div class="alert-box alert-danger-custom"><?php 
-    echo \gc_alumni_officer_events_list_e($error);
+    echo \gc_e($error);
     ?></div><?php 
 }
 ?>
@@ -318,7 +318,7 @@ if (!$events) {
                     <article class="event-post" id="event-post-<?php 
         echo $eventId;
         ?>" data-search="<?php 
-        echo \gc_alumni_officer_events_list_e($searchText);
+        echo \gc_e($searchText);
         ?>">
                         <div class="post-header">
                             <div class="poster-info">
@@ -327,7 +327,7 @@ if (!$events) {
         ?>
                                 <div>
                                     <h4 class="poster-name"><?php 
-        echo \gc_alumni_officer_events_list_e($postedBy);
+        echo \gc_e($postedBy);
         ?></h4>
                                     <div class="post-meta">Posted an alumni event • Event ID #<?php 
         echo $eventId;
@@ -337,26 +337,26 @@ if (!$events) {
                             <div class="post-badges-right">
                                 <div class="post-id-badge">Event</div>
                                 <div class="status-pill <?php 
-        echo \gc_alumni_officer_events_list_e($statusClass);
+        echo \gc_e($statusClass);
         ?>"><?php 
-        echo \gc_alumni_officer_events_list_e($statusText);
+        echo \gc_e($statusText);
         ?></div>
                             </div>
                         </div>
 
                         <div class="post-content">
                             <h2 class="event-title"><?php 
-        echo \gc_alumni_officer_events_list_e($event["title"]);
+        echo \gc_e($event["title"]);
         ?></h2>
                             <div class="event-text"><?php 
-        echo nl2br(\gc_alumni_officer_events_list_e(\gc_alumni_officer_events_list_short_text($event["content"], 320)));
+        echo nl2br(\gc_e(\gc_alumni_officer_events_list_short_text($event["content"], 320)));
         ?></div>
                             <div class="schedule-line">
                                 <span>🟢 Start: <?php 
-        echo \gc_alumni_officer_events_list_e(!empty($event['post_start_date']) ? \gc_alumni_officer_events_list_format_schedule_date($event['post_start_date']) : 'Immediately');
+        echo \gc_e(!empty($event['post_start_date']) ? \gc_alumni_officer_events_list_format_schedule_date($event['post_start_date']) : 'Immediately');
         ?></span>
                                 <span>🔴 End: <?php 
-        echo \gc_alumni_officer_events_list_e(!empty($event['post_end_date']) ? \gc_alumni_officer_events_list_format_schedule_date($event['post_end_date']) : 'No end date');
+        echo \gc_e(!empty($event['post_end_date']) ? \gc_alumni_officer_events_list_format_schedule_date($event['post_end_date']) : 'No end date');
         ?></span>
                             </div>
                         </div>
@@ -368,7 +368,7 @@ if (!$events) {
                                 <img src="<?php 
             echo \url('');
             ?>/uploads/events/<?php 
-            echo \gc_alumni_officer_events_list_e($event["image"]);
+            echo \gc_e($event["image"]);
             ?>" class="event-image" alt="Event Image" onclick="openImageLightbox(this.src)">
                             <?php 
         } else {
@@ -394,9 +394,9 @@ if (!$events) {
                 if (($counts[$key] ?? 0) > 0) {
                     ?>
                                                 <span title="<?php 
-                    echo \gc_alumni_officer_events_list_e($info['label']);
+                    echo \gc_e($info['label']);
                     ?>"><?php 
-                    echo \gc_alumni_officer_events_list_e($info['emoji']);
+                    echo \gc_e($info['emoji']);
                     ?></span>
                                             <?php 
                 }
@@ -439,17 +439,17 @@ if (!$events) {
         foreach ($allowedReactions as $reactionKey => $reactionInfo) {
             ?>
                                         <button type="submit" name="reaction_type" value="<?php 
-            echo \gc_alumni_officer_events_list_e($reactionKey);
+            echo \gc_e($reactionKey);
             ?>" class="reaction-option" title="<?php 
-            echo \gc_alumni_officer_events_list_e($reactionInfo['label']);
+            echo \gc_e($reactionInfo['label']);
             ?>" aria-label="<?php 
-            echo \gc_alumni_officer_events_list_e($reactionInfo['label']);
+            echo \gc_e($reactionInfo['label']);
             ?>">
                                             <span class="reaction-option-emoji"><?php 
-            echo \gc_alumni_officer_events_list_e($reactionInfo['emoji']);
+            echo \gc_e($reactionInfo['emoji']);
             ?></span>
                                             <span class="reaction-option-label"><?php 
-            echo \gc_alumni_officer_events_list_e($reactionInfo['label']);
+            echo \gc_e($reactionInfo['label']);
             ?></span>
                                         </button>
                                     <?php 
@@ -458,15 +458,15 @@ if (!$events) {
                                 </div>
 
                                 <button type="button" class="btn-action btn-like reaction-main-btn <?php 
-        echo $userReaction ? 'active-' . \gc_alumni_officer_events_list_e($userReaction) : '';
+        echo $userReaction ? 'active-' . \gc_e($userReaction) : '';
         ?>" data-current-reaction="<?php 
-        echo \gc_alumni_officer_events_list_e($userReaction ?: 'like');
+        echo \gc_e($userReaction ?: 'like');
         ?>" aria-haspopup="true" aria-expanded="false">
                                     <span class="main-reaction-emoji"><?php 
-        echo \gc_alumni_officer_events_list_e($reactionEmoji);
+        echo \gc_e($reactionEmoji);
         ?></span>
                                     <span class="main-reaction-label"><?php 
-        echo \gc_alumni_officer_events_list_e($reactionLabel);
+        echo \gc_e($reactionLabel);
         ?></span>
                                 </button>
                             </form>
@@ -523,7 +523,7 @@ if (!$events) {
 
                                 <div class="comment-toggle-row">
                                     <button type="button" class="view-comments-btn" onclick="toggleCommentsBox('<?php 
-            echo \gc_alumni_officer_events_list_e($commentsBoxId);
+            echo \gc_e($commentsBoxId);
             ?>', this)" data-open-text="Hide comments" data-closed-text="View all <?php 
             echo number_format($comments);
             ?> comment<?php 
@@ -556,10 +556,10 @@ if (!$events) {
                                             <div class="comment-bubble">
                                                 <div class="comment-top">
                                                     <div class="comment-name"><?php 
-            echo \gc_alumni_officer_events_list_e($previewCommentName);
+            echo \gc_e($previewCommentName);
             ?></div>
                                                     <div class="comment-date"><?php 
-            echo \gc_alumni_officer_events_list_e(date('M d, Y h:i A', strtotime($previewComment['created_at'] ?? 'now')));
+            echo \gc_e(date('M d, Y h:i A', strtotime($previewComment['created_at'] ?? 'now')));
             ?></div>
                                                 </div>
                                                 <div class="comment-text"><?php 
@@ -571,7 +571,7 @@ if (!$events) {
                                 </div>
 
                                 <div class="comments-collapse" id="<?php 
-            echo \gc_alumni_officer_events_list_e($commentsBoxId);
+            echo \gc_e($commentsBoxId);
             ?>">
                                     <div class="comments-list">
                                         <?php 
@@ -589,10 +589,10 @@ if (!$events) {
                                                         <div class="comment-bubble">
                                                             <div class="comment-top">
                                                                 <div class="comment-name"><?php 
-                echo \gc_alumni_officer_events_list_e($comment['fullname'] ?? 'Unknown User');
+                echo \gc_e($comment['fullname'] ?? 'Unknown User');
                 ?></div>
                                                                 <div class="comment-date"><?php 
-                echo \gc_alumni_officer_events_list_e(date('M d, Y h:i A', strtotime($comment['created_at'] ?? 'now')));
+                echo \gc_e(date('M d, Y h:i A', strtotime($comment['created_at'] ?? 'now')));
                 ?></div>
                                                             </div>
                                                             <div class="comment-text"><?php 
@@ -644,10 +644,10 @@ if (!$events) {
                                                                             <div class="comment-bubble reply-bubble">
                                                                                 <div class="comment-top">
                                                                                     <div class="comment-name"><?php 
-                        echo \gc_alumni_officer_events_list_e($reply['fullname'] ?? 'Unknown User');
+                        echo \gc_e($reply['fullname'] ?? 'Unknown User');
                         ?></div>
                                                                                     <div class="comment-date"><?php 
-                        echo \gc_alumni_officer_events_list_e(date('M d, Y h:i A', strtotime($reply['created_at'] ?? 'now')));
+                        echo \gc_e(date('M d, Y h:i A', strtotime($reply['created_at'] ?? 'now')));
                         ?></div>
                                                                                 </div>
                                                                                 <div class="comment-text"><?php 
@@ -662,9 +662,9 @@ if (!$events) {
                         ?>
                                                                             <div class="comment-tools">
                                                                                 <button type="button" class="comment-reply-btn" onclick="toggleReplyBoxById('<?php 
-                        echo \gc_alumni_officer_events_list_e($replyReplyBoxId);
+                        echo \gc_e($replyReplyBoxId);
                         ?>', '@<?php 
-                        echo \gc_alumni_officer_events_list_e($reply['fullname'] ?? 'User');
+                        echo \gc_e($reply['fullname'] ?? 'User');
                         ?> ')">Reply</button>
                                                                                 <form method="POST" action="" class="comment-delete-form" onsubmit="return confirm('Delete this reply?');">
                                                                                     <input type="hidden" name="comment_id" value="<?php 
@@ -675,7 +675,7 @@ if (!$events) {
                                                                             </div>
 
                                                                             <form method="POST" action="" class="reply-form" id="<?php 
-                        echo \gc_alumni_officer_events_list_e($replyReplyBoxId);
+                        echo \gc_e($replyReplyBoxId);
                         ?>" style="display:none;">
                                                                                 <?php 
                         echo \gc_alumni_officer_events_list_avatar_html($currentFullname, $currentUserPhoto, 'user-avatar reply-avatar');

@@ -177,7 +177,7 @@ final class EmployerAlumniListController extends PageController
                             $insertOfferStmt->execute([$employerId, $selectedAlumniId, $offerToken, $mailSubject, $customMessage, $expiresAt]);
                             $offerId = (int) $pdo->lastInsertId();
                             \gc_employer_alumni_list_log_employer_activity($pdo, $employerId, 'JOB_OFFER_SENT', "Subject: {$mailSubject}\nMessage: {$customMessage}\nAlignment: {$selectedSummaryAlignment['status']} - {$selectedSummaryAlignment['reason']}", $selectedAlumniId, $offerId);
-                            $msg = 'Job offer sent successfully to '.\gc_employer_alumni_list_e($selectedAlumni['email']).'. They will receive an email with options to accept or decline.';
+                            $msg = 'Job offer sent successfully to '.\gc_e($selectedAlumni['email']).'. They will receive an email with options to accept or decline.';
                             \gc_context()->session['send_snapshot_email_token'] = bin2hex(random_bytes(32));
                             $sendSnapshotEmailToken = \gc_context()->session['send_snapshot_email_token'];
                         } catch (\Throwable $e) {

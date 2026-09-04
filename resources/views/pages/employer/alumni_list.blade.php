@@ -974,7 +974,7 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
 if ($msg) {
     ?>
         <div class="alert-box alert-success-custom"><?php 
-    echo \gc_employer_alumni_list_e($msg);
+    echo \gc_e($msg);
     ?></div>
     <?php 
 }
@@ -984,7 +984,7 @@ if ($msg) {
 if ($error) {
     ?>
         <div class="alert-box alert-danger-custom"><?php 
-    echo \gc_employer_alumni_list_e($error);
+    echo \gc_e($error);
     ?></div>
     <?php 
 }
@@ -1001,9 +1001,9 @@ if ($error) {
 foreach ($courseOptions as $course) {
     ?>
                         <option value="<?php 
-    echo \gc_employer_alumni_list_e($course);
+    echo \gc_e($course);
     ?>"><?php 
-    echo \gc_employer_alumni_list_e($course);
+    echo \gc_e($course);
     ?></option>
                     <?php 
 }
@@ -1019,9 +1019,9 @@ foreach ($courseOptions as $course) {
 foreach ($batchOptions as $batch) {
     ?>
                         <option value="<?php 
-    echo \gc_employer_alumni_list_e($batch);
+    echo \gc_e($batch);
     ?>"><?php 
-    echo \gc_employer_alumni_list_e($batch);
+    echo \gc_e($batch);
     ?></option>
                     <?php 
 }
@@ -1067,7 +1067,7 @@ foreach ($alumni as $a) {
     $profilePicFile = trim((string) ($a['profile_picture'] ?? ''));
     $profilePicUrl = '';
     if ($profilePicFile !== '') {
-        $profilePicUrl = \gc_employer_alumni_list_e(\url('') . '/uploads/profiles/' . rawurlencode($profilePicFile));
+        $profilePicUrl = \gc_e(\url('') . '/uploads/profiles/' . rawurlencode($profilePicFile));
     }
     $initials = strtoupper(substr(trim($a['fullname'] ?? 'A'), 0, 1) ?: 'A');
     ?>
@@ -1082,7 +1082,7 @@ foreach ($alumni as $a) {
         echo $profilePicUrl;
         ?>"
                                          alt="<?php 
-        echo \gc_employer_alumni_list_e($a['fullname']);
+        echo \gc_e($a['fullname']);
         ?>"
                                          class="alumni-avatar"
                                          onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">
@@ -1106,25 +1106,25 @@ foreach ($alumni as $a) {
     echo (int) $a['id'];
     ?>">
                                     <?php 
-    echo \gc_employer_alumni_list_e($a['fullname']);
+    echo \gc_e($a['fullname']);
     ?>
                                 </a>
                             </div>
                         </td>
                         <td><?php 
-    echo \gc_employer_alumni_list_e($a['username']);
+    echo \gc_e($a['username']);
     ?></td>
                         <td><?php 
-    echo \gc_employer_alumni_list_e($a['email'] ?? '');
+    echo \gc_e($a['email'] ?? '');
     ?></td>
                         <td><?php 
-    echo \gc_employer_alumni_list_e($a['course'] ?? '');
+    echo \gc_e($a['course'] ?? '');
     ?></td>
                         <td><?php 
-    echo \gc_employer_alumni_list_e($a['batch_year'] ?? '');
+    echo \gc_e($a['batch_year'] ?? '');
     ?></td>
                         <td><?php 
-    echo \gc_employer_alumni_list_e($a['skills'] ?? '');
+    echo \gc_e($a['skills'] ?? '');
     ?></td>
                         <td>
                             <button
@@ -1159,7 +1159,7 @@ foreach ($alumni as $a) {
     $snapPicFile = trim((string) ($a['profile_picture'] ?? ''));
     $snapPicUrl = '';
     if ($snapPicFile !== '') {
-        $snapPicUrl = \gc_employer_alumni_list_e(\url('') . '/uploads/profiles/' . rawurlencode($snapPicFile));
+        $snapPicUrl = \gc_e(\url('') . '/uploads/profiles/' . rawurlencode($snapPicFile));
     }
     $snapInitials = strtoupper(substr(trim($a['fullname'] ?? 'A'), 0, 1) ?: 'A');
     ?>
@@ -1176,7 +1176,7 @@ foreach ($alumni as $a) {
         echo $snapPicUrl;
         ?>"
                          alt="<?php 
-        echo \gc_employer_alumni_list_e($a['fullname']);
+        echo \gc_e($a['fullname']);
         ?>"
                          class="snapshot-profile-pic"
                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
@@ -1194,61 +1194,61 @@ foreach ($alumni as $a) {
     ?>
                 <div>
                     <p class="snapshot-profile-info-name"><?php 
-    echo \gc_employer_alumni_list_e($a['fullname']);
+    echo \gc_e($a['fullname']);
     ?></p>
                     <p class="snapshot-profile-info-sub"><?php 
-    echo \gc_employer_alumni_list_e($a['course'] ?? '');
+    echo \gc_e($a['course'] ?? '');
     ?> &bull; Batch <?php 
-    echo \gc_employer_alumni_list_e($a['batch_year'] ?? '');
+    echo \gc_e($a['batch_year'] ?? '');
     ?></p>
                     <p class="snapshot-profile-info-status"><?php 
-    echo \gc_employer_alumni_list_e($a['employment_status'] ?? '');
+    echo \gc_e($a['employment_status'] ?? '');
     ?></p>
                 </div>
             </div>
 
             <div class="snapshot-grid">
                 <div class="snapshot-item"><div class="snapshot-label">Fullname</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['fullname']);
+    echo \gc_e($a['fullname']);
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Username</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['username']);
+    echo \gc_e($a['username']);
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Email</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['email'] ?? '');
+    echo \gc_e($a['email'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Course</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['course'] ?? '');
+    echo \gc_e($a['course'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Batch</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['batch_year'] ?? '');
+    echo \gc_e($a['batch_year'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Birthdate</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['birthdate'] ?? '');
+    echo \gc_e($a['birthdate'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Age</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['age'] ?? '');
+    echo \gc_e($a['age'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Gender</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['gender'] ?? '');
+    echo \gc_e($a['gender'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Civil Status</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['civil_status'] ?? '');
+    echo \gc_e($a['civil_status'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Contact Number</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['contact_number'] ?? '');
+    echo \gc_e($a['contact_number'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Address</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['address'] ?? '');
+    echo \gc_e($a['address'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Indigenous Tribe</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['indigenous_tribe'] ?? '');
+    echo \gc_e($a['indigenous_tribe'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Disability</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['special_needs'] ?? '');
+    echo \gc_e($a['special_needs'] ?? '');
     ?></div></div>
                 <div class="snapshot-item"><div class="snapshot-label">Employment Status</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['employment_status'] ?? '');
+    echo \gc_e($a['employment_status'] ?? '');
     ?></div></div>
                 <?php 
     $summaryAlignment = \gc_employer_alumni_list_summarize_job_alignment($a['course'] ?? '', $jobs);
@@ -1257,26 +1257,26 @@ foreach ($alumni as $a) {
                     <div class="snapshot-label">Job Alignment</div>
                     <div class="snapshot-value">
                         <span class="alignment-badge <?php 
-    echo \gc_employer_alumni_list_e($summaryAlignment['class']);
+    echo \gc_e($summaryAlignment['class']);
     ?>"><?php 
-    echo \gc_employer_alumni_list_e($summaryAlignment['status']);
+    echo \gc_e($summaryAlignment['status']);
     ?></span>
                         <div class="details-empty"><?php 
-    echo \gc_employer_alumni_list_e($summaryAlignment['reason']);
+    echo \gc_e($summaryAlignment['reason']);
     ?></div>
                     </div>
                 </div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Career Objective</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['career_objective'] ?? '');
+    echo \gc_e($a['career_objective'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Skills</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['skills'] ?? '');
+    echo \gc_e($a['skills'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Work Experience</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['work_experience'] ?? '');
+    echo \gc_e($a['work_experience'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Trainings</div><div class="snapshot-value"><?php 
-    echo \gc_employer_alumni_list_e($a['trainings'] ?? '');
+    echo \gc_e($a['trainings'] ?? '');
     ?></div></div>
             </div>
 
@@ -1305,10 +1305,10 @@ foreach ($alumni as $a) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($edu['school_name']);
+            echo \gc_e($edu['school_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($edu['degree']);
+            echo \gc_e($edu['degree']);
             ?></td>
                                             <td><?php 
             echo \gc_employer_alumni_list_format_year_range($edu['start_year'] ?? '', $edu['end_year'] ?? '');
@@ -1352,20 +1352,20 @@ foreach ($alumni as $a) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($deg['degree_name']);
+            echo \gc_e($deg['degree_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($deg['school_name'] ?? '');
+            echo \gc_e($deg['school_name'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($deg['year_graduated'] ?? '');
+            echo \gc_e($deg['year_graduated'] ?? '');
             ?></td>
                                             <td>
                                                 <?php 
             if (!empty($deg['diploma_file'])) {
                 ?>
                                                     <a href="<?php 
-                echo \gc_employer_alumni_list_e(\url('') . '/uploads/diplomas/' . rawurlencode($deg['diploma_file']));
+                echo \gc_e(\url('') . '/uploads/diplomas/' . rawurlencode($deg['diploma_file']));
                 ?>" target="_blank">View Diploma</a>
                                                 <?php 
             } else {
@@ -1395,7 +1395,7 @@ foreach ($alumni as $a) {
     if ($employmentHistoryError !== '') {
         ?>
                         <div class="details-empty"><?php 
-        echo \gc_employer_alumni_list_e($employmentHistoryError);
+        echo \gc_e($employmentHistoryError);
         ?></div>
                     <?php 
     } elseif (empty($jobs)) {
@@ -1424,38 +1424,38 @@ foreach ($alumni as $a) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($job['company_name']);
+            echo \gc_e($job['company_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($job['job_title']);
+            echo \gc_e($job['job_title']);
             ?></td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($job['employment_type'] ?? '');
+            echo \gc_e($job['employment_type'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($job['location'] ?? '');
+            echo \gc_e($job['location'] ?? '');
             ?></td>
                                             <td><?php 
             echo \gc_employer_alumni_list_format_date_range($job['start_date'] ?? '', $job['end_date'] ?? '');
             ?></td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($job['job_description'] ?? '');
+            echo \gc_e($job['job_description'] ?? '');
             ?></td>
                                             <td>
                                                 <?php 
             $jobAlignment = \gc_employer_alumni_list_analyze_course_job_alignment($a['course'] ?? '', $job['job_title'] ?? '', $job['job_description'] ?? '');
             ?>
                                                 <span class="alignment-badge <?php 
-            echo \gc_employer_alumni_list_e($jobAlignment['class']);
+            echo \gc_e($jobAlignment['class']);
             ?>"><?php 
-            echo \gc_employer_alumni_list_e($jobAlignment['status']);
+            echo \gc_e($jobAlignment['status']);
             ?></span>
                                                 <div class="details-empty"><?php 
-            echo \gc_employer_alumni_list_e($jobAlignment['reason']);
+            echo \gc_e($jobAlignment['reason']);
             ?></div>
                                             </td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($job['created_at'] ?? '');
+            echo \gc_e($job['created_at'] ?? '');
             ?></td>
                                         </tr>
                                     <?php 
@@ -1495,10 +1495,10 @@ foreach ($alumni as $a) {
             ?>
                                         <tr>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($cert['certificate_name']);
+            echo \gc_e($cert['certificate_name']);
             ?></td>
                                             <td><?php 
-            echo \gc_employer_alumni_list_e($cert['issue_date'] ?? '');
+            echo \gc_e($cert['issue_date'] ?? '');
             ?></td>
                                             <td>
                                                 <?php 
@@ -1506,10 +1506,10 @@ foreach ($alumni as $a) {
                 ?>
                                                     <div class="certificate-preview-wrap">
                                                         <a href="<?php 
-                echo \gc_employer_alumni_list_e(\url('') . '/uploads/certificates/' . rawurlencode($cert['certificate_image']));
+                echo \gc_e(\url('') . '/uploads/certificates/' . rawurlencode($cert['certificate_image']));
                 ?>" target="_blank">
                                                             <img class="cert-preview" src="<?php 
-                echo \gc_employer_alumni_list_e(\url('') . '/uploads/certificates/' . rawurlencode($cert['certificate_image']));
+                echo \gc_e(\url('') . '/uploads/certificates/' . rawurlencode($cert['certificate_image']));
                 ?>" alt="Certificate Preview">
                                                         </a>
                                                     </div>
@@ -1563,7 +1563,7 @@ foreach ($alumni as $a) {
             <form method="POST" id="sendSnapshotEmailForm">
                 <input type="hidden" name="send_snapshot_email" value="1">
                 <input type="hidden" name="send_snapshot_email_token" value="<?php 
-echo \gc_employer_alumni_list_e($sendSnapshotEmailToken);
+echo \gc_e($sendSnapshotEmailToken);
 ?>">
                 <input type="hidden" name="email_alumni_id" id="emailAlumniId" value="">
 
@@ -1593,7 +1593,7 @@ echo \gc_employer_alumni_list_e($sendSnapshotEmailToken);
                             name="email_subject"
                             placeholder="Example: Job Opportunity Invitation"
                             value="<?php 
-echo \gc_employer_alumni_list_e(\gc_context()->post['email_subject'] ?? '');
+echo \gc_e(\gc_context()->post['email_subject'] ?? '');
 ?>"
                         >
                     </div>
@@ -1607,7 +1607,7 @@ echo \gc_employer_alumni_list_e(\gc_context()->post['email_subject'] ?? '');
                             placeholder="Type your custom message here..."
                             required
                         ><?php 
-echo \gc_employer_alumni_list_e(\gc_context()->post['email_message'] ?? '');
+echo \gc_e(\gc_context()->post['email_message'] ?? '');
 ?></textarea>
                     </div>
 
