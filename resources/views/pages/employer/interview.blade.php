@@ -212,6 +212,8 @@ td {
     }
 }
 </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/request-security.js') }}" defer></script>
 </head>
 <body>
 
@@ -222,23 +224,23 @@ td {
     <h1 class="page-title">Set Interview Schedule</h1>
     <p class="page-subtitle">Set the interview date, time, and location, then send it to the applicant's email.</p>
 
-    <?php 
+    <?php
 if ($success) {
     ?>
-        <div class="alert alert-success"><?php 
+        <div class="alert alert-success"><?php
     echo \gc_e($success);
     ?></div>
-    <?php 
+    <?php
 }
 ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert alert-error"><?php 
+        <div class="alert alert-error"><?php
     echo \gc_e($error);
     ?></div>
-    <?php 
+    <?php
 }
 ?>
 
@@ -246,21 +248,21 @@ if ($error) {
         <div class="info-grid">
             <div class="info-box">
                 <div class="info-label">Applicant</div>
-                <div class="info-value"><?php 
+                <div class="info-value"><?php
 echo \gc_e($application['fullname']);
 ?></div>
             </div>
 
             <div class="info-box">
                 <div class="info-label">Email</div>
-                <div class="info-value"><?php 
+                <div class="info-value"><?php
 echo \gc_e($application['email']);
 ?></div>
             </div>
 
             <div class="info-box">
                 <div class="info-label">Job</div>
-                <div class="info-value"><?php 
+                <div class="info-value"><?php
 echo \gc_e($application['job_title']);
 ?></div>
             </div>
@@ -268,7 +270,7 @@ echo \gc_e($application['job_title']);
             <div class="info-box">
                 <div class="info-label">Company</div>
                 <div class="info-value">
-                    <?php 
+                    <?php
 echo \gc_e($application['employer_company'] ?: $application['company']);
 ?>
                 </div>
@@ -277,16 +279,16 @@ echo \gc_e($application['employer_company'] ?: $application['company']);
 
         <form method="POST">
 @csrf
-            <input type="hidden" name="application_id" value="<?php 
+            <input type="hidden" name="application_id" value="<?php
 echo (int) $application_id;
 ?>">
-            <?php 
+            <?php
 if ($offer_id > 0) {
     ?>
-                <input type="hidden" name="offer_id" value="<?php 
+                <input type="hidden" name="offer_id" value="<?php
     echo (int) $offer_id;
     ?>">
-            <?php 
+            <?php
 }
 ?>
 
@@ -295,7 +297,7 @@ if ($offer_id > 0) {
                 <input 
                     type="date" 
                     name="interview_date" 
-                    value="<?php 
+                    value="<?php
 echo \gc_e($interview['interview_date'] ?? '');
 ?>" 
                     required>
@@ -306,7 +308,7 @@ echo \gc_e($interview['interview_date'] ?? '');
                 <input 
                     type="time" 
                     name="interview_time" 
-                    value="<?php 
+                    value="<?php
 echo \gc_e($interview['interview_time'] ?? '');
 ?>" 
                     required>
@@ -318,7 +320,7 @@ echo \gc_e($interview['interview_time'] ?? '');
                     type="text" 
                     name="location" 
                     placeholder="Example: CCC Room 101 or Google Meet link"
-                    value="<?php 
+                    value="<?php
 echo \gc_e($interview['location'] ?? '');
 ?>" 
                     required>
@@ -326,7 +328,7 @@ echo \gc_e($interview['location'] ?? '');
 
             <div class="form-group">
                 <label>Message</label>
-                <textarea name="message" placeholder="Write your interview message here..."><?php 
+                <textarea name="message" placeholder="Write your interview message here..."><?php
 echo \gc_e($interview['message'] ?? 'Good day! We are inviting you for an interview. Please see the interview details below. Thank you.');
 ?></textarea>
             </div>
@@ -338,7 +340,7 @@ echo \gc_e($interview['message'] ?? 'Good day! We are inviting you for an interv
         </form>
     </div>
 
-    <?php 
+    <?php
 if ($interview) {
     ?>
         <div class="table-card">
@@ -355,38 +357,39 @@ if ($interview) {
                 </thead>
                 <tbody>
                     <tr>
-                        <td><?php 
+                        <td><?php
     echo \gc_e($application['fullname']);
     ?></td>
-                        <td><?php 
+                        <td><?php
     echo \gc_e($application['job_title']);
     ?></td>
                         <td>
-                            <?php 
-    echo \gc_e(date("M d, Y", strtotime($interview['interview_date'])));
+                            <?php
+    echo \gc_e(date('M d, Y', strtotime($interview['interview_date'])));
     ?>
                             <br>
-                            <?php 
-    echo \gc_e(date("h:i A", strtotime($interview['interview_time'])));
+                            <?php
+    echo \gc_e(date('h:i A', strtotime($interview['interview_time'])));
     ?>
                         </td>
-                        <td><span class="badge"><?php 
+                        <td><span class="badge"><?php
     echo \gc_e($interview['status']);
     ?></span></td>
                         <td>
-                            <?php 
-    echo (int) $interview['email_sent'] === 1 ? "Sent" : "Not Sent";
+                            <?php
+    echo (int) $interview['email_sent'] === 1 ? 'Sent' : 'Not Sent';
     ?>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-    <?php 
+    <?php
 }
 ?>
 
 </div>
 
+    @include('partials.logout-modal')
 </body>
 </html>

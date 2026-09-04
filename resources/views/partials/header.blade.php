@@ -3,8 +3,8 @@
 if (session_status() === PHP_SESSION_NONE) {
     \gc_noop();
 }
-null;
-if (!defined('TOPBAR_INCLUDED')) {
+
+if (! defined('TOPBAR_INCLUDED')) {
     define('TOPBAR_INCLUDED', true);
 }
 $currentUserName = \gc_context()->session['user']['fullname'] ?? 'Admin';
@@ -18,6 +18,8 @@ $currentUserRoleLabel = $roleLabels[$currentUserRole] ?? ucfirst($currentUserRol
   <meta charset="utf-8">
   <title>GradConn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <script src="{{ asset('js/request-security.js') }}" defer></script>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -274,10 +276,10 @@ $currentUserRoleLabel = $roleLabels[$currentUserRole] ?? ucfirst($currentUserRol
   <div class="header-left">
     <button class="mobile-sidebar-toggle" type="button" onclick="toggleSidebar(true)">☰</button>
     <div>
-        <div class="header-brand"><a href="<?php 
+        <div class="header-brand"><a href="<?php
 echo \url('');
 ?>">GradConn</a></div>
-        <div class="header-tagline"><?php 
+        <div class="header-tagline"><?php
 echo htmlspecialchars($currentUserRoleLabel, ENT_QUOTES, 'UTF-8');
 ?></div>
     </div>
@@ -285,10 +287,10 @@ echo htmlspecialchars($currentUserRoleLabel, ENT_QUOTES, 'UTF-8');
 
   <div class="header-right">
     <div class="header-user">
-      <div class="header-user-avatar"><?php 
+      <div class="header-user-avatar"><?php
 echo strtoupper(substr(trim($currentUserName), 0, 1));
 ?></div>
-      <div><?php 
+      <div><?php
 echo htmlspecialchars($currentUserName, ENT_QUOTES, 'UTF-8');
 ?></div>
     </div>
@@ -359,3 +361,4 @@ echo htmlspecialchars($currentUserName, ENT_QUOTES, 'UTF-8');
     }
   });
 </script>
+@include('partials.logout-modal')

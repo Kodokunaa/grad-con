@@ -290,13 +290,15 @@
             }
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/request-security.js') }}" defer></script>
 </head>
 <body>
 
 <div class="app-header">
-    <div class="header-brand"><a href="<?php 
+    <div class="header-brand"><a href="<?php
 echo \url('');
-?>">GradConn</a></div>
+    ?>">GradConn</a></div>
     <button class="mobile-sidebar-toggle" type="button" onclick="toggleSidebar(true)">☰</button>
 </div>
 <div class="mobile-sidebar-overlay" onclick="toggleSidebar(false)"></div>
@@ -307,25 +309,25 @@ echo \url('');
             <h2>Create Employer Account</h2>
             <p class="subtitle">Add a new employer account that can log in and manage job posts and applicants.</p>
 
-            <?php 
+            <?php
 if ($success) {
     ?>
-                <div class="alert alert-success"><?php 
+                <div class="alert alert-success"><?php
     echo htmlspecialchars($success);
     ?></div>
-            <?php 
+            <?php
 }
-?>
+    ?>
 
-            <?php 
+            <?php
 if ($error) {
     ?>
-                <div class="alert alert-error"><?php 
+                <div class="alert alert-error"><?php
     echo htmlspecialchars($error);
     ?></div>
-            <?php 
+            <?php
 }
-?>
+    ?>
 
             <form method="POST">
 @csrf
@@ -358,9 +360,9 @@ if ($error) {
 
                 <div class="actions">
                     <button type="submit" class="btn btn-primary">Create Employer Account</button>
-                    <a href="<?php 
-echo \url('');
-?>/admin/dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+                    <a href="<?php
+    echo \url('');
+    ?>/admin/dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
                 </div>
             </form>
         </div>
@@ -406,5 +408,6 @@ echo \url('');
     window.addEventListener('load', refreshSidebarToggle);
 </script>
 
+    @include('partials.logout-modal')
 </body>
 </html>

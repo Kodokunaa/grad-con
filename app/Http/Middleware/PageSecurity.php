@@ -8,8 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class PageSecurity
 {
@@ -53,32 +51,6 @@ final class PageSecurity
                 DB::table('audit_logs')->insert(['user_id' => $request->user()->id, 'method' => 'POST', 'path' => $request->path(), 'status' => $response->getStatusCode(), 'ip_address' => $request->ip()]);
             } catch (\Throwable $exception) {
                 report($exception);
-            }
-        }
-        if (! ($response instanceof BinaryFileResponse)
-            && ! ($response instanceof StreamedResponse)
-            && str_contains($response->headers->get('Content-Type', 'text/html'), 'text/html')) {
-            $html = $response->getContent();
-            if (is_string($html) && str_contains($html, '<')) {
-                if (! preg_match('/<meta\b[^>]*\bname\s*=\s*[\x22\x27]csrf-token[\x22\x27]/i', $html)) {
-                    $meta = '<meta name="csrf-token" content="'.e(csrf_token()).'">';
-                    $html = preg_replace('/<head\b[^>]*>/i', '$0'.$meta, $html, 1);
-                }
-                if (! str_contains($html, 'js/request-security.js')) {
-                    $script = '<script src="'.e(asset('js/request-security.js')).'"></script>';
-                    $html = preg_replace('/<\/head>/i', $script.'</head>', $html, 1, $scriptCount);
-                    if ($scriptCount === 0) {
-                        $html = $script.$html;
-                    }
-                }
-                if ($request->user() && ! str_contains($html, 'id="logoutLightbox"')) {
-                    $logoutModal = view('partials.logout-modal')->render();
-                    $html = preg_replace('/<\/body>/i', $logoutModal.'</body>', $html, 1, $modalCount);
-                    if ($modalCount === 0) {
-                        $html .= $logoutModal;
-                    }
-                }
-                $response->setContent($html);
             }
         }
         $response->headers->set('X-Content-Type-Options', 'nosniff');

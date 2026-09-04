@@ -198,6 +198,8 @@
         }
     }
 </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/request-security.js') }}" defer></script>
 </head>
 <body>
 
@@ -205,84 +207,84 @@
 
     <div class="topbar">
         <h1 class="page-title">Job Details</h1>
-        <a href="<?php 
+        <a href="<?php
 echo \url('');
-?>/alumni/dashboard.php" class="back-btn">
+        ?>/alumni/dashboard.php" class="back-btn">
             <i class="fas fa-arrow-left"></i> Back
         </a>
     </div>
 
-    <?php 
+    <?php
 if ($success) {
     ?>
-        <div class="alert alert-success"><?php 
+        <div class="alert alert-success"><?php
     echo htmlspecialchars($success);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+        ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert alert-error"><?php 
+        <div class="alert alert-error"><?php
     echo htmlspecialchars($error);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+        ?>
 
     <div class="card">
-        <div class="job-title"><?php 
-echo htmlspecialchars($job['title'] ?? '');
-?></div>
-        <div class="company"><?php 
-echo htmlspecialchars($job['company'] ?? '');
-?></div>
+        <div class="job-title"><?php
+        echo htmlspecialchars($job['title'] ?? '');
+        ?></div>
+        <div class="company"><?php
+        echo htmlspecialchars($job['company'] ?? '');
+        ?></div>
 
         <div class="grid">
             <div class="info-box">
                 <div class="label">Employer Company</div>
-                <div class="value"><?php 
-echo htmlspecialchars($job['employer_company'] ?? 'N/A');
-?></div>
+                <div class="value"><?php
+        echo htmlspecialchars($job['employer_company'] ?? 'N/A');
+        ?></div>
             </div>
 
             <div class="info-box">
                 <div class="label">Job Type</div>
-                <div class="value"><?php 
-echo htmlspecialchars($job['job_type'] ?? 'N/A');
-?></div>
+                <div class="value"><?php
+        echo htmlspecialchars($job['job_type'] ?? 'N/A');
+        ?></div>
             </div>
 
             <div class="info-box">
                 <div class="label">Location</div>
-                <div class="value"><?php 
-echo htmlspecialchars($job['location'] ?? 'Not specified');
-?></div>
+                <div class="value"><?php
+        echo htmlspecialchars($job['location'] ?? 'Not specified');
+        ?></div>
             </div>
 
             <div class="info-box">
                 <div class="label">Target Course</div>
-                <div class="value"><?php 
-echo htmlspecialchars($job['target_course'] ?? 'Open for All');
-?></div>
+                <div class="value"><?php
+        echo htmlspecialchars($job['target_course'] ?? 'Open for All');
+        ?></div>
             </div>
         </div>
 
         <div class="description-box">
             <div class="description-title">Description</div>
-            <div class="description-text"><?php 
-echo htmlspecialchars($job['description'] ?? '');
-?></div>
+            <div class="description-text"><?php
+        echo htmlspecialchars($job['description'] ?? '');
+        ?></div>
         </div>
 
         <div class="actions">
-            <?php 
+            <?php
 if ($alreadyApplied) {
     ?>
                 <button class="btn-disabled" disabled>You already applied</button>
-            <?php 
+            <?php
 } else {
     ?>
                 <form method="POST">
@@ -291,7 +293,7 @@ if ($alreadyApplied) {
                         <i class="fas fa-paper-plane"></i> Apply Now
                     </button>
                 </form>
-            <?php 
+            <?php
 }
 ?>
         </div>
@@ -299,5 +301,6 @@ if ($alreadyApplied) {
 
 </div>
 
+    @include('partials.logout-modal')
 </body>
 </html>

@@ -278,6 +278,8 @@
         }
     }
 </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/request-security.js') }}" defer></script>
 </head>
 <body>
 
@@ -293,23 +295,23 @@
 
     </div>
 
-    <?php 
+    <?php
 if ($msg) {
     ?>
-        <div class="alert-box alert-success"><?php 
+        <div class="alert-box alert-success"><?php
     echo htmlspecialchars($msg);
     ?></div>
-    <?php 
+    <?php
 }
 ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert-box alert-error"><?php 
+        <div class="alert-box alert-error"><?php
     echo htmlspecialchars($error);
     ?></div>
-    <?php 
+    <?php
 }
 ?>
 
@@ -323,7 +325,7 @@ if ($error) {
                     <input
                         type="text"
                         class="form-control"
-                        value="<?php 
+                        value="<?php
 echo htmlspecialchars($employer_fullname);
 ?>"
                         readonly
@@ -336,7 +338,7 @@ echo htmlspecialchars($employer_fullname);
                     <input
                         type="email"
                         class="form-control"
-                        value="<?php 
+                        value="<?php
 echo htmlspecialchars($employer_email);
 ?>"
                         readonly
@@ -351,7 +353,7 @@ echo htmlspecialchars($employer_email);
                         class="form-control"
                         name="job_type"
                         placeholder="Full-time / Part-time / Internship"
-                        value="<?php 
+                        value="<?php
 echo htmlspecialchars(\gc_context()->post['job_type'] ?? '');
 ?>"
                         required
@@ -365,7 +367,7 @@ echo htmlspecialchars(\gc_context()->post['job_type'] ?? '');
                         class="form-control"
                         name="title"
                         placeholder="Enter job title"
-                        value="<?php 
+                        value="<?php
 echo htmlspecialchars(\gc_context()->post['title'] ?? '');
 ?>"
                         required
@@ -378,7 +380,7 @@ echo htmlspecialchars(\gc_context()->post['title'] ?? '');
                         type="date"
                         class="form-control"
                         name="start_date"
-                        value="<?php 
+                        value="<?php
 echo htmlspecialchars(\gc_context()->post['start_date'] ?? '');
 ?>"
                         required
@@ -391,7 +393,7 @@ echo htmlspecialchars(\gc_context()->post['start_date'] ?? '');
                         type="date"
                         class="form-control"
                         name="end_date"
-                        value="<?php 
+                        value="<?php
 echo htmlspecialchars(\gc_context()->post['end_date'] ?? '');
 ?>"
                         required
@@ -405,7 +407,7 @@ echo htmlspecialchars(\gc_context()->post['end_date'] ?? '');
                         type="hidden"
                         name="profile_location"
                         id="profile_location"
-                        value="<?php 
+                        value="<?php
 echo htmlspecialchars($employer_profile_address);
 ?>"
                     >
@@ -417,7 +419,7 @@ echo htmlspecialchars($employer_profile_address);
                                 class="form-control"
                                 name="location"
                                 id="location"
-                                value="<?php 
+                                value="<?php
 echo htmlspecialchars($display_location);
 ?>"
                                 readonly
@@ -425,44 +427,44 @@ echo htmlspecialchars($display_location);
                             >
                             <div class="helper-text">
                                 Automatically retrieved from your employer profile address.
-                                <?php 
-if ($employer_profile_address === "") {
+                                <?php
+if ($employer_profile_address === '') {
     ?>
                                     Please update your employer profile address first.
-                                <?php 
+                                <?php
 }
 ?>
                             </div>
                         </div>
 
-                        <?php 
-if (!empty($employer_branches)) {
+                        <?php
+if (! empty($employer_branches)) {
     ?>
                             <div class="branch-side-field">
                                 <select class="form-select" name="branch_location" id="branch_location">
                                     <option value="">Main company address</option>
-                                    <?php 
+                                    <?php
     foreach ($employer_branches as $branch) {
         ?>
                                         <option
-                                            value="<?php 
+                                            value="<?php
         echo htmlspecialchars($branch);
         ?>"
-                                            <?php 
+                                            <?php
         echo $selected_branch_location === $branch ? 'selected' : '';
         ?>
                                         >
-                                            <?php 
+                                            <?php
         echo htmlspecialchars($branch);
         ?>
                                         </option>
-                                    <?php 
+                                    <?php
     }
     ?>
                                 </select>
                                 <div class="helper-text">Choose a branch if this job is assigned to another location.</div>
                             </div>
-                        <?php 
+                        <?php
 }
 ?>
                     </div>
@@ -475,7 +477,7 @@ if (!empty($employer_branches)) {
                         name="description"
                         placeholder="Enter full job description, responsibilities, and qualifications"
                         required
-                    ><?php 
+                    ><?php
 echo htmlspecialchars(\gc_context()->post['description'] ?? '');
 ?></textarea>
                 </div>
@@ -486,8 +488,8 @@ echo htmlspecialchars(\gc_context()->post['description'] ?? '');
                             type="checkbox"
                             name="is_open"
                             id="is_open"
-                            <?php 
-echo isset(\gc_context()->post['is_open']) || \request()->server->all()["REQUEST_METHOD"] !== "POST" ? 'checked' : '';
+                            <?php
+echo isset(\gc_context()->post['is_open']) || \request()->server->all()['REQUEST_METHOD'] !== 'POST' ? 'checked' : '';
 ?>
                         >
                         <label for="is_open">Open for applications</label>
@@ -501,7 +503,7 @@ echo isset(\gc_context()->post['is_open']) || \request()->server->all()["REQUEST
                     <i class="fas fa-paper-plane"></i> Post Job
                 </button>
 
-                <a href="<?php 
+                <a href="<?php
 echo \url('');
 ?>/employer/posted_job.php" class="btn-secondary">
                     <i class="fas fa-briefcase"></i> View Posted Jobs
@@ -538,5 +540,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+    @include('partials.logout-modal')
 </body>
 </html>

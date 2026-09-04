@@ -13,8 +13,8 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Validation | In progress | Auth validation plus Form Requests for administrative employer, officer, alumni creation, and alumni editing | Add Form Requests for jobs, applications, offers, interviews, events, training, profiles, education, employment, and social actions |
 | Uploads and files | In progress | Normalized private paths, Laravel disk writes, recognized categories, resume/certificate policies, portal-image scope tests | Convert deletion and reads fully to `Storage`; collision-resistant names; orphan reconciliation; MIME boundary tests |
 | Mail and queues | In progress | Laravel queued delivery, reset notification, configured sender addresses, and removal of PHPMailer transport setup | Consolidate mail templates, harden queued attachments, document/verify worker and SMTP deployment |
-| Views and frontend | In progress | Shared public-authentication document layout, native CSRF in every Blade POST form, and logout modal regression coverage | Auth asset extraction; authenticated layouts/components/assets; remove remaining response rewriting and duplicated inline CSS/JavaScript |
-| Middleware and responses | In progress | Native form CSRF, idempotent asset/modal augmentation, non-fatal audit records, upload validation, security headers | Remove remaining head/modal HTML rewriting and query-action interception after native layouts/routes are complete |
+| Views and frontend | In progress | Shared public-authentication document layout; native authenticated header security assets and logout component; native CSRF in every Blade POST form; logout modal regression coverage | Auth asset extraction; full authenticated layouts/components/assets; remove duplicated inline CSS/JavaScript |
+| Middleware and responses | In progress | Native form CSRF, native page assets/modal, no response-body HTML rewriting, non-fatal audit records, upload validation, security headers | Remove query-action interception after native mutation routes are complete; move audit recording to a service or listener |
 | Duplicate helpers | In progress | Consolidated 20 identical role-prefixed HTML escaping helpers into `gc_e()`; removed dead schema-inspection, compatibility-email, and activity-table helper chains | Consolidate formatting, alignment, activity-log, social-feed, and retained email helpers |
 | Configuration and portability | In progress | Laravel root, environment templates, environment-driven timezone, declared PHP extensions, installation checker, MySQL migration path | Complete isolated clean-device install and production queue/mail verification |
 | Redundant files | Complete | Obsolete conversion tools/documentation, route dump, starter tests/views, blank views, empty migration directories, build cache, and temporary migration runtime removed | Reassess generated compatibility files as their owning architecture chapters are completed |
@@ -55,7 +55,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - Introduce authenticated layouts for the four roles.
 - Convert repeated sidebars, headers, alerts, forms, tables, and modals into Blade components.
 - Remove inline CSS from the remaining page views and inline JavaScript from interactive views.
-- Remove middleware-based HTML rewriting after forms and logout markup are native Blade components.
+- Response rewriting is removed; finish converting standalone documents to the shared authenticated layout.
 
 ## Current middleware and responses checkpoint
 
@@ -72,7 +72,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - Add native CSRF fields to every retained authenticated POST form.
 - Move global upload and password validation into route-specific Form Requests.
 - Replace destructive GET query interception with explicit mutation routes and confirmation components.
-- Remove response-body regular-expression rewriting after the remaining views use shared layouts and components.
+- Response-body regular-expression rewriting has been removed; finish the native route and audit-service conversions.
 - Move audit recording to a dedicated service or event listener with operational failure monitoring.
 
 ## Current duplicate helpers checkpoint

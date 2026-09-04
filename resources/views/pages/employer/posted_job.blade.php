@@ -228,6 +228,8 @@ tbody tr:hover{
     }
 }
 </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/request-security.js') }}" defer></script>
 </head>
 
 <body>
@@ -243,13 +245,13 @@ tbody tr:hover{
         </div>
 
         <div class="header-actions">
-            <a href="<?php 
+            <a href="<?php
 echo \url('');
 ?>/employer/post_job.php" class="btn-header btn-orange">
                 <i class="fas fa-plus"></i> Post New Job
             </a>
 
-            <a href="<?php 
+            <a href="<?php
 echo \url('');
 ?>/employer/applications.php" class="btn-header">
                 <i class="fas fa-users"></i> Applications
@@ -257,21 +259,21 @@ echo \url('');
         </div>
     </div>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert-box alert-error"><?php 
+        <div class="alert-box alert-error"><?php
     echo \gc_e($error);
     ?></div>
-    <?php 
+    <?php
 }
 ?>
 
     <div class="section-card">
         
 
-        <?php 
-if (!empty($posted_jobs)) {
+        <?php
+if (! empty($posted_jobs)) {
     ?>
             <table>
                 <thead>
@@ -289,13 +291,13 @@ if (!empty($posted_jobs)) {
                 </thead>
 
                 <tbody>
-                    <?php 
+                    <?php
     $jobNo = 1;
     ?>
-                    <?php 
+                    <?php
     foreach ($posted_jobs as $job) {
         ?>
-                        <?php 
+                        <?php
         $start = $job['start_date'] ?? '';
         $end = $job['end_date'] ?? '';
         $isOpen = (int) ($job['is_open'] ?? 0);
@@ -314,90 +316,91 @@ if (!empty($posted_jobs)) {
         ?>
 
                         <tr>
-                            <td><?php 
+                            <td><?php
         echo $jobNo++;
         ?></td>
 
                             <td>
-                                <div class="job-title"><?php 
+                                <div class="job-title"><?php
         echo \gc_e($job['title']);
         ?></div>
                                 <div class="small-text">
-                                    <?php 
+                                    <?php
         echo \gc_e($job['employer_company'] ?: $job['company']);
         ?>
                                 </div>
                             </td>
 
-                            <td><?php 
+                            <td><?php
         echo \gc_e($job['job_type'] ?: 'N/A');
         ?></td>
 
-                            <td><?php 
+                            <td><?php
         echo \gc_e($job['location'] ?: 'N/A');
         ?></td>
 
                             <td>
-                                <?php 
-        echo !empty($job['start_date']) ? \gc_e(date("F j, Y", strtotime($job['start_date']))) : 'N/A';
+                                <?php
+        echo ! empty($job['start_date']) ? \gc_e(date('F j, Y', strtotime($job['start_date']))) : 'N/A';
         ?>
                             </td>
 
                             <td>
-                                <?php 
-        echo !empty($job['end_date']) ? \gc_e(date("F j, Y", strtotime($job['end_date']))) : 'N/A';
+                                <?php
+        echo ! empty($job['end_date']) ? \gc_e(date('F j, Y', strtotime($job['end_date']))) : 'N/A';
         ?>
                             </td>
 
                             <td>
-                                <span class="badge <?php 
+                                <span class="badge <?php
         echo $scheduleClass;
         ?>">
-                                    <?php 
+                                    <?php
         echo \gc_e($scheduleStatus);
         ?>
                                 </span>
                             </td>
 
                             <td>
-                                <span class="badge <?php 
+                                <span class="badge <?php
         echo $isOpen ? 'badge-open' : 'badge-closed';
         ?>">
-                                    <?php 
+                                    <?php
         echo $isOpen ? 'Open' : 'Closed';
         ?>
                                 </span>
                             </td>
 
-                            <td><?php 
+                            <td><?php
         echo (int) $job['total_applications'];
         ?></td>
                         </tr>
 
-                    <?php 
+                    <?php
     }
     ?>
                 </tbody>
             </table>
-        <?php 
+        <?php
 } else {
     ?>
             <div class="empty-box">
                 <h3 style="margin-bottom:8px; color:#111827;">No jobs posted yet</h3>
                 <p>You have not created any job posts yet.</p>
                 <br>
-                <a href="<?php 
+                <a href="<?php
     echo \url('');
     ?>/employer/post_job.php" class="btn-header btn-orange">
                     <i class="fas fa-plus"></i> Post New Job
                 </a>
             </div>
-        <?php 
+        <?php
 }
 ?>
     </div>
 
 </div>
 
+    @include('partials.logout-modal')
 </body>
 </html>

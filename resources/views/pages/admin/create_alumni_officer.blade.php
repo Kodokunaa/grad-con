@@ -175,6 +175,8 @@
             }
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/request-security.js') }}" defer></script>
 </head>
 <body>
 
@@ -184,25 +186,25 @@
             <h2>Create Alumni Officer Account</h2>
             <p class="subtitle">Add a new alumni officer account that can log in and access the alumni officer panel.</p>
 
-            <?php 
+            <?php
 if ($success) {
     ?>
-                <div class="alert alert-success"><?php 
+                <div class="alert alert-success"><?php
     echo htmlspecialchars($success);
     ?></div>
-            <?php 
+            <?php
 }
-?>
+            ?>
 
-            <?php 
+            <?php
 if ($error) {
     ?>
-                <div class="alert alert-error"><?php 
+                <div class="alert alert-error"><?php
     echo htmlspecialchars($error);
     ?></div>
-            <?php 
+            <?php
 }
-?>
+            ?>
 
             <form method="POST">
 @csrf
@@ -248,14 +250,15 @@ if ($error) {
 
                 <div class="actions">
                     <button type="submit" class="btn btn-primary">Create Alumni Officer</button>
-                    <a href="<?php 
-echo \url('');
-?>/admin/dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+                    <a href="<?php
+            echo \url('');
+            ?>/admin/dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+    @include('partials.logout-modal')
 </body>
 </html>

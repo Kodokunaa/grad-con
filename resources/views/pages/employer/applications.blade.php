@@ -649,6 +649,8 @@ tbody tr:hover{
     }
 }
 </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/request-security.js') }}" defer></script>
 </head>
 
 <body>
@@ -666,23 +668,23 @@ tbody tr:hover{
         </div>
     </div>
 
-    <?php 
+    <?php
 if ($success) {
     ?>
-        <div class="alert-box alert-success"><?php 
+        <div class="alert-box alert-success"><?php
     echo \gc_e($success);
     ?></div>
-    <?php 
+    <?php
 }
 ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert-box alert-error"><?php 
+        <div class="alert-box alert-error"><?php
     echo \gc_e($error);
     ?></div>
-    <?php 
+    <?php
 }
 ?>
 
@@ -690,8 +692,8 @@ if ($error) {
         <div class="section-title">Applications List</div>
         <div class="section-subtitle">View and manage applicants for your posted jobs.</div>
 
-        <?php 
-if (!empty($applications)) {
+        <?php
+if (! empty($applications)) {
     ?>
             <table>
                 <thead>
@@ -708,13 +710,13 @@ if (!empty($applications)) {
                 </thead>
 
                 <tbody>
-                    <?php 
+                    <?php
     $count = 1;
     ?>
-                    <?php 
+                    <?php
     foreach ($applications as $row) {
         ?>
-                        <?php 
+                        <?php
         $status = \gc_employer_applications_normalize_status($row['status'] ?? 'pending');
         $badgeClass = 'badge-pending';
         if ($status === 'accepted') {
@@ -735,23 +737,23 @@ if (!empty($applications)) {
         ?>
 
                         <tr>
-                            <td><?php 
+                            <td><?php
         echo $count++;
         ?></td>
 
                             <td>
-                                <div class="job-title"><?php 
+                                <div class="job-title"><?php
         echo \gc_e($row['job_title']);
         ?></div>
-                                <div class="small-text"><?php 
+                                <div class="small-text"><?php
         echo \gc_e($row['company']);
         ?></div>
                                 <div class="small-text">
-                                    <?php 
-        if (!empty($row['job_start_date']) && !empty($row['job_end_date'])) {
-            echo \gc_e(date("M d, Y", strtotime($row['job_start_date'])) . " - " . date("M d, Y", strtotime($row['job_end_date'])));
+                                    <?php
+        if (! empty($row['job_start_date']) && ! empty($row['job_end_date'])) {
+            echo \gc_e(date('M d, Y', strtotime($row['job_start_date'])).' - '.date('M d, Y', strtotime($row['job_end_date'])));
         } else {
-            echo "No schedule";
+            echo 'No schedule';
         }
         ?>
                                 </div>
@@ -760,34 +762,34 @@ if (!empty($applications)) {
                             <td>
                                 <a href="javascript:void(0);"
                                    class="name-link view-applicant-btn"
-                                   data-modal-target="snapshot-<?php 
+                                   data-modal-target="snapshot-<?php
         echo (int) $row['application_id'];
         ?>">
-                                    <?php 
+                                    <?php
         echo \gc_e($row['fullname']);
         ?>
                                 </a>
                             </td>
 
-                            <td><?php 
+                            <td><?php
         echo \gc_e($row['email']);
         ?></td>
 
-                            <td><?php 
+                            <td><?php
         echo \gc_e($row['course'] ?? 'N/A');
         ?></td>
 
                             <td>
-                                <?php 
-        echo !empty($row['created_at']) ? \gc_e(date("M d, Y h:i A", strtotime($row['created_at']))) : 'N/A';
+                                <?php
+        echo ! empty($row['created_at']) ? \gc_e(date('M d, Y h:i A', strtotime($row['created_at']))) : 'N/A';
         ?>
                             </td>
 
                             <td>
-                                <span class="badge <?php 
+                                <span class="badge <?php
         echo $badgeClass;
         ?>">
-                                    <?php 
+                                    <?php
         echo \gc_e(\gc_employer_applications_status_label($status));
         ?>
                                 </span>
@@ -795,10 +797,10 @@ if (!empty($applications)) {
 
                             <td>
                                 <div class="actions" style="flex-direction: column; gap: 8px;">
-                                    <?php 
-        if (!empty($row['resume_file'])) {
+                                    <?php
+        if (! empty($row['resume_file'])) {
             ?>
-                                        <a href="?view_resume=<?php 
+                                        <a href="?view_resume=<?php
             echo rawurlencode($row['resume_file']);
             ?>"
                                            class="btn"
@@ -807,44 +809,44 @@ if (!empty($applications)) {
                                            rel="noopener noreferrer">
                                             📄 View Resume
                                         </a>
-                                    <?php 
+                                    <?php
         }
         ?>
 
-                                    <?php 
+                                    <?php
         if ($status === 'cancelled') {
             ?>
-                                        <?php 
+                                        <?php
             if ($cancelReason !== '') {
                 ?>
                                             <button
                                                 type="button"
                                                 class="btn btn-cancel-reason open-cancel-reason-btn"
-                                                data-applicant-name="<?php 
+                                                data-applicant-name="<?php
                 echo \gc_e($row['fullname']);
                 ?>"
-                                                data-job-title="<?php 
+                                                data-job-title="<?php
                 echo \gc_e($row['job_title']);
                 ?>"
-                                                data-cancel-reason="<?php 
+                                                data-cancel-reason="<?php
                 echo \gc_e($cancelReason);
                 ?>"
-                                                data-cancelled-at="<?php 
+                                                data-cancelled-at="<?php
                 echo \gc_e($cancelledAt !== '' ? date('F d, Y h:i A', strtotime($cancelledAt)) : 'N/A');
                 ?>">
                                                 View Cancel Reason
                                             </button>
-                                        <?php 
+                                        <?php
             } else {
                 ?>
                                             <div class="cancel-note-inline">
                                                 This application was cancelled, but no reason was recorded.
                                             </div>
-                                        <?php 
+                                        <?php
             }
             ?>
 
-                                    <?php 
+                                    <?php
         } elseif ($status === 'pending' || $status === 'under_review') {
             ?>
                                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -852,19 +854,19 @@ if (!empty($applications)) {
                                                 type="button"
                                                 class="btn btn-accept open-action-modal-btn"
                                                 data-action="accept"
-                                                data-application-id="<?php 
+                                                data-application-id="<?php
             echo (int) $row['application_id'];
             ?>"
-                                                data-applicant-name="<?php 
+                                                data-applicant-name="<?php
             echo \gc_e($row['fullname']);
             ?>"
-                                                data-job-title="<?php 
+                                                data-job-title="<?php
             echo \gc_e($row['job_title']);
             ?>">
                                                 Accept
                                             </button>
 
-                                            <a href="interview.php?application_id=<?php 
+                                            <a href="interview.php?application_id=<?php
             echo (int) $row['application_id'];
             ?>"
                                                class="btn btn-interview">
@@ -873,7 +875,7 @@ if (!empty($applications)) {
 
                                             <form method="POST" style="display:inline;">
 @csrf
-                                                <input type="hidden" name="application_id" value="<?php 
+                                                <input type="hidden" name="application_id" value="<?php
             echo (int) $row['application_id'];
             ?>">
                                                 <input type="hidden" name="action" value="reject">
@@ -883,7 +885,7 @@ if (!empty($applications)) {
                                             </form>
                                         </div>
 
-                                    <?php 
+                                    <?php
         } elseif ($status === 'interview') {
             ?>
                                         <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -891,19 +893,19 @@ if (!empty($applications)) {
                                                 type="button"
                                                 class="btn btn-accept open-action-modal-btn"
                                                 data-action="accept"
-                                                data-application-id="<?php 
+                                                data-application-id="<?php
             echo (int) $row['application_id'];
             ?>"
-                                                data-applicant-name="<?php 
+                                                data-applicant-name="<?php
             echo \gc_e($row['fullname']);
             ?>"
-                                                data-job-title="<?php 
+                                                data-job-title="<?php
             echo \gc_e($row['job_title']);
             ?>">
                                                 Accept
                                             </button>
 
-                                            <a href="interview.php?application_id=<?php 
+                                            <a href="interview.php?application_id=<?php
             echo (int) $row['application_id'];
             ?>"
                                                class="btn btn-interview">
@@ -912,7 +914,7 @@ if (!empty($applications)) {
 
                                             <form method="POST" style="display:inline;">
 @csrf
-                                                <input type="hidden" name="application_id" value="<?php 
+                                                <input type="hidden" name="application_id" value="<?php
             echo (int) $row['application_id'];
             ?>">
                                                 <input type="hidden" name="action" value="reject">
@@ -922,68 +924,68 @@ if (!empty($applications)) {
                                             </form>
                                         </div>
 
-                                    <?php 
+                                    <?php
         } else {
             ?>
                                         <span class="small-text">No action available</span>
-                                    <?php 
+                                    <?php
         }
         ?>
                                 </div>
                             </td>
                         </tr>
 
-                    <?php 
+                    <?php
     }
     ?>
                 </tbody>
             </table>
-        <?php 
+        <?php
 } else {
     ?>
             <div class="empty-box">
                 <h3 style="margin-bottom:8px; color:#111827;">No applications found</h3>
                 <p>No alumni applications have been submitted to your jobs yet.</p>
             </div>
-        <?php 
+        <?php
 }
 ?>
     </div>
 
-    <?php 
+    <?php
 foreach ($applications as $row) {
     ?>
-        <?php 
+        <?php
     $uid = (int) $row['alumni_id'];
     $appId = (int) $row['application_id'];
     $educations = $educationByUser[$uid] ?? [];
     $jobsHist = $employmentByUser[$uid] ?? [];
     ?>
 
-        <div id="snapshot-<?php 
+        <div id="snapshot-<?php
     echo $appId;
     ?>" style="display:none;">
             <div class="snapshot-profile">
-                <?php 
-    if (!empty($row['profile_picture'])) {
+                <?php
+    if (! empty($row['profile_picture'])) {
         ?>
                     <img
-                        src="<?php 
-        echo \gc_e(\url('') . '/uploads/profiles/' . rawurlencode($row['profile_picture']));
+                        src="<?php
+        echo \gc_e(\url('').'/uploads/profiles/'.rawurlencode($row['profile_picture']));
         ?>"
                         alt="Profile Picture"
                         class="snapshot-profile-pic">
-                <?php 
+                <?php
     } else {
         ?>
                     <div class="snapshot-profile-fallback">👤</div>
-                <?php 
+                <?php
     }
     ?>
 
                 <div class="snapshot-profile-info">
                     <div class="snapshot-label">Fullname</div>
-                    <div class="snapshot-value"><?php 
+                    <div class="snapshot-value"><?php
     echo \gc_e($row['fullname'] ?? 'N/A');
     ?></div>
                 </div>
@@ -992,37 +994,37 @@ foreach ($applications as $row) {
             <div class="snapshot-grid">
                 <div class="snapshot-item">
                     <div class="snapshot-label">Age</div>
-                    <div class="snapshot-value"><?php 
+                    <div class="snapshot-value"><?php
     echo \gc_e($row['age'] ?? 'N/A');
     ?></div>
                 </div>
 
                 <div class="snapshot-item">
                     <div class="snapshot-label">Address</div>
-                    <div class="snapshot-value"><?php 
+                    <div class="snapshot-value"><?php
     echo \gc_e($row['address'] ?? 'N/A');
     ?></div>
                 </div>
 
                 <div class="snapshot-item full-width">
                     <div class="snapshot-label">Skills</div>
-                    <div class="snapshot-value"><?php 
+                    <div class="snapshot-value"><?php
     echo \gc_e($row['skills'] ?? 'N/A');
     ?></div>
                 </div>
 
-                <?php 
+                <?php
     if (\gc_employer_applications_normalize_status($row['status'] ?? '') === 'cancelled') {
         ?>
                     <div class="snapshot-item full-width">
                         <div class="snapshot-label">Cancellation Reason</div>
                         <div class="snapshot-value">
-                            <?php 
-        echo !empty($row['cancel_reason']) ? \gc_e($row['cancel_reason']) : 'No reason recorded.';
+                            <?php
+        echo ! empty($row['cancel_reason']) ? \gc_e($row['cancel_reason']) : 'No reason recorded.';
         ?>
                         </div>
                     </div>
-                <?php 
+                <?php
     }
     ?>
             </div>
@@ -1030,11 +1032,11 @@ foreach ($applications as $row) {
             <div class="details-section">
                 <div class="details-section-header">Educational Background</div>
                 <div class="details-section-body">
-                    <?php 
+                    <?php
     if (empty($educations)) {
         ?>
                         <div class="details-empty">No educational background found.</div>
-                    <?php 
+                    <?php
     } else {
         ?>
                         <table class="details-table">
@@ -1046,26 +1048,26 @@ foreach ($applications as $row) {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php 
+                                <?php
         foreach ($educations as $edu) {
             ?>
                                     <tr>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_e($edu['school_name']);
             ?></td>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_e($edu['degree']);
             ?></td>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_employer_applications_format_year_range($edu['start_year'] ?? '', $edu['end_year'] ?? '');
             ?></td>
                                     </tr>
-                                <?php 
+                                <?php
         }
         ?>
                             </tbody>
                         </table>
-                    <?php 
+                    <?php
     }
     ?>
                 </div>
@@ -1074,11 +1076,11 @@ foreach ($applications as $row) {
             <div class="details-section">
                 <div class="details-section-header">Employment History</div>
                 <div class="details-section-body">
-                    <?php 
+                    <?php
     if (empty($jobsHist)) {
         ?>
                         <div class="details-empty">No employment history found.</div>
-                    <?php 
+                    <?php
     } else {
         ?>
                         <table class="details-table">
@@ -1093,41 +1095,41 @@ foreach ($applications as $row) {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php 
+                                <?php
         foreach ($jobsHist as $job) {
             ?>
                                     <tr>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_e($job['company_name']);
             ?></td>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_e($job['job_title']);
             ?></td>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_e($job['employment_type'] ?? '');
             ?></td>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_e($job['location'] ?? '');
             ?></td>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_employer_applications_format_date_range($job['start_date'] ?? '', $job['end_date'] ?? '');
             ?></td>
-                                        <td><?php 
+                                        <td><?php
             echo \gc_e($job['job_description'] ?? '');
             ?></td>
                                     </tr>
-                                <?php 
+                                <?php
         }
         ?>
                             </tbody>
                         </table>
-                    <?php 
+                    <?php
     }
     ?>
                 </div>
             </div>
         </div>
-    <?php 
+    <?php
 }
 ?>
 
@@ -1387,5 +1389,6 @@ foreach ($applications as $row) {
 })();
 </script>
 
+    @include('partials.logout-modal')
 </body>
 </html>
