@@ -294,6 +294,22 @@ final class WorkflowTest extends TestCase
         $this->assertDatabaseHas('alumni_education', ['user_id' => $alumni->id, 'school_name' => 'Test College']);
     }
 
+    public function test_admin_training_deletion_uses_the_named_delete_route(): void
+    {
+        $admin = $this->user('admin');
+        $trainingId = DB::table('trainings')->insertGetId([
+            'title' => 'Delete route test', 'content' => 'Test',
+            'training_date' => date('Y-m-d'), 'target_course' => 'BSIS',
+            'posted_by' => $admin->id,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.trainings.destroy', $trainingId))
+            ->assertRedirect(route('admin.trainings_list'));
+
+        $this->assertDatabaseMissing('trainings', ['id' => $trainingId]);
+    }
+
     public function test_offer_tokens_persist_between_requests_and_offers_expire(): void
     {
         Mail::fake();

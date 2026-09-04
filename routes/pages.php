@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DestroyTrainingController;
 use App\Http\Controllers\Admin\SendApplicantResumeController;
 use App\Http\Controllers\Pages\AdminAdminArchiveController;
 use App\Http\Controllers\Pages\AdminAlumniCreateController;
@@ -105,6 +106,7 @@ Route::post('/admin/trainings_create.php', AdminTrainingsCreateController::class
 Route::get('/admin/trainings_edit.php', AdminTrainingsEditController::class)->middleware('account:admin')->name('admin.trainings_edit');
 Route::post('/admin/trainings_edit.php', AdminTrainingsEditController::class)->middleware('account:admin');
 Route::get('/admin/trainings_list.php', AdminTrainingsListController::class)->middleware('account:admin')->name('admin.trainings_list');
+Route::delete('/admin/trainings/{training}', DestroyTrainingController::class)->middleware('account:admin')->name('admin.trainings.destroy');
 Route::post('/admin/trainings_list.php', AdminTrainingsListController::class)->middleware('account:admin');
 Route::get('/alumni/add_degree.php', AlumniAddDegreeController::class)->middleware('account:alumni')->name('alumni.add_degree');
 Route::post('/alumni/add_degree.php', AlumniAddDegreeController::class)->middleware('account:alumni');

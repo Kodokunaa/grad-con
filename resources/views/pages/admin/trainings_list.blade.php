@@ -338,9 +338,9 @@ table.dataTable tbody tr:hover{
     <div class="page-header">
         <h3 class="page-title">Trainings List</h3>
 
-        <a class="create-btn" href="<?php 
+        <a class="create-btn" href="<?php
 echo \url('');
-?>/admin/trainings_create.php">
+        ?>/admin/trainings_create.php">
             + Add Training
         </a>
     </div>
@@ -360,48 +360,48 @@ echo \url('');
             </thead>
 
             <tbody>
-                <?php 
+                <?php
 foreach ($trainings as $t) {
     ?>
-                    <?php 
-    $imgUrl = !empty($t['image']) ? \url('') . '/uploads/trainings/' . $t['image'] : '';
+                    <?php
+    $imgUrl = ! empty($t['image']) ? \url('').'/uploads/trainings/'.$t['image'] : '';
     ?>
                     <tr>
                         <td></td>
 
-                        <td><?php 
+                        <td><?php
     echo htmlspecialchars($t['title']);
     ?></td>
 
                         <td>
                             <span class="badge-date">
-                                <?php 
+                                <?php
     echo htmlspecialchars($t['training_date']);
     ?>
                             </span>
                         </td>
 
-                        <td><?php 
+                        <td><?php
     echo htmlspecialchars($t['location'] ?? '-');
     ?></td>
 
                         <td>
-                            <?php 
+                            <?php
     if ($t['image']) {
         ?>
-                                <img src="<?php 
+                                <img src="<?php
         echo $imgUrl;
         ?>" class="img-thumb" alt="Training">
-                            <?php 
+                            <?php
     } else {
         ?>
                                 —
-                            <?php 
+                            <?php
     }
     ?>
                         </td>
 
-                        <td><?php 
+                        <td><?php
     echo htmlspecialchars($t['fullname'] ?? 'Admin');
     ?></td>
 
@@ -411,46 +411,44 @@ foreach ($trainings as $t) {
                                 class="btn-view view-training-btn"
                                 data-bs-toggle="modal"
                                 data-bs-target="#trainingViewModal"
-                                data-title="<?php 
+                                data-title="<?php
     echo htmlspecialchars($t['title'] ?? '', ENT_QUOTES);
     ?>"
-                                data-content="<?php 
+                                data-content="<?php
     echo htmlspecialchars($t['content'] ?? '', ENT_QUOTES);
     ?>"
-                                data-training_date="<?php 
+                                data-training_date="<?php
     echo htmlspecialchars($t['training_date'] ?? '', ENT_QUOTES);
     ?>"
-                                data-location="<?php 
+                                data-location="<?php
     echo htmlspecialchars($t['location'] ?? '', ENT_QUOTES);
     ?>"
-                                data-posted_by="<?php 
+                                data-posted_by="<?php
     echo htmlspecialchars($t['fullname'] ?? 'Admin', ENT_QUOTES);
     ?>"
-                                data-image="<?php 
+                                data-image="<?php
     echo htmlspecialchars($imgUrl, ENT_QUOTES);
     ?>"
                             >
                                 View
                             </button>
 
-                            <a href="<?php 
+                            <a href="<?php
     echo \url('');
-    ?>/admin/trainings_edit.php?id=<?php 
+    ?>/admin/trainings_edit.php?id=<?php
     echo (int) $t['id'];
     ?>" class="btn-edit">Edit</a>
 
-                            <a href="?delete=<?php 
-    echo (int) $t['id'];
-    ?>"
-                               class="btn-delete"
-                               onclick="return confirm('Delete this training?')">
-                               Delete
-                            </a>
+                            <form method="POST" action="{{ route('admin.trainings.destroy', $t['id']) }}" onsubmit="return confirm('Delete this training?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-delete">Delete</button>
+                            </form>
                         </td>
                     </tr>
-                <?php 
+                <?php
 }
-?>
+        ?>
             </tbody>
         </table>
     </div>
@@ -559,5 +557,5 @@ $(document).ready(function () {
 });
 </script>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+        echo \gc_partial('footer', \get_defined_vars());
