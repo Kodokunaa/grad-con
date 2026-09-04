@@ -13,7 +13,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Validation | In progress | Auth validation plus Form Requests for administrative employer, officer, and alumni creation | Add Form Requests for editing, jobs, applications, offers, interviews, events, training, profiles, education, employment, and social actions |
 | Uploads and files | In progress | Normalized private paths, Laravel disk writes, recognized categories, resume/certificate policies, portal-image scope tests | Convert deletion and reads fully to `Storage`; collision-resistant names; orphan reconciliation; MIME boundary tests |
 | Mail and queues | In progress | Laravel queued delivery and reset notification | Remove PHPMailer-style setup, consolidate mail templates, harden queued attachments, document/verify worker and SMTP deployment |
-| Views and frontend | Not started | Logout modal regression coverage | Shared layouts/components/assets; remove response rewriting and duplicated inline CSS/JavaScript |
+| Views and frontend | In progress | Shared public-authentication document layout and logout modal regression coverage | Auth asset extraction; authenticated layouts/components/assets; remove response rewriting and duplicated inline CSS/JavaScript |
 | Middleware and responses | In progress | CSRF compatibility, upload validation, audit records, security headers | Remove HTML regex rewriting and query-action interception after native forms/routes are complete |
 | Duplicate helpers | Not started | Initial duplicates identified | Consolidate role-prefixed helpers, formatting, alignment, schema, and email functions |
 | Configuration and portability | In progress | Laravel root, environment templates, MySQL migration path | Set application timezone, verify clean-device install, document extensions and queue/mail requirements |
@@ -39,3 +39,20 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - Consolidate duplicate interview, job, offer, approval, and training templates.
 - Store queued attachments in a durable location or attach stored disk data.
 - Add production SMTP and queue-worker installation checks.
+
+## Current views and frontend checkpoint
+
+### Done
+
+- Added a shared Blade document layout for login, registration, forgot-password, and reset-password pages.
+- Centralized language, viewport, title, font preconnections, and Blade style/script slots.
+- Removed duplicate `DOCTYPE`, `html`, `head`, and `body` shells from all four public authentication views.
+- Preserved each page's existing fields, messages, styling, and routes.
+
+### Still needs fixing
+
+- Extract authentication-page CSS and JavaScript into versioned assets.
+- Introduce authenticated layouts for the four roles.
+- Convert repeated sidebars, headers, alerts, forms, tables, and modals into Blade components.
+- Remove inline CSS from the remaining page views and inline JavaScript from interactive views.
+- Remove middleware-based HTML rewriting after forms and logout markup are native Blade components.

@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Forgot Password</title>
+@extends('layouts.auth')
+@section('title', 'Forgot Password')
+@push('styles')
 <style>
 * {
     margin: 0;
@@ -103,9 +100,8 @@ button:hover {
     border: 1px solid #fecaca;
 }
 </style>
-</head>
-
-<body>
+@endpush
+@section('content')
 
 <div class="card">
 <h2>Forgot Password</h2>
@@ -125,5 +121,4 @@ button:hover {
 
 </div>
 
-</body>
-</html>
+@endsection

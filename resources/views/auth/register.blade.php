@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register Alumni Account</title>
+@extends('layouts.auth')
+@section('title', 'Register Alumni Account')
+@push('styles')
 <style>
 *{
     margin:0;
@@ -127,8 +124,8 @@ select:focus{
     text-decoration:underline;
 }
 </style>
-</head>
-<body>
+@endpush
+@section('content')
 
 <div class="register-wrapper">
     <div class="register-card">
@@ -238,5 +235,4 @@ select:focus{
     </div>
 </div>
 
-</body>
-</html>
+@endsection

@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reset Password</title>
+@extends('layouts.auth')
+@section('title', 'Reset Password')
+@push('styles')
 <style>
 *{
     margin:0;
@@ -125,8 +122,8 @@ input:focus{
     text-decoration:underline;
 }
 </style>
-</head>
-<body>
+@endpush
+@section('content')
 
 <div class="reset-wrapper">
     <div class="reset-card">
@@ -169,5 +166,4 @@ input:focus{
     </div>
 </div>
 
-</body>
-</html>
+@endsection

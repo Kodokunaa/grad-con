@@ -1,14 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+@extends('layouts.auth')
+@section('title', 'Login')
+@push('styles')
 <style>
 *{
     margin:0;
@@ -311,9 +303,8 @@ body{
     }
 }
 </style>
-</head>
-
-<body>
+@endpush
+@section('content')
 
 <div class="login-wrapper">
     <div class="login-card">
@@ -409,5 +400,4 @@ function togglePassword(){
 }
 </script>
 
-</body>
-</html>
+@endsection
