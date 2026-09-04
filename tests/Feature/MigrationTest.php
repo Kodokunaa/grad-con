@@ -48,6 +48,24 @@ final class MigrationTest extends TestCase
         $this->artisan('gradconn:check --mail')->assertSuccessful();
     }
 
+    public function test_brevo_readiness_check_requires_the_provider_smtp_login(): void
+    {
+        config()->set('mail.default', 'smtp');
+        config()->set('mail.mailers.smtp', [
+            'host' => 'smtp-relay.brevo.com',
+            'port' => 587,
+            'username' => 'account@gmail.com',
+            'password' => 'smtp-key',
+        ]);
+        config()->set('mail.from.address', 'sender@gmail.com');
+        $this->artisan('gradconn:check --mail')
+            ->expectsOutputToContain('@smtp-brevo.com')
+            ->assertFailed();
+
+        config()->set('mail.mailers.smtp.username', 'account@smtp-brevo.com');
+        $this->artisan('gradconn:check --mail')->assertSuccessful();
+    }
+
     protected function tearDown(): void
     {
         foreach ($this->createdFiles as $path) {

@@ -69,6 +69,10 @@ final class CheckInstallation extends Command
                 if (! filter_var(config('mail.from.address'), FILTER_VALIDATE_EMAIL)) {
                     $failures[] = 'MAIL_FROM_ADDRESS must be a valid email address.';
                 }
+                if (config('mail.mailers.smtp.host') === 'smtp-relay.brevo.com'
+                    && ! str_ends_with((string) config('mail.mailers.smtp.username'), '@smtp-brevo.com')) {
+                    $failures[] = 'Brevo MAIL_USERNAME must be the SMTP login from Settings > SMTP & API, usually ending in @smtp-brevo.com.';
+                }
             } else {
                 $failures[] = "Unsupported delivery mailer: {$mailer}.";
             }

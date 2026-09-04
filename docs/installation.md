@@ -29,4 +29,4 @@ bash scripts/verify.sh
 
 Point Apache or Nginx to `public`, never the repository root. Configure `APP_URL`, timezone, database, mail, queue, and session values in `.env`. Set `ADMIN_SEED_NAME`, `ADMIN_SEED_USERNAME`, `ADMIN_SEED_EMAIL`, and a 12+ character `ADMIN_SEED_PASSWORD`, then run `php artisan db:seed --class=AdminSeeder` for the first administrator.
 
-For outbound email, verify a domain in Resend and set `MAIL_MAILER=resend`, `RESEND_API_KEY`, and `MAIL_FROM_ADDRESS` using that verified domain. Run `php artisan gradconn:check --mail` before testing account workflows.
+For outbound email without a domain, create and verify an individual sender in Brevo. Set `MAIL_MAILER=smtp`, `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, `MAIL_SCHEME=null`, `MAIL_USERNAME` to the Brevo SMTP login, `MAIL_PASSWORD` to a Brevo SMTP key, and `MAIL_FROM_ADDRESS` to the verified sender. Run `php artisan gradconn:check --mail` before testing account workflows.
