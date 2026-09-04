@@ -73,6 +73,7 @@ use App\Http\Controllers\Pages\EmployerPostedJobController;
 use App\Http\Controllers\Pages\EmployerPostJobController;
 use App\Http\Controllers\Pages\ProfileController;
 use App\Http\Controllers\Profile\DestroyCertificateController;
+use App\Http\Controllers\Profile\UpdateOwnProfileController;
 use App\Http\Controllers\Training\StoreTrainingController;
 use App\Http\Controllers\Training\UpdateTrainingController;
 use App\Models\Job;
@@ -145,7 +146,7 @@ Route::get('/alumni/change_password.php', AlumniChangePasswordController::class)
 Route::post('/alumni/change_password.php', AlumniChangePasswordController::class)->middleware('account:alumni');
 Route::get('/alumni/dashboard.php', AlumniDashboardController::class)->middleware('account:alumni')->name('alumni.dashboard');
 Route::get('/alumni/edit_profile.php', AlumniEditProfileController::class)->middleware('account:alumni')->name('alumni.edit_profile');
-Route::post('/alumni/edit_profile.php', AlumniEditProfileController::class)->middleware('account:alumni');
+Route::post('/alumni/edit_profile.php', UpdateOwnProfileController::class)->middleware('account:alumni')->name('alumni.profile.update');
 Route::get('/alumni/employment_history.php', AlumniEmploymentHistoryController::class)->middleware('account:alumni')->name('alumni.employment_history');
 Route::post('/alumni/employment_history.php', StoreEmploymentController::class)->middleware('account:alumni')->name('alumni.employment.store');
 Route::delete('/alumni/employment/{employment}', DestroyEmploymentController::class)->middleware('account:alumni')->name('alumni.employment.destroy');
