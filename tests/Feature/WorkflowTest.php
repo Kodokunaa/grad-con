@@ -70,8 +70,12 @@ final class WorkflowTest extends TestCase
         $existing = $this->user('alumni_officer');
         $this->post('/admin/create_alumni_officer.php', [
             'fullname' => 'Duplicate Officer', 'email' => $existing->email, 'username' => $existing->username,
+            'password' => 'valid-password', 'confirm_password' => 'valid-password', 'is_active' => 1,
+        ])->assertSessionHasErrors(['email', 'username']);
+        $this->post('/admin/create_alumni_officer.php', [
+            'fullname' => 'Weak Password', 'email' => 'weak@example.test', 'username' => 'weak_password',
             'password' => 'short', 'confirm_password' => 'short', 'is_active' => 1,
-        ])->assertSessionHasErrors(['email', 'username', 'password']);
+        ])->assertSessionHasErrors('password');
 
         $this->post('/admin/alumni_create.php', [
             'fullname' => 'Invalid Alumni', 'student_id' => 'invalid-course-user', 'email' => 'alumni@example.test',
