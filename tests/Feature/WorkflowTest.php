@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\ApplicantResumeMail;
 use App\Mail\PageMailer;
 use App\Mail\PreservedNotification;
 use App\Models\User;
@@ -10,6 +11,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use ZipArchive;
 
@@ -77,6 +79,31 @@ final class WorkflowTest extends TestCase
         $this->assertTrue($mail->hasBcc('hidden@example.test'));
         $this->assertTrue($mail->hasFrom('sender@example.test'));
         $this->assertSame('Plain message', $mail->plainText);
+    }
+
+    public function test_admin_can_queue_an_applicant_resume_from_private_storage(): void
+    {
+        Mail::fake();
+        $admin = $this->user('admin');
+        $alumni = $this->user('alumni');
+        $jobId = DB::table('jobs')->insertGetId([
+            'title' => 'Resume forwarding test', 'company' => 'Test Company',
+            'employer_company' => 'Test Company', 'description' => 'Test',
+            'posted_by' => $admin->id, 'is_open' => 1,
+        ]);
+        $filename = 'forward-'.bin2hex(random_bytes(4)).'.pdf';
+        Storage::disk('local')->put('files/uploads/resumes/'.$filename, '%PDF-1.4 test');
+        $this->createdFiles[] = Storage::disk('local')->path('files/uploads/resumes/'.$filename);
+        $applicationId = DB::table('applications')->insertGetId([
+            'job_id' => $jobId, 'alumni_id' => $alumni->id,
+            'resume_file' => $filename, 'status' => 'pending',
+        ]);
+
+        $this->actingAs($admin)->post(route('admin.applications.resume.send', $applicationId), [
+            'company_email' => 'company@example.test',
+        ])->assertRedirect();
+
+        Mail::assertQueued(ApplicantResumeMail::class, fn ($mail) => $mail->hasTo('company@example.test'));
     }
 
     public function test_admin_account_creation_rejects_invalid_and_duplicate_data(): void

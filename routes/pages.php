@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\SendApplicantResumeController;
 use App\Http\Controllers\Pages\AdminAdminArchiveController;
 use App\Http\Controllers\Pages\AdminAlumniCreateController;
 use App\Http\Controllers\Pages\AdminAlumniEditController;
@@ -81,7 +82,8 @@ Route::post('/admin/events_edit.php', AdminEventsEditController::class)->middlew
 Route::get('/admin/events_list.php', AdminEventsListController::class)->middleware('account:admin')->name('admin.events_list');
 Route::post('/admin/events_list.php', AdminEventsListController::class)->middleware('account:admin');
 Route::get('/admin/forward_to_company.php', AdminForwardToCompanyController::class)->middleware('account:admin')->name('admin.forward_to_company');
-Route::post('/admin/forward_to_company.php', AdminForwardToCompanyController::class)->middleware('account:admin');
+Route::post('/admin/forward_to_company.php', [SendApplicantResumeController::class, 'legacy'])->middleware('account:admin');
+Route::post('/admin/applications/{application}/forward-resume', SendApplicantResumeController::class)->middleware('account:admin')->name('admin.applications.resume.send');
 Route::get('/admin/graduates_list.php', AdminGraduatesListController::class)->middleware('account:admin')->name('admin.graduates_list');
 Route::get('/admin/graduates_report.php', AdminGraduatesReportController::class)->middleware('account:admin')->name('admin.graduates_report');
 Route::get('/admin/graduates_stats.php', AdminGraduatesStatsController::class)->middleware('account:admin')->name('admin.graduates_stats');

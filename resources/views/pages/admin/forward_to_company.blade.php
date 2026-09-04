@@ -2,20 +2,20 @@
 <div class="content">
 <h3>Forward Resume to Company</h3>
 
-<?php 
-if ($msg) {
-    ?><div class="alert alert-success"><?php 
-    echo $msg;
-    ?></div><?php 
+<?php
+if (session('status')) {
+    ?><div class="alert alert-success"><?php
+    echo \gc_e(session('status'));
+    ?></div><?php
 }
-if ($error) {
-    ?><div class="alert alert-danger"><?php 
-    echo $error;
-    ?></div><?php 
+if ($errors->any()) {
+    ?><div class="alert alert-danger"><?php
+    echo \gc_e($errors->first());
+    ?></div><?php
 }
 ?>
 
-<form method="POST">
+<form method="POST" action="{{ route('admin.applications.resume.send', $application) }}">
 @csrf
   <div class="mb-3">
     <label>Company Email</label>

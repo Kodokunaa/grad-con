@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
-use App\Support\PageResponse;
-use App\Support\PrivateUploads;
+use App\Models\JobApplication;
 use Illuminate\Http\Request;
 
 final class AdminForwardToCompanyController extends PageController
@@ -12,39 +11,9 @@ final class AdminForwardToCompanyController extends PageController
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            $pdo = gc_context()->pdo();
-
             \gc_require_role('admin');
             $app_id = (int) (\gc_context()->query['app_id'] ?? 0);
-            $stmt = $pdo->prepare("\r\n  SELECT a.*, u.fullname, j.title\r\n  FROM applications a\r\n  JOIN users u ON u.id=a.alumni_id\r\n  JOIN jobs j ON j.id=a.job_id\r\n  WHERE a.id=?\r\n");
-            $stmt->execute([$app_id]);
-            $app = $stmt->fetch(\PDO::FETCH_ASSOC);
-            if (! $app) {
-                \gc_finish('Not found.');
-            }
-            $msg = '';
-            $error = '';
-            if (\request()->server->all()['REQUEST_METHOD'] === 'POST') {
-                $companyEmail = \gc_context()->post['company_email'];
-                try {
-                    if (empty($app['resume_file']) || ! PrivateUploads::exists('resumes', $app['resume_file'])) {
-                        throw new \RuntimeException('Resume is unavailable.');
-                    }
-                    $resumePath = PrivateUploads::absolutePath('resumes', $app['resume_file']);
-                    $mail = \gc_make_mailer();
-                    $mail->addAddress($companyEmail);
-                    $mail->Subject = 'Applicant Resume - '.$app['fullname'];
-                    $mail->Body = "\r\n            <p>Please see attached resume of ".$app['fullname']."</p>\r\n            <p>Position: ".$app['title']."</p>\r\n        ";
-                    $mail->addAttachment($resumePath);
-                    $mail->send();
-                    $msg = 'Resume sent to company!';
-                } catch (\Exception $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    $error = 'Email failed.';
-                }
-            }
+            $application = JobApplication::with(['alumni', 'job'])->findOrFail($app_id);
             echo \gc_partial('header', \get_defined_vars());
             echo \gc_partial('admin_sidebar', \get_defined_vars());
 
