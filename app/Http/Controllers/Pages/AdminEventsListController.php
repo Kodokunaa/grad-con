@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers\Pages;
 
-use App\Http\Controllers\PageController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Services\SocialFeedService;
+use Illuminate\View\View;
 
-final class AdminEventsListController extends PageController
+final class AdminEventsListController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(SocialFeedService $feed): View
     {
-        return $this->renderPage(function () {
-            $pdo = gc_context()->pdo();
-
-            return $this->pageView('pages.admin.events_list', get_defined_vars());
-        });
+        return view('pages.admin.events_list', ['posts' => $feed->postsFor(request()->user(), true), 'mentionUsers' => $feed->mentionUsers()]);
     }
 }
+

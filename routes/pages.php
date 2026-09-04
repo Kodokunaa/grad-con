@@ -77,6 +77,7 @@ use App\Http\Controllers\Pages\EmployerJobOffersController;
 use App\Http\Controllers\Pages\EmployerPostedJobController;
 use App\Http\Controllers\Pages\EmployerPostJobController;
 use App\Http\Controllers\Pages\ProfileController;
+use App\Http\Controllers\SocialFeedActionController;
 use App\Http\Controllers\Profile\DestroyCertificateController;
 use App\Http\Controllers\Profile\StoreCertificateController;
 use App\Http\Controllers\Profile\UpdateAccountProfileController;
@@ -112,7 +113,6 @@ Route::post('/admin/events_delete.php', AdminEventsDeleteController::class)->mid
 Route::get('/admin/events_edit.php', AdminEventsEditController::class)->middleware('account:admin')->name('admin.events_edit');
 Route::post('/admin/events_edit.php', [UpdateEventController::class, 'legacy'])->middleware('account:admin');
 Route::get('/admin/events_list.php', AdminEventsListController::class)->middleware('account:admin')->name('admin.events_list');
-Route::post('/admin/events_list.php', AdminEventsListController::class)->middleware('account:admin');
 Route::get('/admin/forward_to_company.php', AdminForwardToCompanyController::class)->middleware('account:admin')->name('admin.forward_to_company');
 Route::post('/admin/forward_to_company.php', [SendApplicantResumeController::class, 'legacy'])->middleware('account:admin');
 Route::post('/admin/applications/{application}/forward-resume', SendApplicantResumeController::class)->middleware('account:admin')->name('admin.applications.resume.send');
@@ -146,7 +146,6 @@ Route::get('/admin/trainings_list.php', AdminTrainingsListController::class)->mi
 Route::delete('/admin/trainings/{training}', DestroyTrainingController::class)->middleware('account:admin')->name('admin.trainings.destroy');
 Route::post('/trainings', StoreTrainingController::class)->middleware('account:admin')->name('trainings.store');
 Route::put('/trainings/{training}', UpdateTrainingController::class)->middleware('account:admin')->name('trainings.update');
-Route::post('/admin/trainings_list.php', AdminTrainingsListController::class)->middleware('account:admin');
 Route::get('/alumni/add_degree.php', AlumniAddDegreeController::class)->middleware('account:alumni')->name('alumni.add_degree');
 Route::post('/alumni/add_degree.php', StoreEducationController::class)->middleware('account:alumni')->name('alumni.education.store');
 Route::get('/alumni/apply.php', AlumniApplyController::class)->middleware('account:alumni')->name('alumni.apply');
@@ -160,7 +159,6 @@ Route::get('/alumni/employment_history.php', AlumniEmploymentHistoryController::
 Route::post('/alumni/employment_history.php', StoreEmploymentController::class)->middleware('account:alumni')->name('alumni.employment.store');
 Route::delete('/alumni/employment/{employment}', DestroyEmploymentController::class)->middleware('account:alumni')->name('alumni.employment.destroy');
 Route::get('/alumni/feed.php', AlumniFeedController::class)->middleware('account:alumni')->name('alumni.feed');
-Route::post('/alumni/feed.php', AlumniFeedController::class)->middleware('account:alumni');
 Route::get('/alumni/job_details.php', AlumniJobDetailsController::class)->middleware('account:alumni')->name('alumni.job_details');
 Route::get('/alumni/job_offers.php', AlumniJobOffersController::class)->middleware('account:alumni')->name('alumni.job_offers');
 Route::post('/alumni/job_offers.php', [RespondToOfferController::class, 'legacy'])->middleware('account:alumni');
@@ -171,16 +169,13 @@ Route::get('/alumni/my_applications.php', AlumniMyApplicationsController::class)
 Route::patch('/alumni/applications/{application}/cancel', [AlumniApplicationActionController::class, 'cancel'])->middleware('account:alumni')->name('applications.cancel');
 Route::delete('/alumni/applications/{application}', [AlumniApplicationActionController::class, 'destroy'])->middleware('account:alumni')->name('applications.destroy');
 Route::get('/alumni_officer/alumni_list.php', AlumniOfficerAlumniListController::class)->middleware('account:alumni_officer')->name('alumni_officer.alumni_list');
-Route::post('/alumni_officer/alumni_list.php', AlumniOfficerAlumniListController::class)->middleware('account:alumni_officer');
 Route::get('/alumni_officer/archive.php', AlumniOfficerArchiveController::class)->middleware('account:alumni_officer')->name('alumni_officer.archive');
-Route::post('/alumni_officer/archive.php', AlumniOfficerArchiveController::class)->middleware('account:alumni_officer');
 Route::get('/alumni_officer/dashboard.php', AlumniOfficerDashboardController::class)->middleware('account:alumni_officer')->name('alumni_officer.dashboard');
 Route::get('/alumni_officer/events_create.php', AlumniOfficerEventsCreateController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_create');
 Route::post('/alumni_officer/events_create.php', StoreEventController::class)->middleware('account:alumni_officer');
 Route::get('/alumni_officer/events_edit.php', AlumniOfficerEventsEditController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_edit');
 Route::post('/alumni_officer/events_edit.php', [UpdateEventController::class, 'legacy'])->middleware('account:alumni_officer');
 Route::get('/alumni_officer/events_list.php', AlumniOfficerEventsListController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_list');
-Route::post('/alumni_officer/events_list.php', AlumniOfficerEventsListController::class)->middleware('account:alumni_officer');
 Route::get('/employer/alumni_list.php', EmployerAlumniListController::class)->middleware('account:employer')->name('employer.alumni_list');
 Route::post('/employer/alumni_list.php', AlumniDirectoryActionController::class)->middleware('account:employer')->name('employer.alumni.actions');
 Route::get('/employer/applications.php', EmployerApplicationsController::class)->middleware('account:employer')->name('employer.applications');
@@ -194,7 +189,6 @@ Route::delete('/employer/offers/{offer}', [EmployerJobOfferActionController::cla
 Route::get('/employer/post_job.php', EmployerPostJobController::class)->middleware('account:employer')->name('employer.post_job');
 Route::post('/employer/post_job.php', StoreJobController::class)->middleware('account:employer');
 Route::get('/employer/posted_job.php', EmployerPostedJobController::class)->middleware('account:employer')->name('employer.posted_job');
-Route::post('/employer/posted_job.php', EmployerPostedJobController::class)->middleware('account:employer');
 Route::get('/profile.php', ProfileController::class)->middleware('account')->name('profile');
 Route::patch('/profile/notifications', UpdateNotificationPreferenceController::class)->middleware('account:alumni')->name('profile.notifications.update');
 Route::post('/profile/certificates', StoreCertificateController::class)->middleware('account:alumni')->name('profile.certificates.store');
@@ -204,5 +198,8 @@ Route::delete('/profile/certificates/{certificate}', DestroyCertificateControlle
 Route::patch('/events/{event}/restore', RestoreEventController::class)->middleware('account')->name('events.restore');
 Route::patch('/events/{event}/archive', ArchiveEventController::class)->middleware('account')->name('events.archive');
 Route::post('/events', StoreEventController::class)->middleware('account')->name('events.store');
+Route::post('/feed/{type}/{post}/reaction', [SocialFeedActionController::class, 'reaction'])->whereIn('type', ['event', 'training'])->middleware('account:admin,alumni,alumni_officer')->name('feed.reactions.store');
+Route::post('/feed/{type}/{post}/comments', [SocialFeedActionController::class, 'comment'])->whereIn('type', ['event', 'training'])->middleware('account:admin,alumni,alumni_officer')->name('feed.comments.store');
+Route::delete('/feed/comments/{comment}', [SocialFeedActionController::class, 'destroyComment'])->middleware('account:admin,alumni,alumni_officer')->name('feed.comments.destroy');
 Route::put('/events/{event}', UpdateEventController::class)->middleware('account')->name('events.update');
 Route::get('/archive.php', ArchiveController::class)->middleware('account:alumni_officer')->name('archive');

@@ -1,0 +1,25 @@
+@props(['posts', 'manageEvents' => false, 'mentionUsers' => []])
+<div class="feed">
+@forelse($posts as $post)
+    @php($key = $post['post_type'].'-'.$post['id'])
+    <article class="post" id="post-{{ $key }}">
+        <header><div class="avatar">{{ strtoupper(substr($post['poster'] ?? 'G', 0, 1)) }}</div><div><strong>{{ $post['poster'] }}</strong><small>{{ optional(\Carbon\Carbon::parse($post['created_at']))->diffForHumans() }}</small></div></header>
+        <h2>{{ $post['title'] }}</h2><p>{!! nl2br(e($post['content'] ?? $post['description'] ?? '')) !!}</p>
+        @if(!empty($post['image']))<img class="post-image" src="{{ url('/uploads/'.($post['post_type']==='event'?'events':'trainings').'/'.basename($post['image'])) }}" alt="">@endif
+        <div class="engagement"><span data-counts>{{ $post['counts']['total'] }} reactions</span><span>{{ count($post['comments']) }} comments</span></div>
+        <form method="POST" action="{{ url('/feed/'.$post['post_type'].'/'.$post['id'].'/reaction') }}" class="reaction-form">@csrf
+            <select name="reaction_type" aria-label="Reaction">@foreach(\App\Services\SocialFeedService::REACTIONS as $type=>$reaction)<option value="{{ $type }}" @selected($post['user_reaction']===$type)>{{ $reaction['emoji'] }} {{ $reaction['label'] }}</option>@endforeach</select><button>React</button>
+        </form>
+        <section class="comments">
+        @foreach($post['comments'] as $comment)
+            <div class="comment"><strong>{{ $comment['fullname'] ?? 'User' }}</strong><p>{{ $comment['comment'] }}</p>
+            @if((int)$comment['user_id']===auth()->id() || in_array(auth()->user()->role,['admin','alumni_officer'],true))
+                <form method="POST" action="{{ url('/feed/comments/'.$comment['id']) }}">@csrf @method('DELETE')<button class="link danger">Delete</button></form>
+            @endif</div>
+        @endforeach
+        </section>
+        <form method="POST" action="{{ url('/feed/'.$post['post_type'].'/'.$post['id'].'/comments') }}" class="comment-form">@csrf<textarea name="comment" required maxlength="3000" placeholder="Write a comment"></textarea><button>Post</button></form>
+        @if($manageEvents && $post['post_type']==='event')<form method="POST" action="{{ route('events.archive',$post['id']) }}">@csrf @method('PATCH')<button class="danger">Archive event</button></form>@endif
+    </article>
+@empty <div class="empty">No posts are available.</div> @endforelse
+</div>
