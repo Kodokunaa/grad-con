@@ -190,7 +190,6 @@ Route::post('/employer/post_job.php', StoreJobController::class)->middleware('ac
 Route::get('/employer/posted_job.php', EmployerPostedJobController::class)->middleware('account:employer')->name('employer.posted_job');
 Route::post('/employer/posted_job.php', EmployerPostedJobController::class)->middleware('account:employer');
 Route::get('/profile.php', ProfileController::class)->middleware('account')->name('profile');
-Route::post('/profile.php', ProfileController::class)->middleware('account');
 Route::patch('/profile/notifications', UpdateNotificationPreferenceController::class)->middleware('account:alumni')->name('profile.notifications.update');
 Route::post('/profile/certificates', StoreCertificateController::class)->middleware('account:alumni')->name('profile.certificates.store');
 Route::put('/profile', UpdateAccountProfileController::class)->middleware('account')->name('profile.update');

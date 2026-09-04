@@ -183,11 +183,11 @@ final class MigrationTest extends TestCase
     {
         $admin = $this->user('admin');
 
-        $this->actingAs($admin)->post('/profile.php', [
+        $this->actingAs($admin)->put('/profile/password', [
             'old_password' => 'test-password-123',
             'new_password' => 'replacement-admin-password',
             'confirm_password' => 'replacement-admin-password',
-        ])->assertOk()->assertSee('Password changed successfully!');
+        ])->assertRedirect('/profile.php');
 
         $this->assertTrue(Hash::check('replacement-admin-password', $admin->fresh()->password));
         Auth::logout();

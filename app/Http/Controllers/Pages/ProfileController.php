@@ -3,117 +3,33 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
-use App\Models\User;
-use App\Services\UpdatePassword;
-use App\Support\PageResponse;
+use App\Models\SecurityLog;
 use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 final class ProfileController extends PageController
 {
     public function __invoke(Request $request)
     {
-        return $this->renderPage(function () {
-            $pdo = gc_context()->pdo();
-
-            \gc_require_role();
-            $id = (int) \gc_context()->session['user']['id'];
-            $role = \gc_context()->session['user']['role'];
-            // Load user
-            $stmt = $pdo->prepare('SELECT * FROM users WHERE id=? LIMIT 1');
-            $stmt->execute([$id]);
-            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
-            if (! $user) {
-                \gc_finish('User not found.');
-            }
+        return $this->renderPage(function () use ($request) {
+            $account = request()->user()->load(['certificates', 'employmentHistory', 'education', 'securityLogs']);
+            $id = $account->id;
+            $role = $account->role;
+            $user = $account->getAttributes();
             $profile_msg = '';
             $profile_error = '';
             $password_msg = '';
             $password_error = '';
             $active_tab = 'profile';
-            if ($role === 'alumni' && isset(\gc_context()->post['update_notifications'])) {
-                $active_tab = 'profile';
-                $receive_update_notifications = isset(\gc_context()->post['receive_update_notifications']) ? 1 : 0;
-                try {
-                    $notificationUpdate = $pdo->prepare("UPDATE users SET receive_update_notifications=? WHERE id=? AND role='alumni'");
-                    $notificationUpdate->execute([$receive_update_notifications, $id]);
-                    $user['receive_update_notifications'] = $receive_update_notifications;
-                    $profile_msg = $receive_update_notifications ? 'Website update notifications enabled.' : 'Website update notifications disabled.';
-                } catch (\Throwable $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    $profile_error = 'Unable to update notification settings.';
-                }
-            }
             $cert_msg = (string) session('status', '');
+            $profile_msg = $cert_msg;
             $cert_error = '';
             $certificates_list = [];
             // ========================
             // CERTIFICATE CRUD
-            // ========================
-            if ($role === 'alumni' && isset(\gc_context()->post['add_certificate'])) {
-                $active_tab = 'profile';
-                $certificate_name = trim(\gc_context()->post['certificate_name'] ?? '');
-                $issue_date = trim(\gc_context()->post['issue_date'] ?? '');
-                $certificate_image_name = null;
-                if ($certificate_name === '') {
-                    $cert_error = 'Certificate name is required.';
-                } elseif ($issue_date !== '' && strtotime($issue_date) === false) {
-                    $cert_error = 'Issue date is invalid.';
-                }
-                if ($cert_error === '') {
-                    if (empty(\gc_files()['certificate_image']['name'])) {
-                        $cert_error = 'Certificate image is required.';
-                    } else {
-                        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-                        $ext = strtolower(pathinfo(\gc_files()['certificate_image']['name'], PATHINFO_EXTENSION));
-                        if (! in_array($ext, $allowed, true)) {
-                            $cert_error = 'Invalid certificate image type. Allowed: jpg, jpeg, png, webp.';
-                        } elseif ((\gc_files()['certificate_image']['size'] ?? 0) > 3 * 1024 * 1024) {
-                            $cert_error = 'Certificate image too large. Max 3MB.';
-                        } else {
-                            $certificate_image_name = "cert_{$id}_".Str::uuid().'.'.$ext;
-                            if (! PrivateUploads::store(request()->file('certificate_image'), 'certificates', $certificate_image_name)) {
-                                $cert_error = 'Certificate image upload failed. Try again.';
-                            }
-                        }
-                    }
-                }
-                if ($cert_error === '') {
-                    try {
-                        $ins = $pdo->prepare("\r\n                INSERT INTO alumni_certificates (user_id, certificate_name, issuer, issue_date, certificate_image)\r\n                VALUES (?, ?, ?, ?, ?)\r\n            ");
-                        $ins->execute([$id, $certificate_name, '', $issue_date !== '' ? $issue_date : null, $certificate_image_name]);
-                        \gc_profile_add_log($pdo, $id, 'CERTIFICATE_ADDED', 'Certificate added');
-                        $cert_msg = 'Certificate added successfully!';
-                    } catch (\Throwable $e) {
-                        if ($e instanceof PageResponse) {
-                            throw $e;
-                        }
-                        if ($certificate_image_name) {
-                            PrivateUploads::delete('certificates', $certificate_image_name);
-                        }
-                        $cert_error = 'Certificates table is missing the certificate_image column. Run the SQL fix first.';
-                    }
-                }
-            }
             // Load certificates
             if ($role === 'alumni') {
-                try {
-                    $certificateStmt = $pdo->prepare("\r\n            SELECT id, certificate_name, issuer, issue_date, certificate_image\r\n            FROM alumni_certificates\r\n            WHERE user_id=?\r\n            ORDER BY COALESCE(issue_date, '0000-00-00') DESC, id DESC\r\n        ");
-                    $certificateStmt->execute([$id]);
-                    $certificates_list = $certificateStmt->fetchAll(\PDO::FETCH_ASSOC);
-                } catch (\Throwable $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    $certificates_list = [];
-                    if ($cert_error === '') {
-                        $cert_error = 'Certificates table not ready. Please run the SQL fix first.';
-                    }
-                }
+                $certificates_list = $account->certificates->sortByDesc('issue_date')->map->getAttributes()->values()->all();
             }
             // ========================
             // LOAD CURRENT/LATEST EMPLOYMENT FOR AUTOMATIC COURSE ALIGNMENT
@@ -121,61 +37,33 @@ final class ProfileController extends PageController
             $current_employment = null;
             $latestEmploymentAlignment = ['status' => 'Not Aligned', 'value' => 'No', 'class' => 'alignment-not', 'reason' => 'No current/latest job found for alignment checking.'];
             if ($role === 'alumni') {
-                try {
-                    $employmentAlignStmt = $pdo->prepare("\r\n            SELECT id, company_name, job_title, employment_type, location, start_date, end_date, job_description\r\n            FROM employment_history\r\n            WHERE user_id = ?\r\n            ORDER BY \r\n                CASE WHEN end_date IS NULL THEN 0 ELSE 1 END ASC,\r\n                COALESCE(end_date, '9999-12-31') DESC,\r\n                start_date DESC,\r\n                id DESC\r\n            LIMIT 1\r\n        ");
-                    $employmentAlignStmt->execute([$id]);
-                    $current_employment = $employmentAlignStmt->fetch(\PDO::FETCH_ASSOC) ?: null;
-                    if ($current_employment) {
-                        $latestEmploymentAlignment = \gc_profile_analyze_course_job_alignment($user['course'] ?? '', $current_employment['job_title'] ?? '', $current_employment['job_description'] ?? '');
-                    }
-                } catch (\Throwable $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    $current_employment = null;
-                    $latestEmploymentAlignment = ['status' => 'Not Aligned', 'value' => 'No', 'class' => 'alignment-not', 'reason' => 'Employment history table is not ready.'];
+                $employment = $account->employmentHistory->sortByDesc(fn ($item) => ($item->end_date === null ? '9999-12-31' : $item->getRawOriginal('end_date')).$item->getRawOriginal('start_date'))->first();
+                $current_employment = $employment?->getAttributes();
+                if ($current_employment) {
+                    $latestEmploymentAlignment = gc_profile_analyze_course_job_alignment($user['course'] ?? '', $current_employment['job_title'] ?? '', $current_employment['job_description'] ?? '');
                 }
             }
             $employment_history_list = [];
             $employment_history_error = '';
             // Load complete employment history for resume export
             if ($role === 'alumni') {
-                try {
-                    $employmentHistoryStmt = $pdo->prepare("\r\n            SELECT id, company_name, job_title, employment_type, location, start_date, end_date, job_description\r\n            FROM employment_history\r\n            WHERE user_id = ?\r\n            ORDER BY\r\n                CASE WHEN end_date IS NULL THEN 0 ELSE 1 END ASC,\r\n                COALESCE(end_date, '9999-12-31') DESC,\r\n                start_date DESC,\r\n                id DESC\r\n        ");
-                    $employmentHistoryStmt->execute([$id]);
-                    $employment_history_list = $employmentHistoryStmt->fetchAll(\PDO::FETCH_ASSOC);
-                } catch (\Throwable $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    $employment_history_list = [];
-                    $employment_history_error = 'Employment history table is not ready.';
-                }
+                $employment_history_list = $account->employmentHistory->sortByDesc('start_date')->map->getAttributes()->values()->all();
             }
             $education_list = [];
             $education_error = '';
             // Load educational background for resume export
             if ($role === 'alumni') {
-                try {
-                    $educationStmt = $pdo->prepare("\r\n            SELECT id, school_name, degree, start_year, end_year, created_at\r\n            FROM alumni_education\r\n            WHERE user_id=?\r\n            ORDER BY COALESCE(end_year, 9999) DESC, COALESCE(start_year, 0) DESC, id DESC\r\n        ");
-                    $educationStmt->execute([$id]);
-                    $education_list = $educationStmt->fetchAll(\PDO::FETCH_ASSOC);
-                } catch (\Throwable $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    $education_list = [];
-                    $education_error = 'Educational background table not ready. Please run the alumni_education SQL table first.';
-                }
+                $education_list = $account->education->sortByDesc('end_year')->map->getAttributes()->values()->all();
             }
             // ========================
             // RESUME VIEW / EXPORT (ALUMNI ONLY)
             // ========================
-            if ($role === 'alumni' && (isset(\gc_context()->query['export_resume']) || isset(\gc_context()->query['view_resume']))) {
-                $isResumeExport = isset(\gc_context()->query['export_resume']);
-                $isResumePreview = isset(\gc_context()->query['view_resume']);
+            if ($role === 'alumni' && ($request->has('export_resume') || $request->has('view_resume'))) {
+                $isResumeExport = $request->has('export_resume');
+                $isResumePreview = $request->has('view_resume');
                 if ($isResumeExport) {
-                    \gc_profile_add_log($pdo, $id, 'RESUME_EXPORTED', 'Alumni exported resume');
+                    $log = new SecurityLog;
+                    $log->forceFill(['user_id' => $id, 'action' => 'RESUME_EXPORTED', 'details' => 'Alumni exported resume', 'ip_address' => $request->ip(), 'user_agent' => mb_substr((string) $request->userAgent(), 0, 255)])->save();
                 }
                 $safe = function ($value) {
                     return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES, 'UTF-8');
@@ -838,175 +726,8 @@ final class ProfileController extends PageController
             // ========================
             // PROFILE UPDATE + PHOTO UPLOAD
             // ========================
-            if (isset(\gc_context()->post['update_profile'])) {
-                $active_tab = 'profile';
-                $fullname = trim(\gc_context()->post['fullname'] ?? '');
-                $email = trim(\gc_context()->post['email'] ?? '');
-                $course = $user['course'] ?? '';
-                $batch_year = $user['batch_year'] ?? '';
-                $birthdate = trim(\gc_context()->post['birthdate'] ?? '');
-                $age = trim(\gc_context()->post['age'] ?? '');
-                $gender = trim(\gc_context()->post['gender'] ?? '');
-                $civil_status = trim(\gc_context()->post['civil_status'] ?? '');
-                $contact_number = trim(\gc_context()->post['contact_number'] ?? '');
-                $address = trim(\gc_context()->post['address'] ?? '');
-                $has_multiple_branches = isset(\gc_context()->post['has_multiple_branches']) ? 1 : 0;
-                $branch_location = trim(\gc_context()->post['branch_location'] ?? '');
-                $indigenous_tribe = trim(\gc_context()->post['indigenous_tribe'] ?? '');
-                $special_needs = trim(\gc_context()->post['special_needs'] ?? '');
-                $employment_status = trim(\gc_context()->post['employment_status'] ?? '');
-                $job_aligned = null;
-                // Auto-generated based on course and latest/current employment history.
-                $career_objective = trim(\gc_context()->post['career_objective'] ?? '');
-                $skills = trim(\gc_context()->post['skills'] ?? '');
-                $trainings = trim(\gc_context()->post['trainings'] ?? '');
-                if ($fullname === '') {
-                    $profile_error = 'Fullname is required.';
-                } elseif ($role === 'alumni') {
-                    if ($birthdate !== '') {
-                        $ts = strtotime($birthdate);
-                        if ($ts === false) {
-                            $profile_error = 'Invalid birthdate.';
-                        } else {
-                            $today = new \DateTime;
-                            $bday = new \DateTime($birthdate);
-                            if ($bday > $today) {
-                                $profile_error = 'Birthdate cannot be in the future.';
-                            } else {
-                                $computedAge = $today->diff($bday)->y;
-                                $age = (string) $computedAge;
-                            }
-                        }
-                    } else {
-                        $age = '';
-                    }
-                    if ($age !== '' && (! ctype_digit($age) || (int) $age < 1 || (int) $age > 120)) {
-                        $profile_error = 'Please enter a valid age.';
-                    }
-                    if ($gender !== '' && ! in_array($gender, ['Male', 'Female'], true)) {
-                        $profile_error = 'Invalid gender selected.';
-                    }
-                    if ($civil_status !== '' && ! in_array($civil_status, ['Single', 'Married', 'Widowed', 'Separated'], true)) {
-                        $profile_error = 'Invalid civil status selected.';
-                    }
-                    if ($contact_number !== '' && ! preg_match('/^[0-9+\-\s]{7,20}$/', $contact_number)) {
-                        $profile_error = 'Please enter a valid contact number.';
-                    }
-                    if ($special_needs !== '' && ! in_array($special_needs, ['Visual Impairment', 'Hearing Impairment', 'Speech Impairment', 'Physical Disability', 'Learning Disability', 'Intellectual Disability', 'Psychosocial Disability', 'Autism Spectrum Disorder', 'Multiple Disabilities', 'Chronic Illness', 'Orthopedic Disability'], true)) {
-                        $profile_error = 'Invalid disability selected.';
-                    }
-                    if ($employment_status !== '' && ! in_array($employment_status, ['Employed', 'Unemployed'], true)) {
-                        $profile_error = 'Invalid employment status.';
-                    }
-                    if ($employment_status === 'Employed') {
-                        $job_aligned = $latestEmploymentAlignment['value'] ?? 'No';
-                    } else {
-                        $job_aligned = null;
-                    }
-                } elseif ($role === 'employer') {
-                    $birthdate = null;
-                    $age = null;
-                    $gender = null;
-                    $civil_status = null;
-                    $contact_number = null;
-                    $indigenous_tribe = null;
-                    $special_needs = null;
-                    $employment_status = null;
-                    $job_aligned = null;
-                    $career_objective = null;
-                    $skills = null;
-                    $trainings = null;
-                    if ($address === '') {
-                        $profile_error = 'Company address is required.';
-                    }
-                    if (! $has_multiple_branches) {
-                        $branch_location = '';
-                    } elseif ($branch_location === '') {
-                        $profile_error = 'Please enter the branch location.';
-                    }
-                } else {
-                    $birthdate = null;
-                    $age = null;
-                    $gender = null;
-                    $civil_status = null;
-                    $contact_number = null;
-                    $address = null;
-                    $has_multiple_branches = 0;
-                    $branch_location = '';
-                    $indigenous_tribe = null;
-                    $special_needs = null;
-                    $employment_status = null;
-                    $job_aligned = null;
-                    $career_objective = null;
-                    $skills = null;
-                    $trainings = null;
-                }
-                if ($profile_error === '') {
-                    $old_pic_name = $user['profile_picture'] ?? null;
-                    $new_pic_name = $old_pic_name;
-                    if (! empty(\gc_files()['profile_picture']['name'])) {
-                        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
-                        $ext = strtolower(pathinfo(\gc_files()['profile_picture']['name'], PATHINFO_EXTENSION));
-                        if (! in_array($ext, $allowed)) {
-                            $profile_error = 'Invalid image type. Allowed: jpg, jpeg, png, webp.';
-                        } elseif (\gc_files()['profile_picture']['size'] > 2 * 1024 * 1024) {
-                            $profile_error = 'Image too large. Max 2MB.';
-                        } else {
-                            $new_pic_name = "u{$id}_".Str::uuid().'.'.$ext;
-                            if (! PrivateUploads::store(request()->file('profile_picture'), 'profiles', $new_pic_name)) {
-                                $profile_error = 'Upload failed. Try again.';
-                            }
-                        }
-                    }
-                    if ($profile_error === '') {
-                        $upd = $pdo->prepare("\r\n                UPDATE users\r\n                SET fullname = ?, email = ?, course = ?, batch_year = ?, birthdate = ?, age = ?, gender = ?, civil_status = ?, contact_number = ?, address = ?, has_multiple_branches = ?, branch_location = ?, indigenous_tribe = ?, special_needs = ?, employment_status = ?, job_aligned = ?, career_objective = ?, skills = ?, trainings = ?, profile_picture = ?\r\n                WHERE id = ?\r\n            ");
-                        $upd->execute([$fullname, $email, $course, $batch_year, $birthdate ?: null, $age === '' ? null : (int) $age, $gender ?: null, $civil_status ?: null, $contact_number ?: null, $address ?: null, (int) $has_multiple_branches, $branch_location ?: null, $indigenous_tribe ?: null, $special_needs ?: null, $employment_status ?: null, $job_aligned, $career_objective ?: null, $skills ?: null, $trainings ?: null, $new_pic_name, $id]);
-                        if ($new_pic_name !== $old_pic_name) {
-                            PrivateUploads::delete('profiles', $old_pic_name);
-                        }
-                        \gc_context()->session['user']['fullname'] = $fullname;
-                        \gc_profile_add_log($pdo, $id, 'PROFILE_UPDATED', 'Profile info updated');
-                        $profile_msg = 'Profile updated successfully!';
-                        $stmt->execute([$id]);
-                        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
-                    }
-                }
-            }
-            // ========================
-            // PASSWORD UPDATE ONLY
-            // ========================
-            $isPasswordSubmission = isset(\gc_context()->post['update_password'])
-                || array_key_exists('old_password', \gc_context()->post)
-                || array_key_exists('new_password', \gc_context()->post)
-                || array_key_exists('confirm_password', \gc_context()->post);
-            if ($isPasswordSubmission) {
-                $active_tab = 'security';
-                $old = trim(\gc_context()->post['old_password'] ?? '');
-                $new = trim(\gc_context()->post['new_password'] ?? '');
-                $confirm = trim(\gc_context()->post['confirm_password'] ?? '');
-                if ($old === '' || $new === '' || $confirm === '') {
-                    $password_error = 'All fields are required.';
-                } elseif ($new !== $confirm) {
-                    $password_error = 'New passwords do not match.';
-                } elseif (strlen($new) < 8) {
-                    $password_error = 'New password must be at least 8 characters.';
-                } elseif (! Hash::check($old, $user['password'])) {
-                    $password_error = 'Old password is incorrect.';
-                } else {
-                    $account = User::findOrFail($id);
-                    if (app(UpdatePassword::class)->handle($account, $old, $new, request())) {
-                        $password_msg = 'Password changed successfully!';
-                        $stmt->execute([$id]);
-                        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
-                    } else {
-                        $password_error = 'Old password is incorrect.';
-                    }
-                }
-            }
             // Load latest logs
-            $logsStmt = $pdo->prepare("SELECT action, details, ip_address, created_at\r\n                           FROM security_logs\r\n                           WHERE user_id=?\r\n                           ORDER BY id DESC\r\n                           LIMIT 10");
-            $logsStmt->execute([$id]);
-            $logs = $logsStmt->fetchAll(\PDO::FETCH_ASSOC);
+            $logs = $account->securityLogs->sortByDesc('id')->take(10)->map->getAttributes()->values()->all();
             echo \gc_partial('header', \get_defined_vars());
             if ($role === 'admin') {
                 echo \gc_partial('admin_sidebar', \get_defined_vars());
