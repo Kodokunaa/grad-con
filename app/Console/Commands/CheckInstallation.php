@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 final class CheckInstallation extends Command
 {
-    protected $signature = 'gradconn:check {--database : Test the configured database connection}';
+    protected $signature = 'gradconn:check {--database : Test the configured database connection} {--mail : Validate outbound mail configuration}';
 
     protected $description = 'Check whether this device is ready to run GradConn';
 
@@ -43,6 +43,22 @@ final class CheckInstallation extends Command
                 $this->components->info('Database connection succeeded.');
             } catch (\Throwable $exception) {
                 $failures[] = 'Database connection failed: '.$exception->getMessage();
+            }
+        }
+
+        if ($this->option('mail')) {
+            $mailer = (string) config('mail.default');
+            if ($mailer === 'log' || $mailer === 'array') {
+                $failures[] = "MAIL_MAILER={$mailer} does not deliver email to recipients. Use smtp for Gmail delivery.";
+            } elseif ($mailer === 'smtp') {
+                foreach (['host', 'port', 'username', 'password'] as $key) {
+                    if (blank(config("mail.mailers.smtp.{$key}"))) {
+                        $failures[] = 'SMTP '.strtoupper($key).' is missing.';
+                    }
+                }
+                if (! filter_var(config('mail.from.address'), FILTER_VALIDATE_EMAIL)) {
+                    $failures[] = 'MAIL_FROM_ADDRESS must be a valid email address.';
+                }
             }
         }
 
