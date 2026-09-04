@@ -5,7 +5,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Chapter | Status | Completed | Still needs fixing |
 |---|---|---|---|
 | Critical architecture | In progress | Native authentication; initial report/list controllers; native redirects and event deletion | Remaining PDO controllers, `PageContext`, `PageResponse`, `PasswordStatement`, global helpers, and `page-functions.php` |
-| Database and migrations | In progress | Preserved baseline schema; Laravel infrastructure; job fields; social/interview upgrade, legacy social-data migration, and removal of request-time DDL/data migration | Remove remaining dynamic schema inspection; split the monolithic schema; improve rollback strategy |
+| Database and migrations | In progress | Preserved baseline schema; Laravel infrastructure; canonical job/application fields; social/interview upgrade; legacy social-data migration; all request-time DDL, data migration, and schema inspection removed | Split the monolithic baseline schema; improve rollback strategy |
 | Models and relationships | Foundation complete | Active domain models, relationships, casts, and status/role enums | Adopt models throughout legacy controllers; enable role/status enum casts after string comparisons are removed |
 | Routing | In progress | GET-only read pages and compatibility redirects; method regression tests | Split multi-action pages into named POST/PATCH/DELETE resource actions; remove destructive query parameters and `.php` URLs |
 | Authentication and account security | In progress | Hashing, centralized password policy, rehash-on-login, reset flow, security logging, other-session invalidation, and removal of automatic PDO password rewriting | Review production cookie settings and complete native account-management controllers |
@@ -15,7 +15,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Mail and queues | In progress | Laravel queued delivery, reset notification, configured sender addresses, and removal of PHPMailer transport setup | Consolidate mail templates, harden queued attachments, document/verify worker and SMTP deployment |
 | Views and frontend | In progress | Shared public-authentication document layout, native CSRF in every Blade POST form, and logout modal regression coverage | Auth asset extraction; authenticated layouts/components/assets; remove remaining response rewriting and duplicated inline CSS/JavaScript |
 | Middleware and responses | In progress | Native form CSRF, idempotent asset/modal augmentation, non-fatal audit records, upload validation, security headers | Remove remaining head/modal HTML rewriting and query-action interception after native layouts/routes are complete |
-| Duplicate helpers | In progress | Consolidated 20 identical role-prefixed HTML escaping helpers into `gc_e()` | Consolidate formatting, alignment, schema, activity-log, social-feed, and email helpers |
+| Duplicate helpers | In progress | Consolidated 20 identical role-prefixed HTML escaping helpers into `gc_e()`; removed dead schema-inspection, compatibility-email, and activity-table helper chains | Consolidate formatting, alignment, activity-log, social-feed, and retained email helpers |
 | Configuration and portability | In progress | Laravel root, environment templates, environment-driven timezone, declared PHP extensions, installation checker, MySQL migration path | Complete isolated clean-device install and production queue/mail verification |
 | Redundant files | Complete | Obsolete conversion tools/documentation, route dump, starter tests/views, blank views, empty migration directories, build cache, and temporary migration runtime removed | Reassess generated compatibility files as their owning architecture chapters are completed |
 | Tests | In progress | Authentication, native-CSRF form inventory, role-route contracts, explicit POST contracts, response headers, record policies, uploads, mail envelopes, and primary workflows | Remaining mutation, Form Request, mail-worker, migration-upgrade, browser, and clean-device coverage |
@@ -87,7 +87,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 
 - Consolidate repeated year, employment-date, and date-range formatting helpers.
 - Extract the three copies of course/job alignment analysis into a domain service.
-- Replace repeated PDO table/column checks with migrations and schema-backed code.
+- Runtime PDO table/column checks have been removed; split and document the migration-owned schema.
 - Consolidate duplicate activity/security logging functions.
 - Consolidate the admin, alumni, and officer social-feed functions.
 - Replace repeated application, interview, job-offer, and snapshot email helpers with dedicated Mailables or Notifications.

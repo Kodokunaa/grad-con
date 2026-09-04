@@ -4,14 +4,7 @@ use App\Mail\PageMailer;
 use App\Support\PageResponse;
 
 // Preserved page-specific presentation and domain helpers; uniquely named to avoid collisions.
-function gc_admin_admin_archive_ensure_archive_column(PDO $pdo, string $column, string $definition): void
-{
-    $check = $pdo->prepare('SHOW COLUMNS FROM events LIKE ?');
-    $check->execute([$column]);
-    if (! $check->fetch(PDO::FETCH_ASSOC)) {
-        \gc_context()->schemaChange($pdo, "ALTER TABLE events ADD COLUMN `{$column}` {$definition}");
-    }
-}
+
 function gc_admin_admin_archive_format_date($date): string
 {
     if (empty($date)) {
@@ -22,36 +15,6 @@ function gc_admin_admin_archive_format_date($date): string
     return $timestamp ? date('M d, Y h:i A', $timestamp) : \gc_e($date);
 }
 
-function gc_admin_alumni_list_column_exists(PDO $pdo, string $table, string $column): bool
-{
-    try {
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-        $stmt->execute([$column]);
-
-        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return false;
-    }
-}
-function gc_admin_alumni_list_table_exists(PDO $pdo, string $table): bool
-{
-    try {
-        $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
-        $stmt->execute([$table]);
-
-        return (bool) $stmt->fetch(PDO::FETCH_NUM);
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return false;
-    }
-}
 function gc_admin_alumni_list_format_year_range($start, $end): string
 {
     $start = trim((string) ($start ?? ''));
@@ -265,10 +228,7 @@ function gc_admin_applications_format_date_range($start, $end): string
 
     return 'N/A';
 }
-function gc_admin_applications_appColExists(array $columns, string $name): bool
-{
-    return in_array($name, $columns, true);
-}
+
 // ==========================
 // Optional email sender
 // ==========================
@@ -327,14 +287,6 @@ function gc_admin_applications_sendAdminApplicantEmail(array $application, strin
     }
 }
 
-function gc_admin_events_create_column_exists(PDO $pdo, string $table, string $column): bool
-{
-    $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-    $stmt->execute([$column]);
-
-    return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
-}
-
 function gc_admin_events_list_short_text($text, $limit = 320): string
 {
     $text = trim(strip_tags((string) $text));
@@ -376,20 +328,7 @@ function gc_admin_events_list_get_current_user_id(): int
 
     return 0;
 }
-function gc_admin_events_list_column_exists(PDO $pdo, string $table, string $column): bool
-{
-    $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-    $stmt->execute([$column]);
 
-    return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
-}
-function gc_admin_events_list_table_exists(PDO $pdo, string $table): bool
-{
-    $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
-    $stmt->execute([$table]);
-
-    return (bool) $stmt->fetchColumn();
-}
 function gc_admin_events_list_format_schedule_date($date): string
 {
     if (! $date) {
@@ -452,14 +391,7 @@ function gc_admin_events_list_profile_image_url(?string $image): string
 }
 function gc_admin_events_list_get_user_profile_column(PDO $pdo): ?string
 {
-    $profileColumns = ['profile_picture', 'profile_image', 'profile_photo', 'photo', 'avatar', 'image', 'picture'];
-    foreach ($profileColumns as $col) {
-        if (\gc_admin_events_list_column_exists($pdo, 'users', $col)) {
-            return $col;
-        }
-    }
-
-    return null;
+    return 'profile_picture';
 }
 function gc_admin_events_list_get_current_user_photo(PDO $pdo, int $userId, ?string $profileColumn): string
 {
@@ -648,27 +580,6 @@ function gc_admin_offers_history_render_activity_details(array $log): string
 
     return $html.'</div>';
 }
-function gc_admin_offers_history_table_exists(PDO $pdo, string $table): bool
-{
-    try {
-        $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
-        $stmt->execute([$table]);
-
-        return (bool) $stmt->fetch(PDO::FETCH_NUM);
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return false;
-    }
-}
-function gc_admin_offers_history_create_employer_activity_logs_table(PDO $pdo): void
-{
-    if (! \gc_admin_offers_history_table_exists($pdo, 'employer_activity_logs')) {
-        \gc_context()->schemaChange($pdo, "CREATE TABLE IF NOT EXISTS employer_activity_logs (\r\n                id INT AUTO_INCREMENT PRIMARY KEY,\r\n                employer_id INT NOT NULL,\r\n                alumni_id INT NULL,\r\n                offer_id INT NULL,\r\n                action VARCHAR(100) NOT NULL,\r\n                details TEXT NULL,\r\n                course_filter VARCHAR(100) NULL,\r\n                batch_filter VARCHAR(100) NULL,\r\n                skill_search VARCHAR(255) NULL,\r\n                result_count INT NULL,\r\n                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n                INDEX idx_employer_id (employer_id),\r\n                INDEX idx_alumni_id (alumni_id),\r\n                INDEX idx_offer_id (offer_id)\r\n            )");
-    }
-}
 
 // Helper: Add security log
 function gc_alumni_add_degree_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null): void
@@ -718,17 +629,7 @@ function gc_alumni_employment_history_normalize_alignment_text(?string $text): s
     return $text;
 }
 // Helper: Check if text contains any keyword
-function gc_alumni_employment_history_contains_any_keyword(string $text, array $keywords): bool
-{
-    foreach ($keywords as $keyword) {
-        $keyword = \gc_alumni_employment_history_normalize_alignment_text($keyword);
-        if ($keyword !== '' && strpos($text, $keyword) !== false) {
-            return true;
-        }
-    }
 
-    return false;
-}
 // Helper: Detect the exact CCC course key saved in the users table
 function gc_alumni_employment_history_detect_alumni_course_key(string $course): string
 {
@@ -874,36 +775,10 @@ function gc_alumni_feed_initials($name)
 
     return \gc_e($first.$last);
 }
-function gc_alumni_feed_column_exists(PDO $pdo, string $table, string $column): bool
-{
-    $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-    $stmt->execute([$column]);
 
-    return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
-}
-function gc_alumni_feed_table_exists(PDO $pdo, string $table): bool
-{
-    $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
-    $stmt->execute([$table]);
-
-    return (bool) $stmt->fetchColumn();
-}
 function gc_alumni_feed_get_user_profile_column(PDO $pdo): ?string
 {
-    $possibleColumns = ['profile_picture', 'profile_image', 'profile_photo', 'photo', 'avatar', 'image', 'picture'];
-    foreach ($possibleColumns as $column) {
-        try {
-            if (\gc_alumni_feed_column_exists($pdo, 'users', $column)) {
-                return $column;
-            }
-        } catch (Throwable $e) {
-            if ($e instanceof PageResponse) {
-                throw $e;
-            }
-        }
-    }
-
-    return null;
+    return 'profile_picture';
 }
 function gc_alumni_feed_profile_image_url($photo): string
 {
@@ -1312,25 +1187,7 @@ function gc_alumni_officer_archive_post_status_label($startDate, $endDate): arra
 
     return ['Active', 'status-active'];
 }
-function gc_alumni_officer_archive_column_exists(PDO $pdo, string $table, string $column): bool
-{
-    $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-    $stmt->execute([$column]);
 
-    return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
-}
-function gc_alumni_officer_archive_ensure_column(PDO $pdo, string $table, string $column, string $definition): void
-{
-    if (! \gc_alumni_officer_archive_column_exists($pdo, $table, $column)) {
-        try {
-            \gc_context()->schemaChange($pdo, "ALTER TABLE `{$table}` ADD COLUMN `{$column}` {$definition}");
-        } catch (Throwable $e) {
-            if ($e instanceof PageResponse) {
-                throw $e;
-            }
-        }
-    }
-}
 function gc_alumni_officer_dashboard_format_date($date): string
 {
     if (! $date) {
@@ -1357,13 +1214,7 @@ function gc_alumni_officer_dashboard_event_status_label($startDate, $endDate): a
 
     return ['Active', 'status-active'];
 }
-function gc_alumni_officer_events_create_column_exists(PDO $pdo, string $table, string $column): bool
-{
-    $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-    $stmt->execute([$column]);
 
-    return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
-}
 function gc_alumni_officer_events_create_to_mysql_datetime(?string $value): ?string
 {
     $value = trim((string) $value);
@@ -1419,42 +1270,10 @@ function gc_alumni_officer_events_list_get_current_user_id(): int
 
     return 0;
 }
-function gc_alumni_officer_events_list_column_exists(PDO $pdo, string $table, string $column): bool
-{
-    $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-    $stmt->execute([$column]);
 
-    return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
-}
-function gc_alumni_officer_events_list_ensure_column(PDO $pdo, string $table, string $column, string $definition): void
-{
-    if (! \gc_alumni_officer_events_list_column_exists($pdo, $table, $column)) {
-        try {
-            \gc_context()->schemaChange($pdo, "ALTER TABLE `{$table}` ADD COLUMN `{$column}` {$definition}");
-        } catch (Throwable $e) {
-            if ($e instanceof PageResponse) {
-                throw $e;
-            }
-        }
-    }
-}
-function gc_alumni_officer_events_list_table_exists(PDO $pdo, string $table): bool
-{
-    $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
-    $stmt->execute([$table]);
-
-    return (bool) $stmt->fetchColumn();
-}
 function gc_alumni_officer_events_list_get_user_profile_column(PDO $pdo): ?string
 {
-    $possibleColumns = ['profile_picture', 'profile_image', 'profile_photo', 'photo', 'avatar', 'image', 'picture'];
-    foreach ($possibleColumns as $column) {
-        if (\gc_alumni_officer_events_list_column_exists($pdo, 'users', $column)) {
-            return $column;
-        }
-    }
-
-    return null;
+    return 'profile_picture';
 }
 function gc_alumni_officer_events_list_profile_image_url($photo): string
 {
@@ -1601,45 +1420,9 @@ function gc_alumni_officer_events_list_get_comments(PDO $pdo, string $postType, 
 
     return ['main' => $mainComments, 'replies' => $replies, 'total' => count($mainComments) + array_sum(array_map('count', $replies))];
 }
-function gc_employer_alumni_list_column_exists(PDO $pdo, string $table, string $column): bool
-{
-    try {
-        $stmt = $pdo->prepare("SHOW COLUMNS FROM `{$table}` LIKE ?");
-        $stmt->execute([$column]);
 
-        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return false;
-    }
-}
-function gc_employer_alumni_list_table_exists(PDO $pdo, string $table): bool
-{
-    try {
-        $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
-        $stmt->execute([$table]);
-
-        return (bool) $stmt->fetch(PDO::FETCH_NUM);
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return false;
-    }
-}
-function gc_employer_alumni_list_create_employer_activity_logs_table(PDO $pdo): void
-{
-    if (! \gc_employer_alumni_list_table_exists($pdo, 'employer_activity_logs')) {
-        \gc_context()->schemaChange($pdo, "CREATE TABLE IF NOT EXISTS employer_activity_logs (\r\n                id INT AUTO_INCREMENT PRIMARY KEY,\r\n                employer_id INT NOT NULL,\r\n                alumni_id INT NULL,\r\n                offer_id INT NULL,\r\n                action VARCHAR(100) NOT NULL,\r\n                details TEXT NULL,\r\n                course_filter VARCHAR(100) NULL,\r\n                batch_filter VARCHAR(100) NULL,\r\n                skill_search VARCHAR(255) NULL,\r\n                result_count INT NULL,\r\n                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\r\n                INDEX idx_employer_id (employer_id),\r\n                INDEX idx_alumni_id (alumni_id),\r\n                INDEX idx_offer_id (offer_id)\r\n            )");
-    }
-}
 function gc_employer_alumni_list_log_employer_activity(PDO $pdo, int $employerId, string $action, ?string $details = null, ?int $alumniId = null, ?int $offerId = null, ?string $courseFilter = null, ?string $batchFilter = null, ?string $skillSearch = null, ?int $resultCount = null): void
 {
-    \gc_employer_alumni_list_create_employer_activity_logs_table($pdo);
     $stmt = $pdo->prepare("INSERT INTO employer_activity_logs (employer_id, alumni_id, offer_id, action, details, course_filter, batch_filter, skill_search, result_count)\r\n         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([$employerId, $alumniId, $offerId, $action, $details, $courseFilter, $batchFilter, $skillSearch, $resultCount]);
 }
@@ -1804,206 +1587,11 @@ function gc_employer_alumni_list_summarize_job_alignment(string $course, array $
 
     return ['status' => $alignment['status'], 'class' => $alignment['class'], 'reason' => $basis.': '.($jobToAnalyze['job_title'] ?? 'N/A').'. '.$alignment['reason']];
 }
-function gc_employer_alumni_list_build_email_value($value): string
-{
-    $value = trim((string) ($value ?? ''));
 
-    return $value !== '' ? \gc_e($value) : 'N/A';
-}
 /**
  * Returns an inline base64 <img> tag for the profile picture, or a fallback initials avatar.
  * Used inside emails so the image is embedded and not dependent on a URL.
  */
-function gc_employer_alumni_list_build_profile_picture_email_html(?string $profilePicturePath, string $alumniName): string
-{
-    $initials = strtoupper(substr(trim($alumniName), 0, 1) ?: 'A');
-    if (! empty($profilePicturePath) && file_exists($profilePicturePath)) {
-        $mime = mime_content_type($profilePicturePath) ?: 'image/jpeg';
-        $b64 = base64_encode(file_get_contents($profilePicturePath));
-
-        return '<img src="data:'.$mime.';base64,'.$b64.'" alt="Profile Picture"
-                     style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #f97316;display:block;">';
-    }
-
-    // Fallback: orange circle with initial
-    return '<div style="width:90px;height:90px;border-radius:50%;background:#f97316;color:#fff;
-                         font-size:36px;font-weight:800;display:flex;align-items:center;
-                         justify-content:center;border:3px solid #ea580c;line-height:90px;
-                         text-align:center;">'.htmlspecialchars($initials, ENT_QUOTES, 'UTF-8').'</div>';
-}
-function gc_employer_alumni_list_build_alumni_snapshot_email_html(array $alumni, array $educations, array $jobs, array $degrees, array $certs, array $summaryAlignment, string $employmentHistoryError = ''): string
-{
-    $profilePicturePath = '';
-    if (! empty($alumni['profile_picture'])) {
-        // Adjust this path to match your actual uploads directory
-        $profilePicturePath = \storage_path('app/private/files/uploads/profiles/'.$alumni['profile_picture']);
-    }
-    $profilePicHtml = \gc_employer_alumni_list_build_profile_picture_email_html($profilePicturePath ?: null, $alumni['fullname'] ?? 'Alumni');
-    $html = '
-    <div style="font-family:Arial, Helvetica, sans-serif; color:#111827; background:#f8fafc; padding:20px;">
-        <div style="max-width:900px; margin:0 auto; background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; overflow:hidden;">
-            <div style="background:#f97316; color:#ffffff; padding:18px 22px;">
-                <h2 style="margin:0; font-size:22px;">Alumni Profile Snapshot</h2>
-                <p style="margin:6px 0 0; font-size:13px;">This profile information was sent through the GradConn Employer Panel.</p>
-            </div>
-
-            <div style="padding:20px;">
-
-                <!-- Profile Picture -->
-                <div style="display:flex;align-items:center;gap:18px;margin-bottom:20px;padding:16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;">
-                    <div style="flex-shrink:0;">'.$profilePicHtml.'</div>
-                    <div>
-                        <div style="font-size:20px;font-weight:800;color:#111827;">'.\gc_employer_alumni_list_build_email_value($alumni['fullname'] ?? '').'</div>
-                        <div style="font-size:14px;color:#6b7280;margin-top:4px;">'.\gc_employer_alumni_list_build_email_value($alumni['course'] ?? '').' &bull; Batch '.\gc_employer_alumni_list_build_email_value($alumni['batch_year'] ?? '').'</div>
-                        <div style="font-size:13px;color:#9a3412;margin-top:2px;">'.\gc_employer_alumni_list_build_email_value($alumni['employment_status'] ?? '').'</div>
-                    </div>
-                </div>
-
-                <h3 style="margin:0 0 12px; color:#9a3412;">Basic Information</h3>
-                <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
-                    <tr>
-                        <td style="border:1px solid #e5e7eb;"><strong>Full Name</strong><br>'.\gc_employer_alumni_list_build_email_value($alumni['fullname'] ?? '').'</td>
-                        <td style="border:1px solid #e5e7eb;"><strong>Email</strong><br>'.\gc_employer_alumni_list_build_email_value($alumni['email'] ?? '').'</td>
-                    </tr>
-                    <tr>
-                        <td style="border:1px solid #e5e7eb;"><strong>Course</strong><br>'.\gc_employer_alumni_list_build_email_value($alumni['course'] ?? '').'</td>
-                        <td style="border:1px solid #e5e7eb;"><strong>Batch Year</strong><br>'.\gc_employer_alumni_list_build_email_value($alumni['batch_year'] ?? '').'</td>
-                    </tr>
-                    <tr>
-                        <td style="border:1px solid #e5e7eb;"><strong>Contact Number</strong><br>'.\gc_employer_alumni_list_build_email_value($alumni['contact_number'] ?? '').'</td>
-                        <td style="border:1px solid #e5e7eb;"><strong>Employment Status</strong><br>'.\gc_employer_alumni_list_build_email_value($alumni['employment_status'] ?? '').'</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="border:1px solid #e5e7eb;"><strong>Address</strong><br>'.nl2br(\gc_employer_alumni_list_build_email_value($alumni['address'] ?? '')).'</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="border:1px solid #e5e7eb;"><strong>Skills</strong><br>'.nl2br(\gc_employer_alumni_list_build_email_value($alumni['skills'] ?? '')).'</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="border:1px solid #e5e7eb;"><strong>Career Objective</strong><br>'.nl2br(\gc_employer_alumni_list_build_email_value($alumni['career_objective'] ?? '')).'</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="border:1px solid #e5e7eb;"><strong>Job Alignment</strong><br>'.\gc_employer_alumni_list_build_email_value($summaryAlignment['status'] ?? '').'<br><span style="color:#6b7280;">'.\gc_employer_alumni_list_build_email_value($summaryAlignment['reason'] ?? '').'</span></td>
-                    </tr>
-                </table>';
-    $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Educational Background</h3>';
-    if (empty($educations)) {
-        $html .= '<p style="color:#6b7280;">No educational background found.</p>';
-    } else {
-        $html .= '<table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
-            <tr style="background:#fff7ed;">
-                <th align="left" style="border:1px solid #e5e7eb;">School</th>
-                <th align="left" style="border:1px solid #e5e7eb;">Degree</th>
-                <th align="left" style="border:1px solid #e5e7eb;">Years</th>
-            </tr>';
-        foreach ($educations as $edu) {
-            $html .= '<tr>
-                <td style="border:1px solid #e5e7eb;">'.\gc_employer_alumni_list_build_email_value($edu['school_name'] ?? '').'</td>
-                <td style="border:1px solid #e5e7eb;">'.\gc_employer_alumni_list_build_email_value($edu['degree'] ?? '').'</td>
-                <td style="border:1px solid #e5e7eb;">'.\gc_employer_alumni_list_format_year_range($edu['start_year'] ?? '', $edu['end_year'] ?? '').'</td>
-            </tr>';
-        }
-        $html .= '</table>';
-    }
-    $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Employment History</h3>';
-    if ($employmentHistoryError !== '') {
-        $html .= '<p style="color:#6b7280;">'.\gc_e($employmentHistoryError).'</p>';
-    } elseif (empty($jobs)) {
-        $html .= '<p style="color:#6b7280;">No employment history found.</p>';
-    } else {
-        $html .= '<table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
-            <tr style="background:#fff7ed;">
-                <th align="left" style="border:1px solid #e5e7eb;">Company</th>
-                <th align="left" style="border:1px solid #e5e7eb;">Job Title</th>
-                <th align="left" style="border:1px solid #e5e7eb;">Type</th>
-                <th align="left" style="border:1px solid #e5e7eb;">Duration</th>
-            </tr>';
-        foreach ($jobs as $job) {
-            $html .= '<tr>
-                <td style="border:1px solid #e5e7eb;">'.\gc_employer_alumni_list_build_email_value($job['company_name'] ?? '').'</td>
-                <td style="border:1px solid #e5e7eb;">'.\gc_employer_alumni_list_build_email_value($job['job_title'] ?? '').'</td>
-                <td style="border:1px solid #e5e7eb;">'.\gc_employer_alumni_list_build_email_value($job['employment_type'] ?? '').'</td>
-                <td style="border:1px solid #e5e7eb;">'.\gc_employer_alumni_list_format_date_range($job['start_date'] ?? '', $job['end_date'] ?? '').'</td>
-            </tr>';
-            if (! empty($job['job_description'])) {
-                $html .= '<tr><td colspan="4" style="border:1px solid #e5e7eb; color:#374151;"><strong>Description:</strong><br>'.nl2br(\gc_e($job['job_description'])).'</td></tr>';
-            }
-        }
-        $html .= '</table>';
-    }
-    $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Degrees</h3>';
-    if (empty($degrees)) {
-        $html .= '<p style="color:#6b7280;">No degrees found.</p>';
-    } else {
-        $html .= '<ul style="font-size:14px;">';
-        foreach ($degrees as $deg) {
-            $html .= '<li><strong>'.\gc_employer_alumni_list_build_email_value($deg['degree_name'] ?? '').'</strong> - '.\gc_employer_alumni_list_build_email_value($deg['school_name'] ?? '').' ('.\gc_employer_alumni_list_build_email_value($deg['year_graduated'] ?? '').')</li>';
-        }
-        $html .= '</ul>';
-    }
-    $html .= '<h3 style="margin:22px 0 12px; color:#9a3412;">Certificates</h3>';
-    if (empty($certs)) {
-        $html .= '<p style="color:#6b7280;">No certificates found.</p>';
-    } else {
-        $html .= '<ul style="font-size:14px;">';
-        foreach ($certs as $cert) {
-            $html .= '<li><strong>'.\gc_employer_alumni_list_build_email_value($cert['certificate_name'] ?? '').'</strong> - Issue Date: '.\gc_employer_alumni_list_build_email_value($cert['issue_date'] ?? '').'</li>';
-        }
-        $html .= '</ul>';
-    }
-    $html .= '
-                <p style="margin-top:24px; font-size:12px; color:#6b7280;">
-                    This email contains alumni information for employment review purposes only. Please handle it according to data privacy and confidentiality requirements.
-                </p>
-            </div>
-        </div>
-    </div>';
-
-    return $html;
-}
-function gc_employer_alumni_list_build_professional_email_html(string $alumniName, string $employerName, string $subject, string $message): string
-{
-    $safeAlumniName = \gc_e($alumniName ?: 'Alumni');
-    $safeEmployerName = \gc_e($employerName ?: 'Employer');
-    $safeSubject = \gc_e($subject ?: 'Message from Employer');
-    $safeMessage = nl2br(\gc_e($message));
-
-    return '
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"></head>
-<body style="margin:0; padding:0; background:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f6f8; padding:30px 0;">
-<tr><td align="center">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:680px; background:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#f97316 0%,#ea580c 100%); padding:24px 32px;">
-<div style="font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#ffedd5; font-weight:700; margin-bottom:8px;">GradConn Employer Message</div>
-<div style="font-size:26px; line-height:1.3; color:#ffffff; font-weight:800;">'.$safeSubject.'</div>
-</td></tr>
-<tr><td style="padding:30px 32px 12px 32px;">
-<div style="font-size:15px; line-height:1.8; color:#374151;">Dear <strong>'.$safeAlumniName.'</strong>,</div>
-</td></tr>
-<tr><td style="padding:0 32px 20px 32px;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fff7ed; border:1px solid #fdba74; border-radius:14px;">
-<tr><td style="padding:20px 22px;">
-<div style="font-size:13px; font-weight:700; text-transform:uppercase; color:#c2410c; margin-bottom:10px;">Message</div>
-<div style="font-size:15px; line-height:1.8; color:#374151;">'.$safeMessage.'</div>
-</td></tr></table>
-</td></tr>
-<tr><td style="padding:8px 32px 26px 32px;">
-<div style="font-size:15px; line-height:1.8; color:#374151;">Best regards,<br><strong>'.$safeEmployerName.'</strong></div>
-</td></tr>
-<tr><td style="padding:22px 32px; background:#f9fafb; border-top:1px solid #e5e7eb;">
-<div style="font-size:12px; line-height:1.7; color:#6b7280;">
-This email was sent through the GradConn Employer Panel. Please reply directly to the sender if you wish to respond.
-</div>
-</td></tr>
-</table></td></tr></table></body></html>';
-}
-function gc_employer_alumni_list_build_professional_email_text(string $alumniName, string $employerName, string $subject, string $message): string
-{
-    return ($subject ?: 'Message from Employer')."\n\n".'Dear '.($alumniName ?: 'Alumni').",\n\n".$message."\n\n"."Best regards,\n".($employerName ?: 'Employer')."\n\n".'This email was sent through the GradConn Employer Panel.';
-}
 function gc_employer_alumni_list_build_job_offer_email_html(string $alumniName, string $employerName, string $subject, string $message, string $acceptLink, string $declineLink): string
 {
     $safeAlumniName = \gc_e($alumniName ?: 'Alumni');
@@ -2046,10 +1634,7 @@ This email contains a job offer sent through the GradConn Job Portal. The offer 
 </td></tr>
 </table></td></tr></table></body></html>';
 }
-function gc_employer_alumni_list_build_alumni_snapshot_email_text(array $alumni, array $summaryAlignment): string
-{
-    return "Alumni Profile Snapshot\n\n".'Full Name: '.($alumni['fullname'] ?? 'N/A')."\n".'Email: '.($alumni['email'] ?? 'N/A')."\n".'Course: '.($alumni['course'] ?? 'N/A')."\n".'Batch Year: '.($alumni['batch_year'] ?? 'N/A')."\n".'Contact Number: '.($alumni['contact_number'] ?? 'N/A')."\n".'Employment Status: '.($alumni['employment_status'] ?? 'N/A')."\n".'Skills: '.($alumni['skills'] ?? 'N/A')."\n".'Career Objective: '.($alumni['career_objective'] ?? 'N/A')."\n".'Job Alignment: '.($summaryAlignment['status'] ?? 'N/A').' - '.($summaryAlignment['reason'] ?? '')."\n";
-}
+
 function gc_employer_applications_normalize_status($status): string
 {
     $status = strtolower(trim((string) $status));
@@ -2217,39 +1802,11 @@ function gc_employer_interview_sendInterviewEmail(array $application, string $da
 /**
  * Safely check if a table exists.
  */
-function gc_employer_post_job_table_exists(PDO $pdo, string $tableName): bool
-{
-    try {
-        $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
-        $stmt->execute([$tableName]);
 
-        return (bool) $stmt->fetch(PDO::FETCH_NUM);
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return false;
-    }
-}
 /**
  * Get all column names from a table.
  */
-function gc_employer_post_job_get_table_columns(PDO $pdo, string $tableName): array
-{
-    try {
-        $stmt = $pdo->query("SHOW COLUMNS FROM `{$tableName}`");
-        $cols = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
-        return array_map(fn ($row) => $row['Field'], $cols);
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return [];
-    }
-}
 /**
  * Split branch text saved in one profile field into dropdown choices.
  * Accepted separators: newline, comma, semicolon, or vertical bar.
@@ -2274,22 +1831,7 @@ function gc_employer_post_job_parse_branch_locations(?string $branchText): array
 // ========================
 // ENSURE EMPLOYER PROFILE COLUMNS EXIST
 // ========================
-function gc_profile_ensure_users_column(PDO $pdo, string $column, string $definition): void
-{
-    try {
-        $check = $pdo->prepare('SHOW COLUMNS FROM users LIKE ?');
-        $check->execute([$column]);
-        if (! $check->fetch(PDO::FETCH_ASSOC)) {
-            \gc_context()->schemaChange($pdo, "ALTER TABLE users ADD COLUMN {$column} {$definition}");
-        }
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-        // If the database user has no ALTER privilege, the form will still load.
-        // Run the SQL below manually if saving employer branch details fails.
-    }
-}
+
 // Helper: Add security log
 function gc_profile_add_log(PDO $pdo, int $user_id, string $action, ?string $details = null)
 {

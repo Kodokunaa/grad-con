@@ -32,82 +32,15 @@ final class EmployerPostJobController extends PageController
             $employer_branches = [];
             if ($posted_by > 0) {
                 try {
-                    $userCols = \gc_employer_post_job_get_table_columns($pdo, 'users');
-                    $selectCols = ['fullname', 'email'];
-                    // Profile address field. This uses users.address if available.
-                    if (in_array('address', $userCols, true)) {
-                        $selectCols[] = 'address';
-                    }
-                    // Optional profile branch fields. Any of these may exist depending on your database.
-                    $possibleBranchCols = ['branch_location', 'branch_locations', 'company_branch', 'company_branches', 'branches', 'branch_address', 'branch_addresses'];
-                    foreach ($possibleBranchCols as $col) {
-                        if (in_array($col, $userCols, true)) {
-                            $selectCols[] = $col;
-                        }
-                    }
-                    $selectSql = implode(', ', array_map(fn ($col) => "`{$col}`", array_unique($selectCols)));
-                    $empStmt = $pdo->prepare("\r\n            SELECT {$selectSql}\r\n            FROM users\r\n            WHERE id = ?\r\n            LIMIT 1\r\n        ");
+                    $empStmt = $pdo->prepare('SELECT fullname, email, address, branch_location FROM users WHERE id = ? LIMIT 1');
                     $empStmt->execute([$posted_by]);
                     $empRow = $empStmt->fetch(\PDO::FETCH_ASSOC);
                     if ($empRow) {
                         $employer_fullname = trim($empRow['fullname'] ?? $employer_fullname);
                         $employer_email = trim($empRow['email'] ?? $employer_email);
                         $employer_profile_address = trim($empRow['address'] ?? '');
-                        foreach ($possibleBranchCols as $col) {
-                            if (! empty($empRow[$col])) {
-                                $employer_branches = array_merge($employer_branches, \gc_employer_post_job_parse_branch_locations($empRow[$col]));
-                            }
-                        }
-                    }
-                    // Optional separate table support:
-                    // This works if you have a table named employer_branches with employer_id or user_id,
-                    // and a branch location/address column.
-                    if (\gc_employer_post_job_table_exists($pdo, 'employer_branches')) {
-                        $branchCols = \gc_employer_post_job_get_table_columns($pdo, 'employer_branches');
-                        $ownerCol = '';
-                        foreach (['employer_id', 'user_id', 'created_by'] as $candidate) {
-                            if (in_array($candidate, $branchCols, true)) {
-                                $ownerCol = $candidate;
-                                break;
-                            }
-                        }
-                        $locationCol = '';
-                        foreach (['branch_location', 'location', 'address', 'branch_address'] as $candidate) {
-                            if (in_array($candidate, $branchCols, true)) {
-                                $locationCol = $candidate;
-                                break;
-                            }
-                        }
-                        $nameCol = '';
-                        foreach (['branch_name', 'name', 'title'] as $candidate) {
-                            if (in_array($candidate, $branchCols, true)) {
-                                $nameCol = $candidate;
-                                break;
-                            }
-                        }
-                        if ($ownerCol !== '' && $locationCol !== '') {
-                            $branchSql = "SELECT `{$locationCol}` AS branch_location";
-                            if ($nameCol !== '') {
-                                $branchSql .= ", `{$nameCol}` AS branch_name";
-                            }
-                            $branchSql .= " FROM employer_branches WHERE `{$ownerCol}` = ?";
-                            if (in_array('is_active', $branchCols, true)) {
-                                $branchSql .= ' AND is_active = 1';
-                            }
-                            $branchSql .= ' ORDER BY id DESC';
-                            $branchStmt = $pdo->prepare($branchSql);
-                            $branchStmt->execute([$posted_by]);
-                            $branchRows = $branchStmt->fetchAll(\PDO::FETCH_ASSOC);
-                            foreach ($branchRows as $branchRow) {
-                                $branchName = trim($branchRow['branch_name'] ?? '');
-                                $branchLocation = trim($branchRow['branch_location'] ?? '');
-                                if ($branchLocation !== '') {
-                                    $displayBranch = $branchName !== '' ? $branchName.' - '.$branchLocation : $branchLocation;
-                                    if (! in_array($displayBranch, $employer_branches, true)) {
-                                        $employer_branches[] = $displayBranch;
-                                    }
-                                }
-                            }
+                        if (! empty($empRow['branch_location'])) {
+                            $employer_branches = \gc_employer_post_job_parse_branch_locations($empRow['branch_location']);
                         }
                     }
                     $employer_branches = array_values(array_unique(array_filter($employer_branches)));
@@ -152,73 +85,8 @@ final class EmployerPostJobController extends PageController
                     $error = 'End date cannot be earlier than start date.';
                 } else {
                     try {
-                        $hasEmailColumn = false;
-                        $hasStartDateColumn = false;
-                        $hasEndDateColumn = false;
-                        try {
-                            $checkCol = $pdo->query("SHOW COLUMNS FROM jobs LIKE 'email_address'");
-                            $hasEmailColumn = $checkCol && $checkCol->fetch(\PDO::FETCH_ASSOC) ? true : false;
-                            $checkCol = $pdo->query("SHOW COLUMNS FROM jobs LIKE 'start_date'");
-                            $hasStartDateColumn = $checkCol && $checkCol->fetch(\PDO::FETCH_ASSOC) ? true : false;
-                            $checkCol = $pdo->query("SHOW COLUMNS FROM jobs LIKE 'end_date'");
-                            $hasEndDateColumn = $checkCol && $checkCol->fetch(\PDO::FETCH_ASSOC) ? true : false;
-                        } catch (\Throwable $e) {
-                            if ($e instanceof PageResponse) {
-                                throw $e;
-                            }
-                            $hasEmailColumn = false;
-                            $hasStartDateColumn = false;
-                            $hasEndDateColumn = false;
-                        }
-                        // Also check for employer_id and created_at columns so inserted jobs match other parts of the app
-                        $hasEmployerIdColumn = false;
-                        $hasCreatedAtColumn = false;
-                        try {
-                            $checkCol = $pdo->query("SHOW COLUMNS FROM jobs LIKE 'employer_id'");
-                            $hasEmployerIdColumn = $checkCol && $checkCol->fetch(\PDO::FETCH_ASSOC) ? true : false;
-                            $checkCol = $pdo->query("SHOW COLUMNS FROM jobs LIKE 'created_at'");
-                            $hasCreatedAtColumn = $checkCol && $checkCol->fetch(\PDO::FETCH_ASSOC) ? true : false;
-                        } catch (\Throwable $e) {
-                            if ($e instanceof PageResponse) {
-                                throw $e;
-                            }
-                            $hasEmployerIdColumn = false;
-                            $hasCreatedAtColumn = false;
-                        }
-                        // Build columns and parameters dynamically to support different schema versions
-                        $columns = ['title', 'company', 'employer_company'];
-                        $params = [$title, $company, $employer_company];
-                        if ($hasEmailColumn) {
-                            $columns[] = 'email_address';
-                            $params[] = $email_address;
-                        }
-                        $columns[] = 'location';
-                        $params[] = $location;
-                        $columns[] = 'job_type';
-                        $params[] = $job_type;
-                        if ($hasStartDateColumn) {
-                            $columns[] = 'start_date';
-                            $params[] = $start_date;
-                        }
-                        if ($hasEndDateColumn) {
-                            $columns[] = 'end_date';
-                            $params[] = $end_date;
-                        }
-                        $columns[] = 'description';
-                        $params[] = $description;
-                        $columns[] = 'is_open';
-                        $params[] = $is_open;
-                        // keep posted_by for backward compatibility with code expecting this column
-                        $columns[] = 'posted_by';
-                        $params[] = $posted_by;
-                        if ($hasEmployerIdColumn) {
-                            $columns[] = 'employer_id';
-                            $params[] = $posted_by;
-                        }
-                        if ($hasCreatedAtColumn) {
-                            $columns[] = 'created_at';
-                            $params[] = date('Y-m-d H:i:s');
-                        }
+                        $columns = ['title', 'company', 'employer_company', 'email_address', 'location', 'job_type', 'start_date', 'end_date', 'description', 'is_open', 'posted_by', 'employer_id', 'created_at'];
+                        $params = [$title, $company, $employer_company, $email_address, $location, $job_type, $start_date, $end_date, $description, $is_open, $posted_by, $posted_by, date('Y-m-d H:i:s')];
                         $placeholders = implode(',', array_fill(0, count($columns), '?'));
                         $sql = 'INSERT INTO jobs('.implode(', ', $columns).") VALUES({$placeholders})";
                         $stmt = $pdo->prepare($sql);

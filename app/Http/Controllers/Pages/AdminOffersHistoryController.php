@@ -19,7 +19,6 @@ final class AdminOffersHistoryController extends PageController
             $employerCount = 0;
             $alumniCount = 0;
             try {
-                \gc_admin_offers_history_create_employer_activity_logs_table($pdo);
                 $stmt = $pdo->prepare("SELECT l.*, emp.fullname AS employer_name, al.fullname AS alumni_name, al.email AS alumni_email,\r\n                 jo.status AS offer_status, jo.accepted_at, jo.declined_at\r\n         FROM employer_activity_logs l\r\n         LEFT JOIN users emp ON emp.id = l.employer_id\r\n         LEFT JOIN users al ON al.id = l.alumni_id\r\n            LEFT JOIN job_offers jo ON jo.id = l.offer_id\r\n         ORDER BY l.created_at DESC\r\n            LIMIT 500");
                 $stmt->execute();
                 $logs = $stmt->fetchAll(\PDO::FETCH_ASSOC);

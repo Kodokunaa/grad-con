@@ -31,19 +31,8 @@ final class PageContext
     public function pdo(): \PDO
     {
         $pdo = DB::connection()->getPdo();
-        // MariaDB does not support native placeholders in legacy SHOW ... LIKE queries.
         $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
 
         return $pdo;
-    }
-
-    public function schemaChange(\PDO $pdo, string $sql): int|false
-    {
-        // Schema is installed by versioned migrations, never by HTTP requests.
-        if (preg_match('/^\s*(CREATE|ALTER|DROP)\s/i', $sql)) {
-            return 0;
-        }
-
-        return $pdo->exec($sql);
     }
 }

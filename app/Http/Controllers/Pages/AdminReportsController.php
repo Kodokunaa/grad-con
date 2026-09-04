@@ -35,20 +35,11 @@ final class AdminReportsController extends PageController
                 $report['applicants'] = (int) $pdo->query('SELECT COUNT(*) FROM applications')->fetchColumn();
                 $report['using_alumni'] = (int) $pdo->query('SELECT COUNT(DISTINCT alumni_id) FROM applications')->fetchColumn();
                 $report['hired_alumni'] = (int) $pdo->query("SELECT COUNT(DISTINCT alumni_id) FROM applications WHERE LOWER(TRIM(status)) = 'hired'")->fetchColumn();
-                $userColumns = [];
-                $colStmt = $pdo->query('SHOW COLUMNS FROM users');
-                $userColumns = $colStmt->fetchAll(\PDO::FETCH_COLUMN);
                 $monthStart = $selectedMonth.'-01';
                 $monthEnd = date('Y-m-d', strtotime('+1 month', strtotime($monthStart)));
-                if (in_array('last_login', $userColumns, true)) {
-                    $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE last_login >= ? AND last_login < ?');
-                    $stmt->execute([$monthStart, $monthEnd]);
-                    $report['monthly_active_users'] = (int) $stmt->fetchColumn();
-                } elseif (in_array('created_at', $userColumns, true)) {
-                    $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE created_at >= ? AND created_at < ?');
-                    $stmt->execute([$monthStart, $monthEnd]);
-                    $report['monthly_active_users'] = (int) $stmt->fetchColumn();
-                }
+                $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE created_at >= ? AND created_at < ?');
+                $stmt->execute([$monthStart, $monthEnd]);
+                $report['monthly_active_users'] = (int) $stmt->fetchColumn();
                 $monthlyEmployers = $pdo->prepare("\r\n\t\tSELECT COUNT(DISTINCT j.posted_by)\r\n\t\tFROM jobs j\r\n\t\tINNER JOIN users u ON u.id = j.posted_by AND u.role = 'employer'\r\n\t\tWHERE j.created_at >= ? AND j.created_at < DATE_ADD(?, INTERVAL 1 MONTH)\r\n\t");
                 $monthlyEmployers->execute([$monthStart, $monthStart]);
                 $report['monthly_employers'] = (int) $monthlyEmployers->fetchColumn();

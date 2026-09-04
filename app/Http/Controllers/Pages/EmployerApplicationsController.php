@@ -28,32 +28,6 @@ final class EmployerApplicationsController extends PageController
             $success = '';
             $error = '';
             $employer_id = (int) (\gc_context()->session['user']['id'] ?? 0);
-            $hasStartDate = false;
-            $hasEndDate = false;
-            $hasCancelReason = false;
-            $hasCancelledAt = false;
-            try {
-                $colStmt = $pdo->query('SHOW COLUMNS FROM jobs');
-                $jobColumns = $colStmt->fetchAll(\PDO::FETCH_COLUMN);
-                $hasStartDate = in_array('start_date', $jobColumns, true);
-                $hasEndDate = in_array('end_date', $jobColumns, true);
-            } catch (\Throwable $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-                $error = 'Unable to read jobs table structure.';
-            }
-            try {
-                $appColStmt = $pdo->query('SHOW COLUMNS FROM applications');
-                $appColumns = $appColStmt->fetchAll(\PDO::FETCH_COLUMN);
-                $hasCancelReason = in_array('cancel_reason', $appColumns, true);
-                $hasCancelledAt = in_array('cancelled_at', $appColumns, true);
-            } catch (\Throwable $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-                $error = 'Unable to read applications table structure.';
-            }
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST' && isset(\gc_context()->post['application_id'], \gc_context()->post['action'])) {
                 $application_id = (int) (\gc_context()->post['application_id'] ?? 0);
                 $action = trim(\gc_context()->post['action'] ?? '');
@@ -105,7 +79,7 @@ final class EmployerApplicationsController extends PageController
             }
             $applications = [];
             try {
-                $applicationFields = ['a.id AS application_id', 'a.status', 'a.resume_file', 'a.created_at', 'a.job_id', $hasCancelReason ? 'a.cancel_reason' : 'NULL AS cancel_reason', $hasCancelledAt ? 'a.cancelled_at' : 'NULL AS cancelled_at', 'j.title AS job_title', 'j.company', $hasStartDate ? 'j.start_date AS job_start_date' : 'NULL AS job_start_date', $hasEndDate ? 'j.end_date AS job_end_date' : 'NULL AS job_end_date', 'u.id AS alumni_id', 'u.fullname', 'u.username', 'u.email', 'u.course', 'u.batch_year', 'u.birthdate', 'u.age', 'u.gender', 'u.civil_status', 'u.contact_number', 'u.address', 'u.indigenous_tribe', 'u.special_needs', 'u.employment_status', 'u.job_aligned', 'u.profile_picture', 'u.career_objective', 'u.skills', 'u.work_experience', 'u.trainings', 'u.is_active'];
+                $applicationFields = ['a.id AS application_id', 'a.status', 'a.resume_file', 'a.created_at', 'a.job_id', 'a.cancel_reason', 'a.cancelled_at', 'j.title AS job_title', 'j.company', 'j.start_date AS job_start_date', 'j.end_date AS job_end_date', 'u.id AS alumni_id', 'u.fullname', 'u.username', 'u.email', 'u.course', 'u.batch_year', 'u.birthdate', 'u.age', 'u.gender', 'u.civil_status', 'u.contact_number', 'u.address', 'u.indigenous_tribe', 'u.special_needs', 'u.employment_status', 'u.job_aligned', 'u.profile_picture', 'u.career_objective', 'u.skills', 'u.work_experience', 'u.trainings', 'u.is_active'];
                 $applicationsSql = "\r\n        SELECT ".implode(",\n            ", $applicationFields)."\r\n        FROM applications a\r\n        INNER JOIN jobs j ON a.job_id = j.id\r\n        INNER JOIN users u ON a.alumni_id = u.id\r\n        WHERE j.posted_by = ?\r\n        ORDER BY a.id DESC\r\n    ";
                 $stmt = $pdo->prepare($applicationsSql);
                 $stmt->execute([$employer_id]);

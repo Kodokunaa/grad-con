@@ -35,19 +35,6 @@ final class AdminApplicationsController extends PageController
             $isEmployerPosted = isset($job['poster_role']) && strtolower($job['poster_role']) === 'employer';
             $isAdminPosted = isset($job['poster_role']) && strtolower($job['poster_role']) === 'admin';
             // ==========================
-            // Detect available columns in applications table
-            // ==========================
-            $appColumns = [];
-            try {
-                $colStmt = $pdo->query('SHOW COLUMNS FROM applications');
-                $appColumns = $colStmt->fetchAll(\PDO::FETCH_COLUMN);
-            } catch (\Throwable $e) {
-                if ($e instanceof PageResponse) {
-                    throw $e;
-                }
-                $appColumns = [];
-            }
-            // ==========================
             // Handle actions
             // ==========================
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST' && isset(\gc_context()->post['application_id'], \gc_context()->post['action'])) {
@@ -112,15 +99,7 @@ final class AdminApplicationsController extends PageController
             // ==========================
             // Applications list
             // ==========================
-            $selectParts = ['a.id AS application_id', 'a.status', \gc_admin_applications_appColExists($appColumns, 'message') ? 'a.message' : 'NULL AS message', \gc_admin_applications_appColExists($appColumns, 'cancel_reason') ? 'a.cancel_reason' : 'NULL AS cancel_reason', \gc_admin_applications_appColExists($appColumns, 'cancelled_at') ? 'a.cancelled_at' : 'NULL AS cancelled_at', \gc_admin_applications_appColExists($appColumns, 'created_at') ? 'a.created_at' : 'NULL AS created_at', 'a.job_id', 'u.id AS alumni_id', 'u.fullname', 'u.username', 'u.email', 'u.course', 'u.batch_year', 'u.birthdate', 'u.age', 'u.gender', 'u.civil_status', 'u.contact_number', 'u.address', 'u.indigenous_tribe', 'u.special_needs', 'u.employment_status', 'u.job_aligned', 'u.profile_picture', 'u.career_objective', 'u.skills', 'u.work_experience', 'u.trainings', 'u.is_active'];
-            $resumeCandidates = ['resume_file', 'resume', 'resume_path', 'cv', 'cv_file', 'file', 'attachment'];
-            foreach ($resumeCandidates as $col) {
-                if (\gc_admin_applications_appColExists($appColumns, $col)) {
-                    $selectParts[] = "a.`{$col}`";
-                } else {
-                    $selectParts[] = "NULL AS `{$col}`";
-                }
-            }
+            $selectParts = ['a.id AS application_id', 'a.status', 'a.message', 'a.cancel_reason', 'a.cancelled_at', 'a.created_at', 'a.job_id', 'u.id AS alumni_id', 'u.fullname', 'u.username', 'u.email', 'u.course', 'u.batch_year', 'u.birthdate', 'u.age', 'u.gender', 'u.civil_status', 'u.contact_number', 'u.address', 'u.indigenous_tribe', 'u.special_needs', 'u.employment_status', 'u.job_aligned', 'u.profile_picture', 'u.career_objective', 'u.skills', 'u.work_experience', 'u.trainings', 'u.is_active', 'a.resume_file', 'NULL AS resume', 'NULL AS resume_path', 'NULL AS cv', 'NULL AS cv_file', 'NULL AS file', 'NULL AS attachment'];
             $appSql = "\r\n    SELECT \r\n        ".implode(",\n        ", $selectParts)."\r\n    FROM applications a\r\n    JOIN users u ON u.id = a.alumni_id\r\n    WHERE a.job_id=?\r\n    ORDER BY a.id DESC\r\n";
             $astmt = $pdo->prepare($appSql);
             $astmt->execute([$job_id]);
