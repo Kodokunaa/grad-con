@@ -57,6 +57,29 @@ final class WorkflowTest extends TestCase
         Mail::assertQueued(PreservedNotification::class);
     }
 
+    public function test_admin_account_creation_rejects_invalid_and_duplicate_data(): void
+    {
+        $this->actingAs($this->user('admin'));
+
+        $this->post('/admin/create_employer.php', [
+            'fullname' => 'Invalid Employer', 'company' => 'Company', 'email' => 'not-an-email',
+            'username' => 'invalid_employer', 'password' => 'valid-password',
+        ])->assertSessionHasErrors('email');
+        $this->assertDatabaseMissing('users', ['username' => 'invalid_employer']);
+
+        $existing = $this->user('alumni_officer');
+        $this->post('/admin/create_alumni_officer.php', [
+            'fullname' => 'Duplicate Officer', 'email' => $existing->email, 'username' => $existing->username,
+            'password' => 'short', 'confirm_password' => 'short', 'is_active' => 1,
+        ])->assertSessionHasErrors(['email', 'username', 'password']);
+
+        $this->post('/admin/alumni_create.php', [
+            'fullname' => 'Invalid Alumni', 'student_id' => 'invalid-course-user', 'email' => 'alumni@example.test',
+            'course' => 'Unknown Course', 'batch_year' => date('Y'), 'password' => 'valid-password',
+        ])->assertSessionHasErrors('course');
+        $this->assertDatabaseMissing('users', ['username' => 'invalid-course-user']);
+    }
+
     public function test_admin_and_employer_can_post_jobs(): void
     {
         Mail::fake();
