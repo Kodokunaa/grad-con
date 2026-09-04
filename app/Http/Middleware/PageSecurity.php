@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Password;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -34,7 +35,7 @@ final class PageSecurity
         if ($request->isMethod('POST') && $request->user()) {
             foreach (['password', 'new_password'] as $field) {
                 if ($request->filled($field)) {
-                    $request->validate([$field => 'string|min:8|max:1024']);
+                    $request->validate([$field => ['string', 'max:1024', Password::defaults()]]);
                 }
             }
             if ($request->is('alumni/job_offers.php') && ($request->filled('offer_action') || $request->hasAny(['accept', 'decline']))) {

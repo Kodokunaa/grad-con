@@ -146,8 +146,16 @@ final class MigrationTest extends TestCase
     public function test_password_change_verifies_hash_and_stores_another_hash(): void
     {
         $user = $this->user();
+        DB::table('sessions')->insert([
+            'id' => 'another-device-session',
+            'user_id' => $user->id,
+            'payload' => 'expired test session',
+            'last_activity' => time(),
+        ]);
         $this->actingAs($user)->post('/alumni/change_password.php', ['old_password' => 'test-password-123', 'new_password' => 'replacement-password', 'confirm_password' => 'replacement-password'])->assertOk();
         $this->assertTrue(Hash::check('replacement-password', $user->fresh()->password));
+        $this->assertDatabaseMissing('sessions', ['id' => 'another-device-session']);
+        $this->assertDatabaseHas('security_logs', ['user_id' => $user->id, 'action' => 'PASSWORD_CHANGED']);
     }
 
     public function test_admin_can_change_password_from_profile_and_log_in_again(): void

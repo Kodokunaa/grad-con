@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
+use App\Models\User;
+use App\Services\UpdatePassword;
 use App\Support\PageResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -1029,12 +1031,14 @@ final class ProfileController extends PageController
                 } elseif (! Hash::check($old, $user['password'])) {
                     $password_error = 'Old password is incorrect.';
                 } else {
-                    $upd = $pdo->prepare('UPDATE users SET password=? WHERE id=?');
-                    $upd->execute([$new, $id]);
-                    \gc_profile_add_log($pdo, $id, 'PASSWORD_CHANGED', 'Password changed');
-                    $password_msg = 'Password changed successfully!';
-                    $stmt->execute([$id]);
-                    $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+                    $account = User::findOrFail($id);
+                    if (app(UpdatePassword::class)->handle($account, $old, $new, request())) {
+                        $password_msg = 'Password changed successfully!';
+                        $stmt->execute([$id]);
+                        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+                    } else {
+                        $password_error = 'Old password is incorrect.';
+                    }
                 }
             }
             // Load latest logs

@@ -36,6 +36,10 @@ final class AuthController extends Controller
         }
         Auth::login($user);
         $request->session()->regenerate();
+        if (Hash::needsRehash($user->password)) {
+            $user->password = $request->validated('password');
+            $user->save();
+        }
 
         return redirect()->intended($this->destination($user));
     }
@@ -54,7 +58,7 @@ final class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $data = $request->validate(['fullname' => 'required|string|max:150', 'student_id' => 'required|string|max:100|unique:users,username', 'email' => 'required|email|max:150|unique:users,email', 'course' => ['required', Rule::in(config('gradconn.courses'))], 'batch_year' => 'required|integer|min:2000|max:'.date('Y'), 'password' => ['required', 'string', PasswordRule::min(8), 'same:confirm_password']]);
+        $data = $request->validate(['fullname' => 'required|string|max:150', 'student_id' => 'required|string|max:100|unique:users,username', 'email' => 'required|email|max:150|unique:users,email', 'course' => ['required', Rule::in(config('gradconn.courses'))], 'batch_year' => 'required|integer|min:2000|max:'.date('Y'), 'password' => ['required', 'string', PasswordRule::defaults(), 'same:confirm_password']]);
         $user = new User;
         $user->fill($data);
         $user->username = $data['student_id'];
@@ -87,7 +91,7 @@ final class AuthController extends Controller
     public function reset(Request $request)
     {
         $request->merge(['token' => $request->input('token', $request->query('token')), 'email' => $request->input('email', $request->query('email')), 'password_confirmation' => $request->input('confirm_password')]);
-        $data = $request->validate(['token' => 'required|string', 'email' => 'required|email', 'password' => ['required', 'confirmed', PasswordRule::min(8)]]);
+        $data = $request->validate(['token' => 'required|string', 'email' => 'required|email', 'password' => ['required', 'confirmed', PasswordRule::defaults()]]);
         $status = Password::reset($data, function (User $user, string $password) {
             $user->password = $password;
             $user->remember_token = Str::random(60);
