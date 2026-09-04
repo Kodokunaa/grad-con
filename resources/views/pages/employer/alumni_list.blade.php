@@ -1560,7 +1560,7 @@ foreach ($alumni as $a) {
 <div class="modal fade" id="emailMessageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content email-message-modal-content">
-            <form method="POST" action="{{ route('employer.alumni.actions') }}" id="sendSnapshotEmailForm">
+            <form method="POST" action="{{ route('employer.offers.store') }}" id="sendSnapshotEmailForm">
 @csrf
                 <input type="hidden" name="email_alumni_id" id="emailAlumniId" value="">
 
@@ -1736,7 +1736,7 @@ $(function () {
             result_count: resultCount.toString()
         });
 
-        fetch(window.location.href, {
+        fetch('{{ route('employer.alumni.search-log') }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
             body: payload.toString(),

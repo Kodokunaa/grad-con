@@ -3,36 +3,28 @@
 namespace App\Http\Controllers\Employer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LogAlumniSearchRequest;
+use App\Http\Requests\SendJobOfferRequest;
 use App\Mail\JobOfferMail;
 use App\Models\EmployerActivityLog;
 use App\Models\JobOffer;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 final class AlumniDirectoryActionController extends Controller
 {
-    public function __invoke(Request $request)
+    public function search(LogAlumniSearchRequest $request)
     {
-        if ($request->input('log_action') === 'search') {
-            $data = $request->validate([
-                'course_filter' => ['nullable', 'string', 'max:120'], 'batch_filter' => ['nullable', 'string', 'max:20'],
-                'skills_search' => ['nullable', 'string', 'max:255'], 'result_count' => ['required', 'integer', 'min:0'],
-            ]);
-            $log = new EmployerActivityLog;
-            $log->forceFill(['employer_id' => $request->user()->id, 'action' => 'SEARCH_ALUMNI', 'details' => 'Alumni directory search',
-                'course_filter' => $data['course_filter'] ?? '', 'batch_filter' => $data['batch_filter'] ?? '',
-                'skill_search' => $data['skills_search'] ?? '', 'result_count' => $data['result_count']])->save();
+        $data = $request->validated();
+        $log = new EmployerActivityLog;
+        $log->forceFill(['employer_id' => $request->user()->id, 'action' => 'SEARCH_ALUMNI', 'details' => 'Alumni directory search', 'course_filter' => $data['course_filter'] ?? '', 'batch_filter' => $data['batch_filter'] ?? '', 'skill_search' => $data['skills_search'] ?? '', 'result_count' => $data['result_count']])->save();
+        return response()->json(['status' => 'ok']);
+    }
 
-            return response()->json(['status' => 'ok']);
-        }
-
-        $data = $request->validate([
-            'email_alumni_id' => ['required', 'integer', 'exists:users,id'],
-            'email_subject' => ['nullable', 'string', 'max:255'],
-            'email_message' => ['required', 'string', 'max:5000'],
-        ]);
+    public function offer(SendJobOfferRequest $request)
+    {
+        $data = $request->validated();
         $alumni = User::query()->where('role', 'alumni')->where('is_active', 1)->findOrFail($data['email_alumni_id']);
         abort_unless(filter_var($alumni->email, FILTER_VALIDATE_EMAIL), 422, 'The alumni email address is invalid.');
         $offer = new JobOffer;

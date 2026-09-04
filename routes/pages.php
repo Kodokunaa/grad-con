@@ -177,7 +177,8 @@ Route::get('/alumni_officer/events_edit.php', AlumniOfficerEventsEditController:
 Route::post('/alumni_officer/events_edit.php', [UpdateEventController::class, 'legacy'])->middleware('account:alumni_officer');
 Route::get('/alumni_officer/events_list.php', AlumniOfficerEventsListController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_list');
 Route::get('/employer/alumni_list.php', EmployerAlumniListController::class)->middleware('account:employer')->name('employer.alumni_list');
-Route::post('/employer/alumni_list.php', AlumniDirectoryActionController::class)->middleware('account:employer')->name('employer.alumni.actions');
+Route::post('/employer/alumni-searches', [AlumniDirectoryActionController::class, 'search'])->middleware('account:employer')->name('employer.alumni.search-log');
+Route::post('/employer/offers', [AlumniDirectoryActionController::class, 'offer'])->middleware('account:employer')->name('employer.offers.store');
 Route::get('/employer/applications.php', EmployerApplicationsController::class)->middleware('account:employer')->name('employer.applications');
 Route::post('/employer/applications.php', UpdateApplicationStatusController::class)->middleware('account:employer');
 Route::get('/employer/dashboard.php', EmployerDashboardController::class)->middleware('account:employer')->name('employer.dashboard');

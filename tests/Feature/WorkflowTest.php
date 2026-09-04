@@ -434,7 +434,7 @@ final class WorkflowTest extends TestCase
         $employer = $this->user('employer');
         $alumni = $this->user('alumni');
         $this->actingAs($employer)->get('/employer/alumni_list.php')->assertOk();
-        $this->post('/employer/alumni_list.php', ['email_alumni_id' => $alumni->id, 'email_subject' => 'Test offer', 'email_message' => 'A test job offer.'])->assertRedirect();
+        $this->post('/employer/offers', ['email_alumni_id' => $alumni->id, 'email_subject' => 'Test offer', 'email_message' => 'A test job offer.'])->assertRedirect();
         $offer = DB::table('job_offers')->where('employer_id', $employer->id)->where('alumni_id', $alumni->id)->first();
         $this->assertNotNull($offer);
         Mail::assertQueued(JobOfferMail::class);
@@ -473,3 +473,4 @@ final class WorkflowTest extends TestCase
         $this->assertDatabaseHas('employment_history', ['user_id' => $alumni->id, 'company_name' => 'Employment Test']);
     }
 }
+
