@@ -18,7 +18,7 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 | Duplicate helpers | In progress | Consolidated 20 identical role-prefixed HTML escaping helpers into `gc_e()` | Consolidate formatting, alignment, schema, activity-log, social-feed, and email helpers |
 | Configuration and portability | In progress | Laravel root, environment templates, environment-driven timezone, declared PHP extensions, installation checker, MySQL migration path | Complete isolated clean-device install and production queue/mail verification |
 | Redundant files | Complete | Obsolete conversion tools/documentation, route dump, starter tests/views, blank views, empty migration directories, build cache, and temporary migration runtime removed | Reassess generated compatibility files as their owning architecture chapters are completed |
-| Tests | In progress | Authentication, roles, routing, policy, upload, and primary workflow coverage | Remaining mutation, validation, mail-worker, migration-upgrade, browser, and clean-device coverage |
+| Tests | In progress | Authentication, role-route contracts, explicit POST contracts, response headers, record policies, uploads, mail envelopes, and primary workflows | Remaining mutation, Form Request, mail-worker, migration-upgrade, browser, and clean-device coverage |
 | Documentation | In progress | README, audit, route inventory, and this status tracker | Refresh final installation/deployment/backup/troubleshooting instructions after architecture stabilizes |
 
 ## Current mail and queue checkpoint
@@ -125,3 +125,22 @@ This checklist tracks the Laravel cleanup checkpoints. A chapter is marked compl
 - No standalone cleanup item remains in this chapter.
 - `PageContext`, `PageResponse`, `PasswordStatement`, `page-functions.php`, and generated page controllers remain required compatibility code; remove them only through their architecture chapters.
 - Reassess the Vite starter entry points when shared frontend asset extraction is complete.
+
+## Current testing and verification checkpoint
+
+### Done
+
+- Added a route-contract test that requires every role-prefixed route to retain its matching account middleware.
+- Added a contract test that keeps POST routes explicit and inside Laravel's web middleware group.
+- Added response-header regression checks for MIME sniffing, framing, and referrer policy.
+- Added record-level interview and training policy coverage for administrators, owners, participants, and unrelated accounts.
+- Retained existing authentication, password, upload, application, offer, event, training, education, mail-envelope, page-inventory, and role-isolation coverage.
+
+### Still needs fixing
+
+- Add negative and boundary validation tests as each remaining Form Request is introduced.
+- Cover every retained mutation with success, unauthorized, invalid-input, and transaction-failure cases.
+- Test a real queue worker retry/failure cycle with durable attachments.
+- Test migrations against both an empty database and a representative pre-Laravel schema snapshot.
+- Add browser tests for login, logout modal, navigation, uploads, applications, offers, interviews, and mobile layouts.
+- Run the full installation and test process from a clean checkout on Windows and Linux.
