@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Alumni;
 
 use App\Enums\OfferStatus;
 use App\Http\Controllers\Controller;
+use App\Mail\OfferAcceptedMail;
 use App\Models\JobOffer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 
 final class RespondToOfferController extends Controller
 {
@@ -37,16 +39,21 @@ final class RespondToOfferController extends Controller
         });
 
         if ($action === 'accept') {
-            \gc_alumni_job_offers_send_offer_acceptance_notification(
-                \gc_context()->pdo(),
-                $offer->getRawOriginal(),
-                \gc_user(),
-            );
+            $offer->load(['employer', 'alumni']);
+            Mail::to($offer->employer)->queue(new OfferAcceptedMail($offer));
         }
 
         return to_route('alumni.job_offers')->with('status', $action === 'accept'
             ? 'Offer accepted successfully.'
             : 'Offer declined successfully.');
+    }
+
+    public function legacy(Request $request)
+    {
+        $data = $request->validate(['offer_id' => ['required', 'integer', 'exists:job_offers,id'], 'offer_action' => ['required', 'in:accept,decline']]);
+        $offer = JobOffer::findOrFail($data['offer_id']);
+
+        return $this->update($request, $offer->offer_token, $data['offer_action']);
     }
 
     private function offer(string $token): JobOffer

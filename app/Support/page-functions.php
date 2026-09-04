@@ -1,6 +1,5 @@
 <?php
 
-use App\Mail\PageMailer;
 use App\Support\PageResponse;
 
 // Preserved page-specific presentation and domain helpers; uniquely named to avoid collisions.
@@ -232,60 +231,6 @@ function gc_admin_applications_format_date_range($start, $end): string
 // ==========================
 // Optional email sender
 // ==========================
-function gc_admin_applications_sendAdminApplicantEmail(array $application, string $action, string $customMessage): array
-{
-    try {
-        $mail = \gc_make_mailer();
-        $alumni_email = $application['email'] ?? '';
-        $alumni_name = $application['fullname'] ?? 'Applicant';
-        $job_title = $application['job_title'] ?? '';
-        $company_name = $application['company'] ?? '';
-        $sender_name = \gc_context()->session['user']['fullname'] ?? \gc_context()->session['user']['username'] ?? 'Admin';
-        if (empty($alumni_email)) {
-            return ['success' => false, 'message' => 'Applicant email is missing.'];
-        }
-        $mail->addAddress($alumni_email, $alumni_name);
-        $safeAlumniName = \gc_e($alumni_name);
-        $safeJobTitle = \gc_e($job_title);
-        $safeCompanyName = \gc_e($company_name);
-        $safeSenderName = \gc_e($sender_name);
-        $safeCustomMessage = nl2br(\gc_e($customMessage));
-        if ($action === 'accept') {
-            $subject = "Congratulations! You are hired - {$job_title}";
-            $headline = 'Congratulations! 🎉';
-            $statusLine = "Your application for the position of <strong>{$safeJobTitle}</strong> at <strong>{$safeCompanyName}</strong> has been <strong style='color:#16a34a;'>ACCEPTED / HIRED</strong>.";
-            $intro = 'We are happy to inform you that you have been selected.';
-        } elseif ($action === 'interview') {
-            $subject = "Interview Invitation - {$job_title}";
-            $headline = 'Interview Invitation';
-            $statusLine = "Your application for the position of <strong>{$safeJobTitle}</strong> at <strong>{$safeCompanyName}</strong> has moved to the <strong style='color:#2563eb;'>INTERVIEW</strong> stage.";
-            $intro = 'Please read the message below for your interview details.';
-        } else {
-            return ['success' => false, 'message' => 'Invalid email action.'];
-        }
-        $emailBody = "\r\n            <html>\r\n            <head>\r\n                <style>\r\n                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\r\n                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }\r\n                    .header { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 20px; border-radius: 8px; }\r\n                    .content { background: #f9fafb; padding: 20px; margin: 15px 0; border-radius: 8px; }\r\n                    .message-box { background: white; padding: 15px; border-left: 4px solid #f97316; margin: 15px 0; border-radius: 4px; }\r\n                    .footer { font-size: 12px; color: #6b7280; margin-top: 20px; }\r\n                    h1 { margin: 0; }\r\n                    p { margin: 0 0 12px; }\r\n                </style>\r\n            </head>\r\n            <body>\r\n                <div class='container'>\r\n                    <div class='header'>\r\n                        <h1>{$headline}</h1>\r\n                    </div>\r\n                    <div class='content'>\r\n                        <p>Dear <strong>{$safeAlumniName}</strong>,</p>\r\n                        <p>{$statusLine}</p>\r\n                        <p>{$intro}</p>\r\n\r\n                        <div class='message-box'>\r\n                            <p><strong>Message from {$safeSenderName}:</strong></p>\r\n                            <p>{$safeCustomMessage}</p>\r\n                        </div>\r\n\r\n                        <p>Best regards,<br><strong>{$safeSenderName}</strong><br>{$safeCompanyName}</p>\r\n                    </div>\r\n                    <div class='footer'>\r\n                        <p>This is an automated message from GradConn. Please do not reply to this email.</p>\r\n                    </div>\r\n                </div>\r\n            </body>\r\n            </html>\r\n        ";
-        $plainText = '';
-        if ($action === 'accept') {
-            $plainText = "Congratulations! You are hired.\n\n";
-        } elseif ($action === 'interview') {
-            $plainText = "You are invited for an interview.\n\n";
-        }
-        $plainText .= "Dear {$alumni_name},\n\n"."Position: {$job_title}\n"."Company: {$company_name}\n\n"."Message from {$sender_name}:\n{$customMessage}\n\n".'Thank you.';
-        $mail->Subject = $subject;
-        $mail->Body = $emailBody;
-        $mail->AltBody = $plainText;
-        $mail->send();
-
-        return ['success' => true, 'message' => 'Email sent successfully.'];
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-        error_log('Admin applicant email error: '.\gc_public_error($e));
-
-        return ['success' => false, 'message' => \gc_public_error($e)];
-    }
-}
 
 function gc_admin_events_list_short_text($text, $limit = 320): string
 {
@@ -507,33 +452,6 @@ function gc_admin_events_list_get_comments(PDO $pdo, string $postType, int $post
 function gc_admin_events_list_comment_total(array $commentData): int
 {
     return (int) ($commentData['total'] ?? count($commentData));
-}
-
-function gc_admin_interview_sendInterviewEmail(array $application, string $date, string $time, string $location, string $message): array
-{
-    try {
-
-        $mail = \gc_make_mailer();
-        $alumni_email = $application['email'];
-        $alumni_name = $application['fullname'];
-        $job_title = $application['job_title'];
-        $company = ! empty($application['employer_company']) ? $application['employer_company'] : $application['company'];
-        $formattedDate = date('F j, Y', strtotime($date));
-        $formattedTime = date('h:i A', strtotime($time));
-        $mail->addAddress($alumni_email, $alumni_name);
-        $mail->Subject = 'Interview Schedule - '.$job_title;
-        $mail->Body = "\r\n        <html>\r\n        <body style='font-family: Arial, sans-serif; background:#f8fafc; padding:20px;'>\r\n            <div style='max-width:600px; margin:auto; background:white; border-radius:12px; padding:25px; border:1px solid #e5e7eb;'>\r\n                <h2 style='color:#f97316;'>Interview Invitation</h2>\r\n\r\n                <p>Dear <strong>".\gc_e($alumni_name)."</strong>,</p>\r\n\r\n                <p>You are invited for an interview for the position of \r\n                <strong>".\gc_e($job_title).'</strong> at <strong>'.\gc_e($company)."</strong>.</p>\r\n\r\n                <div style='background:#fff7ed; padding:15px; border-radius:10px; margin:20px 0;'>\r\n                    <p><strong>Date:</strong> ".\gc_e($formattedDate)."</p>\r\n                    <p><strong>Time:</strong> ".\gc_e($formattedTime)."</p>\r\n                    <p><strong>Location / Meeting Link:</strong> ".\gc_e($location)."</p>\r\n                </div>\r\n\r\n                <p><strong>Message:</strong></p>\r\n                <p>".nl2br(\gc_e($message))."</p>\r\n\r\n                <p>Thank you and good luck.</p>\r\n\r\n                <p style='margin-top:25px; color:#6b7280; font-size:12px;'>\r\n                    This is an automated email from GradConn.\r\n                </p>\r\n            </div>\r\n        </body>\r\n        </html>";
-        $mail->AltBody = "Dear {$alumni_name},\n\n"."You are invited for an interview for the position of {$job_title}.\n\n"."Date: {$formattedDate}\n"."Time: {$formattedTime}\n"."Location: {$location}\n\n"."Message:\n{$message}\n\n".'Thank you.';
-        $mail->send();
-
-        return ['success' => true, 'message' => 'Interview email sent successfully.'];
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return ['success' => false, 'message' => \gc_public_error($e)];
-    }
 }
 
 function gc_admin_offers_history_format_activity_date(string $value): string
@@ -1041,33 +959,6 @@ function gc_alumni_feed_render_comments_html(array $comments, int $currentUserId
 }
 
 // Helper function to send acceptance notification
-function gc_alumni_job_offers_send_offer_acceptance_notification($pdo, $offer, $alumniUser)
-{
-    try {
-
-        $employerStmt = $pdo->prepare('SELECT email, fullname FROM users WHERE id = ? LIMIT 1');
-        $employerStmt->execute([$offer['employer_id']]);
-        $employer = $employerStmt->fetch(PDO::FETCH_ASSOC);
-        if (! $employer || empty($employer['email'])) {
-            return;
-        }
-        $mail = new PageMailer(true);
-
-        $mail->setFrom((string) \config('mail.from.address'), 'Job Portal Admin');
-        $mail->addReplyTo((string) \config('mail.from.address'), 'Job Portal Admin');
-        $mail->addAddress($employer['email'], $employer['fullname'] ?? 'Employer');
-        $alumniName = htmlspecialchars($alumniUser['fullname'] ?? 'Alumni');
-        $offerLink = \url('').'/employer/job_offers.php';
-        $mail->Subject = 'Job Offer Acceptance - '.$alumniName;
-        $mail->Body = "\r\n            <html>\r\n            <head>\r\n                <style>\r\n                    body { font-family: Arial, sans-serif; color: #333; }\r\n                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }\r\n                    .header { background: #4CAF50; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }\r\n                    .content { background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }\r\n                    .details { background: white; padding: 15px; margin: 15px 0; border-left: 4px solid #4CAF50; }\r\n                    .button { display: inline-block; background: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 15px; }\r\n                </style>\r\n            </head>\r\n            <body>\r\n                <div class='container'>\r\n                    <div class='header'>\r\n                        <h2>✓ Job Offer Accepted!</h2>\r\n                    </div>\r\n                    <div class='content'>\r\n                        <p>Great news! <strong>{$alumniName}</strong> has accepted your job offer.</p>\r\n                        \r\n                        <div class='details'>\r\n                            <p><strong>Alumni Name:</strong> {$alumniName}</p>\r\n                            <p><strong>Email:</strong> ".htmlspecialchars($alumniUser['email'] ?? '')."</p>\r\n                            <p><strong>Accepted On:</strong> ".date('F d, Y H:i A')."</p>\r\n                        </div>\r\n\r\n                        <p>You can now proceed to schedule an interview with this applicant. Log in to your employer dashboard to manage interviews and next steps.</p>\r\n\r\n                        <a href='{$offerLink}' class='button'>View Job Offers</a>\r\n                    </div>\r\n                </div>\r\n            </body>\r\n            </html>\r\n        ";
-        $mail->send();
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-        // Silently fail - acceptance is already recorded
-    }
-}
 
 function gc_alumni_my_applications_normalize_status($status)
 {
@@ -1592,49 +1483,6 @@ function gc_employer_alumni_list_summarize_job_alignment(string $course, array $
  * Returns an inline base64 <img> tag for the profile picture, or a fallback initials avatar.
  * Used inside emails so the image is embedded and not dependent on a URL.
  */
-function gc_employer_alumni_list_build_job_offer_email_html(string $alumniName, string $employerName, string $subject, string $message, string $acceptLink, string $declineLink): string
-{
-    $safeAlumniName = \gc_e($alumniName ?: 'Alumni');
-    $safeEmployerName = \gc_e($employerName ?: 'Employer');
-    $safeSubject = \gc_e($subject ?: 'Job Offer');
-    $safeMessage = nl2br(\gc_e($message));
-
-    return '
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"></head>
-<body style="margin:0; padding:0; background:#f4f6f8; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f6f8; padding:30px 0;">
-<tr><td align="center">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:680px; background:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
-<tr><td style="background:linear-gradient(135deg,#10b981 0%,#059669 100%); padding:24px 32px;">
-<div style="font-size:13px; letter-spacing:1px; text-transform:uppercase; color:#d1fae5; font-weight:700; margin-bottom:8px;">Job Offer</div>
-<div style="font-size:26px; line-height:1.3; color:#ffffff; font-weight:800;">'.$safeSubject.'</div>
-</td></tr>
-<tr><td style="padding:30px 32px 12px 32px;">
-<div style="font-size:15px; line-height:1.8; color:#374151;">Dear <strong>'.$safeAlumniName.'</strong>,</div>
-</td></tr>
-<tr><td style="padding:0 32px 20px 32px;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px;">
-<tr><td style="padding:20px 22px;">
-<div style="font-size:13px; font-weight:700; text-transform:uppercase; color:#166534; margin-bottom:10px;">Job Offer Details</div>
-<div style="font-size:15px; line-height:1.8; color:#374151;">'.$safeMessage.'</div>
-</td></tr></table>
-</td></tr>
-<tr><td style="padding:22px 32px;">
-<div style="font-size:14px; color:#374151; margin-bottom:16px;">Please login to your account to see the job offer.</div>
-</td></tr>
-<tr><td style="padding:8px 32px 26px 32px;">
-<div style="font-size:15px; line-height:1.8; color:#374151;">Best regards,<br><strong>'.$safeEmployerName.'</strong></div>
-</td></tr>
-<tr><td style="padding:22px 32px; background:#f9fafb; border-top:1px solid #e5e7eb;">
-<div style="font-size:12px; line-height:1.7; color:#6b7280;">
-This email contains a job offer sent through the GradConn Job Portal. The offer will expire in 30 days.
-</div>
-</td></tr>
-</table></td></tr></table></body></html>';
-}
-
 function gc_employer_applications_normalize_status($status): string
 {
     $status = strtolower(trim((string) $status));
@@ -1680,55 +1528,7 @@ function gc_employer_applications_format_date_range($start, $end): string
 
     return 'N/A';
 }
-function gc_employer_applications_sendApplicantEmail(array $application, string $action, string $customMessage): array
-{
-    try {
 
-        $mail = \gc_make_mailer();
-        $alumni_email = $application['email'] ?? '';
-        $alumni_name = $application['fullname'] ?? 'Applicant';
-        $job_title = $application['title'] ?? '';
-        $company_name = ! empty($application['employer_company']) ? $application['employer_company'] : $application['company'] ?? '';
-        $employer_name = \gc_context()->session['user']['fullname'] ?? \gc_context()->session['user']['username'] ?? 'Employer';
-        if (empty($alumni_email)) {
-            return ['success' => false, 'message' => 'Applicant email is missing.'];
-        }
-        $mail->addAddress($alumni_email, $alumni_name);
-        $safeAlumniName = \gc_e($alumni_name);
-        $safeJobTitle = \gc_e($job_title);
-        $safeCompanyName = \gc_e($company_name);
-        $safeEmployerName = \gc_e($employer_name);
-        $safeCustomMessage = nl2br(\gc_e($customMessage));
-        if ($action === 'accept') {
-            $subject = "Congratulations! You are hired - {$job_title}";
-            $headline = 'Congratulations! 🎉';
-            $statusLine = "Your application for the position of <strong>{$safeJobTitle}</strong> at <strong>{$safeCompanyName}</strong> has been <strong style='color:#16a34a;'>ACCEPTED / HIRED</strong>.";
-            $intro = 'We are happy to inform you that you have been selected.';
-        } elseif ($action === 'interview') {
-            $subject = "Interview Invitation - {$job_title}";
-            $headline = 'Interview Invitation';
-            $statusLine = "You have been shortlisted for an interview for the position of <strong>{$safeJobTitle}</strong> at <strong>{$safeCompanyName}</strong>.";
-            $intro = 'Please see the message below for interview details and next steps.';
-        } else {
-            return ['success' => false, 'message' => 'Invalid email action.'];
-        }
-        $emailBody = "\r\n            <html>\r\n            <head>\r\n                <style>\r\n                    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\r\n                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }\r\n                    .header { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 20px; border-radius: 8px; }\r\n                    .content { background: #f9fafb; padding: 20px; margin: 15px 0; border-radius: 8px; }\r\n                    .message-box { background: white; padding: 15px; border-left: 4px solid #f97316; margin: 15px 0; border-radius: 4px; }\r\n                    .footer { font-size: 12px; color: #6b7280; margin-top: 20px; }\r\n                    h1 { margin: 0; }\r\n                    p { margin: 0 0 12px; }\r\n                </style>\r\n            </head>\r\n            <body>\r\n                <div class='container'>\r\n                    <div class='header'>\r\n                        <h1>{$headline}</h1>\r\n                    </div>\r\n                    <div class='content'>\r\n                        <p>Dear <strong>{$safeAlumniName}</strong>,</p>\r\n                        <p>{$statusLine}</p>\r\n                        <p>{$intro}</p>\r\n\r\n                        <div class='message-box'>\r\n                            <p><strong>Message from {$safeEmployerName}:</strong></p>\r\n                            <p>{$safeCustomMessage}</p>\r\n                        </div>\r\n\r\n                        <p>Best regards,<br><strong>{$safeEmployerName}</strong><br>{$safeCompanyName}</p>\r\n                    </div>\r\n                    <div class='footer'>\r\n                        <p>This is an automated message from GradConn. Please do not reply to this email.</p>\r\n                    </div>\r\n                </div>\r\n            </body>\r\n            </html>\r\n        ";
-        $plainText = "Congratulations! You are hired.\n\n"."Dear {$alumni_name},\n\n"."Position: {$job_title}\n"."Company: {$company_name}\n\n"."Message from {$employer_name}:\n{$customMessage}\n\n".'Thank you.';
-        $mail->Subject = $subject;
-        $mail->Body = $emailBody;
-        $mail->AltBody = $plainText;
-        $mail->send();
-
-        return ['success' => true, 'message' => 'Email sent successfully.'];
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-        error_log('Applicant email error: '.\gc_public_error($e));
-
-        return ['success' => false, 'message' => \gc_public_error($e)];
-    }
-}
 function gc_employer_dashboard_initials($name): string
 {
     $name = trim((string) $name);
@@ -1772,32 +1572,6 @@ function gc_employer_dashboard_statusBadge($status)
     return '<span class="status-badge status-pending">Pending</span>';
 }
 /* Send email function */
-function gc_employer_interview_sendInterviewEmail(array $application, string $date, string $time, string $location, string $message): array
-{
-    try {
-
-        $mail = \gc_make_mailer();
-        $alumni_email = $application['email'];
-        $alumni_name = $application['fullname'];
-        $job_title = $application['job_title'];
-        $company = ! empty($application['employer_company']) ? $application['employer_company'] : $application['company'];
-        $formattedDate = date('F j, Y', strtotime($date));
-        $formattedTime = date('h:i A', strtotime($time));
-        $mail->addAddress($alumni_email, $alumni_name);
-        $mail->Subject = 'Interview Schedule - '.$job_title;
-        $mail->Body = "\r\n            <html>\r\n            <body style='font-family: Arial, sans-serif; background:#f8fafc; padding:20px;'>\r\n                <div style='max-width:600px; margin:auto; background:white; border-radius:12px; padding:25px; border:1px solid #e5e7eb;'>\r\n                    <h2 style='color:#f97316;'>Interview Invitation</h2>\r\n\r\n                    <p>Dear <strong>".\gc_e($alumni_name)."</strong>,</p>\r\n\r\n                    <p>You are invited for an interview for the position of \r\n                    <strong>".\gc_e($job_title).'</strong> at <strong>'.\gc_e($company)."</strong>.</p>\r\n\r\n                    <div style='background:#fff7ed; padding:15px; border-radius:10px; margin:20px 0;'>\r\n                        <p><strong>Date:</strong> ".\gc_e($formattedDate)."</p>\r\n                        <p><strong>Time:</strong> ".\gc_e($formattedTime)."</p>\r\n                        <p><strong>Location:</strong> ".\gc_e($location)."</p>\r\n                    </div>\r\n\r\n                    <p><strong>Message:</strong></p>\r\n                    <p>".nl2br(\gc_e($message))."</p>\r\n\r\n                    <p>Thank you and good luck.</p>\r\n\r\n                    <p style='margin-top:25px; color:#6b7280; font-size:12px;'>\r\n                        This is an automated email from GradConn.\r\n                    </p>\r\n                </div>\r\n            </body>\r\n            </html>\r\n        ";
-        $mail->AltBody = "Dear {$alumni_name},\n\n"."You are invited for an interview for the position of {$job_title}.\n\n"."Date: {$formattedDate}\n"."Time: {$formattedTime}\n"."Location: {$location}\n\n"."Message:\n{$message}\n\n".'Thank you.';
-        $mail->send();
-
-        return ['success' => true, 'message' => 'Interview email sent successfully.'];
-    } catch (Throwable $e) {
-        if ($e instanceof PageResponse) {
-            throw $e;
-        }
-
-        return ['success' => false, 'message' => \gc_public_error($e)];
-    }
-}
 
 /**
  * Safely check if a table exists.

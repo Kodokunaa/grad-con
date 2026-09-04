@@ -1,6 +1,5 @@
 <?php
 
-use App\Mail\PageMailer;
 use App\Support\PageContext;
 use App\Support\PageResponse;
 use Illuminate\Http\UploadedFile;
@@ -59,10 +58,7 @@ function gc_public_error(Throwable $exception, string $fallback = 'An unexpected
 
     return config('app.debug') ? $exception->getMessage() : $fallback;
 }
-function gc_make_mailer(): PageMailer
-{
-    return new PageMailer;
-}
+
 function gc_partial(string $name, array $data = []): string
 {
     unset($data['__env'], $data['app']);
