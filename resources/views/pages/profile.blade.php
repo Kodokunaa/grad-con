@@ -718,8 +718,9 @@ echo htmlspecialchars($role);
 if ($role === 'alumni') {
     ?>
             <li class="nav-item">
-                <form method="POST" class="notification-toggle-form">
+                <form method="POST" action="{{ route('profile.notifications.update') }}" class="notification-toggle-form">
 @csrf
+@method('PATCH')
                     <label class="notification-toggle-label" for="receive_update_notifications">Notifications</label>
                     <input
                         class="notification-toggle"
@@ -884,11 +885,12 @@ if ($profile_error) {
 }
         ?>
 
-                        <form id="certificateForm" method="POST" enctype="multipart/form-data" style="display:none;">
+                        <form id="certificateForm" method="POST" action="{{ route('profile.certificates.store') }}" enctype="multipart/form-data" style="display:none;">
 @csrf</form>
 
-                        <form method="POST" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
 @csrf
+@method('PUT')
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Fullname</label>
@@ -1358,8 +1360,9 @@ if ($password_error) {
 
                         <div class="section-title">Change Password</div>
 
-                        <form method="POST">
+                        <form method="POST" action="{{ route('profile.password.update') }}">
 @csrf
+@method('PUT')
                             <div class="mb-3">
                                 <label class="form-label">Old Password</label>
                                 <input class="form-control-custom" type="password" name="old_password" required>
