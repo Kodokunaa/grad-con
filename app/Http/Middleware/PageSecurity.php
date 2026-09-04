@@ -19,11 +19,6 @@ final class PageSecurity
         $context->post = $request->request->all();
         $context->query = $request->query();
         $request->server->set('PHP_SELF', $request->getBaseUrl().$request->getPathInfo());
-        $mutationKeys = ['delete', 'restore', 'delete_certificate', 'accept', 'decline'];
-        $mutatingLink = array_intersect($mutationKeys, array_keys($request->query()));
-        if ($request->isMethod('GET') && ($mutatingLink || $request->is('admin/events_delete.php', 'admin/jobs_notify.php'))) {
-            return response()->view('confirm-action', ['actionUrl' => $request->fullUrl()]);
-        }
         // Validate every uploaded file before the retained handlers inspect it.
         foreach (Arr::flatten($request->allFiles()) as $file) {
             abort_unless($file->isValid(), 422, 'Upload failed.');

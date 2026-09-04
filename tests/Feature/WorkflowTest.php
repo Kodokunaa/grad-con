@@ -363,6 +363,14 @@ final class WorkflowTest extends TestCase
             ->patch(route('events.restore', $eventId))
             ->assertRedirect(route('alumni_officer.archive'));
         $this->assertDatabaseHas('events', ['id' => $eventId, 'is_archived' => 0]);
+
+        $this->actingAs($otherOfficer)
+            ->patch(route('events.archive', $eventId))
+            ->assertForbidden();
+        $this->actingAs($officer)
+            ->patch(route('events.archive', $eventId))
+            ->assertRedirect(route('alumni_officer.events_list'));
+        $this->assertDatabaseHas('events', ['id' => $eventId, 'is_archived' => 1]);
     }
 
     public function test_alumni_employment_deletion_updates_status_and_checks_ownership(): void
@@ -413,6 +421,29 @@ final class WorkflowTest extends TestCase
         DB::table('job_offers')->where('id', $offer->id)->update(['expires_at' => date('Y-m-d H:i:s', strtotime('-1 day'))]);
         $this->actingAs($alumni)->post('/alumni/job_offers.php', ['offer_id' => $offer->id, 'offer_action' => 'accept'])->assertStatus(422);
         $this->assertDatabaseHas('job_offers', ['id' => $offer->id, 'status' => 'sent']);
+    }
+
+    public function test_offer_email_links_confirm_before_recording_a_response(): void
+    {
+        Mail::fake();
+        $employer = $this->user('employer');
+        $alumni = $this->user('alumni');
+        $token = bin2hex(random_bytes(24));
+        DB::table('job_offers')->insert([
+            'employer_id' => $employer->id, 'alumni_id' => $alumni->id,
+            'offer_token' => $token, 'subject' => 'Test offer', 'message' => 'Test message',
+            'status' => 'sent', 'expires_at' => now()->addDay(),
+        ]);
+
+        $this->actingAs($alumni)
+            ->get(route('offers.response.confirm', ['token' => $token, 'action' => 'decline']))
+            ->assertOk()
+            ->assertSee('Confirm decline');
+        $this->assertDatabaseHas('job_offers', ['offer_token' => $token, 'status' => 'sent']);
+
+        $this->patch(route('offers.response.update', ['token' => $token, 'action' => 'decline']))
+            ->assertRedirect(route('alumni.job_offers'));
+        $this->assertDatabaseHas('job_offers', ['offer_token' => $token, 'status' => 'declined']);
     }
 
     public function test_employment_history_uses_laravel_transactions(): void

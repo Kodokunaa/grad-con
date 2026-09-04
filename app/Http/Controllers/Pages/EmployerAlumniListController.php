@@ -140,9 +140,8 @@ final class EmployerAlumniListController extends PageController
                             // Fix 2: Re-fetch employer id from session to ensure it's not null
                             $employerId = (int) (\gc_context()->session['user']['id'] ?? 0);
                             // Build action links
-                            $baseUrl = \url('') ?: '';
-                            $acceptLink = $baseUrl.'/alumni/job_offers.php?accept='.urlencode($offerToken);
-                            $declineLink = $baseUrl.'/alumni/job_offers.php?decline='.urlencode($offerToken);
+                            $acceptLink = route('offers.response.confirm', ['token' => $offerToken, 'action' => 'accept']);
+                            $declineLink = route('offers.response.confirm', ['token' => $offerToken, 'action' => 'decline']);
                             $selectedJobs = $employmentByUser[$selectedAlumniId] ?? [];
                             $selectedEducations = $educationByUser[$selectedAlumniId] ?? [];
                             $selectedDegrees = $degreesByUser[$selectedAlumniId] ?? [];

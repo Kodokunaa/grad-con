@@ -255,7 +255,7 @@ final class MigrationTest extends TestCase
     {
         $admin = $this->user('admin');
         $id = DB::table('events')->insertGetId(['title' => 'Do not delete on GET', 'content' => 'Test', 'posted_by' => $admin->id]);
-        $this->actingAs($admin)->get('/admin/events_delete.php?id='.$id)->assertOk()->assertSee('Confirm this action');
+        $this->actingAs($admin)->get('/admin/events_delete.php?id='.$id)->assertRedirect(route('admin.events_list'));
         $this->assertTrue(DB::table('events')->where('id', $id)->exists());
     }
 

@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\DestroyJobController;
 use App\Http\Controllers\Admin\DestroyTrainingController;
 use App\Http\Controllers\Admin\SendApplicantResumeController;
 use App\Http\Controllers\Alumni\DestroyEmploymentController;
+use App\Http\Controllers\Alumni\RespondToOfferController;
+use App\Http\Controllers\Event\ArchiveEventController;
 use App\Http\Controllers\Event\RestoreEventController;
 use App\Http\Controllers\Pages\AdminAdminArchiveController;
 use App\Http\Controllers\Pages\AdminAlumniCreateController;
@@ -80,7 +82,7 @@ Route::post('/admin/create_employer.php', AdminCreateEmployerController::class)-
 Route::get('/admin/dashboard.php', AdminDashboardController::class)->middleware('account:admin')->name('admin.dashboard');
 Route::get('/admin/events_create.php', AdminEventsCreateController::class)->middleware('account:admin')->name('admin.events_create');
 Route::post('/admin/events_create.php', AdminEventsCreateController::class)->middleware('account:admin');
-Route::get('/admin/events_delete.php', AdminEventsDeleteController::class)->middleware('account:admin')->name('admin.events_delete');
+Route::get('/admin/events_delete.php', fn () => to_route('admin.events_list'))->middleware('account:admin')->name('admin.events_delete');
 Route::post('/admin/events_delete.php', AdminEventsDeleteController::class)->middleware('account:admin');
 Route::get('/admin/events_edit.php', AdminEventsEditController::class)->middleware('account:admin')->name('admin.events_edit');
 Route::post('/admin/events_edit.php', AdminEventsEditController::class)->middleware('account:admin');
@@ -131,6 +133,8 @@ Route::get('/alumni/job_details.php', AlumniJobDetailsController::class)->middle
 Route::post('/alumni/job_details.php', AlumniJobDetailsController::class)->middleware('account:alumni');
 Route::get('/alumni/job_offers.php', AlumniJobOffersController::class)->middleware('account:alumni')->name('alumni.job_offers');
 Route::post('/alumni/job_offers.php', AlumniJobOffersController::class)->middleware('account:alumni');
+Route::get('/alumni/offers/{token}/{action}', [RespondToOfferController::class, 'confirm'])->whereIn('action', ['accept', 'decline'])->middleware('account:alumni')->name('offers.response.confirm');
+Route::patch('/alumni/offers/{token}/{action}', [RespondToOfferController::class, 'update'])->whereIn('action', ['accept', 'decline'])->middleware('account:alumni')->name('offers.response.update');
 Route::get('/alumni/jobs.php', AlumniJobsController::class)->middleware('account:alumni')->name('alumni.jobs');
 Route::get('/alumni/my_applications.php', AlumniMyApplicationsController::class)->middleware('account:alumni')->name('alumni.my_applications');
 Route::post('/alumni/my_applications.php', AlumniMyApplicationsController::class)->middleware('account:alumni');
@@ -162,4 +166,5 @@ Route::get('/profile.php', ProfileController::class)->middleware('account')->nam
 Route::post('/profile.php', ProfileController::class)->middleware('account');
 Route::delete('/profile/certificates/{certificate}', DestroyCertificateController::class)->middleware('account')->name('profile.certificates.destroy');
 Route::patch('/events/{event}/restore', RestoreEventController::class)->middleware('account')->name('events.restore');
+Route::patch('/events/{event}/archive', ArchiveEventController::class)->middleware('account')->name('events.archive');
 Route::get('/archive.php', ArchiveController::class)->middleware('account:alumni_officer')->name('archive');

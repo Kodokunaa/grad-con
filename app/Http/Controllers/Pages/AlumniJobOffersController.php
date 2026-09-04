@@ -21,42 +21,12 @@ final class AlumniJobOffersController extends PageController
             $id = (int) \gc_context()->session['user']['id'];
             $error = '';
             $msg = '';
-            // Handle accept/decline from email links
+            // Preserve old email links as redirects to the explicit confirmation route.
             $emailToken = trim((string) (\gc_context()->query['accept'] ?? \gc_context()->query['decline'] ?? ''));
             if ($emailToken !== '') {
                 $action = isset(\gc_context()->query['accept']) ? 'accept' : 'decline';
-                try {
-                    // Get the offer by token
-                    $offerStmt = $pdo->prepare('SELECT * FROM job_offers WHERE offer_token = ? LIMIT 1');
-                    $offerStmt->execute([$emailToken]);
-                    $offer = $offerStmt->fetch(\PDO::FETCH_ASSOC);
-                    if (! $offer) {
-                        $error = 'Offer not found. It may have expired.';
-                    } elseif ($offer['alumni_id'] !== $id) {
-                        $error = 'This offer was not sent to you.';
-                    } elseif ($offer['status'] !== 'sent') {
-                        $error = 'This offer has already been '.($offer['status'] === 'accepted' ? 'accepted' : 'declined').'.';
-                    } else {
-                        $newStatus = $action === 'accept' ? 'accepted' : 'declined';
-                        $timestampCol = $action === 'accept' ? 'accepted_at' : 'declined_at';
-                        $updateStmt = $pdo->prepare("UPDATE job_offers SET status = ?, {$timestampCol} = NOW() WHERE id = ?");
-                        $updateStmt->execute([$newStatus, $offer['id']]);
-                        if ($action === 'accept') {
-                            $msg = '✓ Offer accepted successfully! Please wait for the employer to set an interview schedule.';
-                        } else {
-                            $msg = 'Offer declined successfully!';
-                        }
-                        // Send notification email to employer if accepted
-                        if ($action === 'accept') {
-                            \gc_alumni_job_offers_send_offer_acceptance_notification($pdo, $offer, \gc_context()->session['user']);
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    if ($e instanceof PageResponse) {
-                        throw $e;
-                    }
-                    $error = 'An error occurred: '.\gc_public_error($e);
-                }
+                \gc_header('Location: '.route('offers.response.confirm', ['token' => $emailToken, 'action' => $action]));
+                \gc_finish();
             }
             // Handle accept/decline action from form submission
             if (\request()->server->all()['REQUEST_METHOD'] === 'POST' && isset(\gc_context()->post['offer_action'])) {

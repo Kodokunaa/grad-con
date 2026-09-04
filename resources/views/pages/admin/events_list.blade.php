@@ -2,7 +2,7 @@
 use App\Support\PageResponse;
 
 \gc_require_role('admin');
-$msg = '';
+$msg = (string) session('status', '');
 $error = '';
 $currentUserId = \gc_admin_events_list_get_current_user_id();
 $currentFullname = \gc_context()->session['user']['fullname'] ?? \gc_context()->session['fullname'] ?? 'Admin';
@@ -135,28 +135,6 @@ if (\request()->server->all()['REQUEST_METHOD'] === 'POST' && isset(\gc_context(
                 throw $e;
             }
             $error = 'Delete comment error: '.$e->getMessage();
-        }
-    }
-}
-if (isset(\gc_context()->query['delete'])) {
-    $delete_id = (int) (\gc_context()->query['delete'] ?? 0);
-    if ($delete_id > 0) {
-        try {
-            $find = $pdo->prepare('SELECT * FROM events WHERE id = ? LIMIT 1');
-            $find->execute([$delete_id]);
-            $event = $find->fetch(PDO::FETCH_ASSOC);
-            if ($event) {
-                $archive = $pdo->prepare('UPDATE events SET is_archived = 1, archived_at = NOW() WHERE id = ?');
-                $archive->execute([$delete_id]);
-                $msg = 'Event archived successfully.';
-            } else {
-                $error = 'Event not found.';
-            }
-        } catch (Throwable $e) {
-            if ($e instanceof PageResponse) {
-                throw $e;
-            }
-            $error = 'Archive error: '.$e->getMessage();
         }
     }
 }
@@ -1326,11 +1304,11 @@ if (! $events) {
         ?>/admin/events_edit.php?id=<?php
         echo $eventId;
         ?>" class="btn-action btn-icon-action btn-edit" title="Edit event" aria-label="Edit event">✏️<span class="action-label">Edit</span></a>
-                            <a href="<?php
-        echo \url('');
-        ?>/admin/events_list.php?delete=<?php
-        echo $eventId;
-        ?>" class="btn-action btn-icon-action btn-delete" title="Archive event" aria-label="Archive event" onclick="return confirm('Archive this event post? It will be removed from the active event list.');">🗄<span class="action-label">Archive</span></a>
+                            <form method="POST" action="{{ route('events.archive', $eventId) }}" onsubmit="return confirm('Archive this event post? It will be removed from the active event list.');">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn-action btn-icon-action btn-delete" title="Archive event" aria-label="Archive event">🗄<span class="action-label">Archive</span></button>
+                            </form>
                         </div>
                     </div>
 

@@ -14,7 +14,7 @@ final class AlumniOfficerEventsListController extends PageController
             $pdo = gc_context()->pdo();
 
             \gc_require_role('alumni_officer');
-            $msg = '';
+            $msg = (string) session('status', '');
             $error = '';
             $currentUserId = \gc_alumni_officer_events_list_get_current_user_id();
             $currentFullname = \gc_context()->session['user']['fullname'] ?? \gc_context()->session['fullname'] ?? 'Alumni Officer';
@@ -177,22 +177,6 @@ final class AlumniOfficerEventsListController extends PageController
                             throw $e;
                         }
                         $error = 'Delete comment error: '.\gc_public_error($e);
-                    }
-                }
-            }
-            // Archive event instead of permanently deleting it
-            if (isset(\gc_context()->query['delete'])) {
-                $delete_id = (int) (\gc_context()->query['delete'] ?? 0);
-                if ($delete_id > 0) {
-                    $find = $pdo->prepare('SELECT id FROM events WHERE id = ? LIMIT 1');
-                    $find->execute([$delete_id]);
-                    $event = $find->fetch(\PDO::FETCH_ASSOC);
-                    if ($event) {
-                        $archiveStmt = $pdo->prepare('UPDATE events SET is_archived = 1, archived_at = NOW() WHERE id = ?');
-                        $archiveStmt->execute([$delete_id]);
-                        $msg = 'Event archived successfully.';
-                    } else {
-                        $error = 'Event not found.';
                     }
                 }
             }
