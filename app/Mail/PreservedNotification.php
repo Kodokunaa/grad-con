@@ -13,7 +13,7 @@ final class PreservedNotification extends Mailable implements ShouldQueue
 
     public int $tries = 3;
 
-    public function __construct(public string $heading, public string $markup, public array $files = [], public array $replies = [])
+    public function __construct(public string $heading, public string $markup, public string $plainText = '', public array $files = [], public array $replies = [], public ?array $sender = null)
     {
         $this->afterCommit();
     }
@@ -21,6 +21,12 @@ final class PreservedNotification extends Mailable implements ShouldQueue
     public function build(): static
     {
         $this->subject($this->heading)->html($this->markup);
+        if ($this->plainText !== '') {
+            $this->text('mail.plain', ['content' => $this->plainText]);
+        }
+        if ($this->sender) {
+            $this->from($this->sender[0], $this->sender[1]);
+        }
         foreach ($this->files as [$path,$name]) {
             $this->attach($path, $name !== '' ? ['as' => $name] : []);
         }

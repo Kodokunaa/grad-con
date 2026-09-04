@@ -26,9 +26,13 @@ final class PageMailer
 
     private array $recipients = [];
 
+    private array $blindCopies = [];
+
     private array $attachments = [];
 
     private array $replies = [];
+
+    private ?array $sender = null;
 
     public function __construct(...$args) {}
 
@@ -36,7 +40,11 @@ final class PageMailer
 
     public function isHTML(bool $html = true): void {}
 
-    public function setFrom(string $address, string $name = '', ...$args): void {}
+    public function setFrom(string $address, string $name = '', ...$args): void
+    {
+        validator(['email' => $address], ['email' => 'required|email'])->validate();
+        $this->sender = [$address, $name];
+    }
 
     public function addAddress(string $email, string $name = ''): void
     {
@@ -46,7 +54,8 @@ final class PageMailer
 
     public function addBCC(string $email, string $name = ''): void
     {
-        $this->addAddress($email, $name);
+        validator(['email' => $email], ['email' => 'required|email'])->validate();
+        $this->blindCopies[] = [$email, $name];
     }
 
     public function addReplyTo(string $email, string $name = ''): void
@@ -69,6 +78,7 @@ final class PageMailer
     public function clearAllRecipients(): void
     {
         $this->recipients = [];
+        $this->blindCopies = [];
     }
 
     public function clearAttachments(): void
@@ -83,10 +93,10 @@ final class PageMailer
         if (! $this->recipients) {
             throw new \RuntimeException('No email recipient.');
         }
-        foreach ($this->recipients as [$email,$name]) {
-            $mail = new PreservedNotification($this->Subject, $this->Body, $this->attachments, $this->replies);
-            Mail::to($email, $name)->queue($mail);
-        }
+        $to = array_map(fn ($recipient) => ['email' => $recipient[0], 'name' => $recipient[1]], $this->recipients);
+        $bcc = array_map(fn ($recipient) => ['email' => $recipient[0], 'name' => $recipient[1]], $this->blindCopies);
+        $mail = new PreservedNotification($this->Subject, $this->Body, $this->AltBody, $this->attachments, $this->replies, $this->sender);
+        Mail::to($to)->bcc($bcc)->queue($mail);
 
         return true;
     }

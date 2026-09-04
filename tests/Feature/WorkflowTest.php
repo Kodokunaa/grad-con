@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\PreservedNotification;
+use App\Mail\PageMailer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
@@ -55,6 +56,27 @@ final class WorkflowTest extends TestCase
         $this->assertSame('approved', $alumni->fresh()->status);
         $this->assertTrue($alumni->fresh()->is_active);
         Mail::assertQueued(PreservedNotification::class);
+    }
+
+    public function test_compatibility_mailer_preserves_sender_bcc_and_plain_text(): void
+    {
+        Mail::fake();
+        $mailer = new PageMailer;
+        $mailer->setFrom('sender@example.test', 'GradConn Sender');
+        $mailer->addAddress('recipient@example.test', 'Recipient');
+        $mailer->addBCC('hidden@example.test', 'Hidden Recipient');
+        $mailer->Subject = 'Delivery test';
+        $mailer->Body = '<p>HTML message</p>';
+        $mailer->AltBody = 'Plain message';
+        $mailer->send();
+
+        Mail::assertQueued(PreservedNotification::class, 1);
+        $mail = Mail::queued(PreservedNotification::class)->first();
+        $mail->build();
+        $this->assertTrue($mail->hasTo('recipient@example.test'));
+        $this->assertTrue($mail->hasBcc('hidden@example.test'));
+        $this->assertTrue($mail->hasFrom('sender@example.test'));
+        $this->assertSame('Plain message', $mail->plainText);
     }
 
     public function test_admin_account_creation_rejects_invalid_and_duplicate_data(): void
