@@ -142,8 +142,10 @@ if ($error) {
 
 <div class="card-box">
 
-<form method="POST">
+<form method="POST" action="{{ route('profile.password.update') }}">
 @csrf
+@method('PUT')
+<input type="hidden" name="change_password_page" value="1">
 
 <div class="mb-3">
 <label class="form-label">Old Password</label>

@@ -14,8 +14,7 @@ final class UpdateApplicationStatusRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['application_id' => ['required', 'integer', 'exists:applications,id'],
-            'action' => ['required', Rule::in(['accept', 'interview', 'reject'])],
+        return ['action' => ['required', Rule::in(['accept', 'interview', 'reject'])],
             'action_message' => [Rule::requiredIf(fn () => in_array($this->input('action'), ['accept', 'interview'], true)), 'nullable', 'string', 'max:5000']];
     }
 }

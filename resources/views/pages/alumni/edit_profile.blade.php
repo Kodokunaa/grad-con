@@ -27,6 +27,7 @@ if ($error) {
 
                 <form method="POST" action="{{ route('alumni.profile.update') }}" class="row g-3">
 @csrf
+@method('PUT')
                     <div class="col-md-6">
                         <label class="form-label">Fullname</label>
                         <input class="form-control" name="fullname"

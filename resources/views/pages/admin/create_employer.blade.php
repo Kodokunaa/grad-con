@@ -329,7 +329,7 @@ if ($error) {
 }
     ?>
 
-            <form method="POST">
+            <form method="POST" action="{{ route('admin.employers.store') }}">
 @csrf
                 <div class="form-grid">
                     <div class="form-group">

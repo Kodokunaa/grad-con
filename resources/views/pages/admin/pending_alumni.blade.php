@@ -318,21 +318,15 @@ if (!empty($pendingUsers)) {
                                 </span>
                             </td>
                             <td>
-                                <form method="POST" action="{{ route('admin.alumni.approval.update') }}" class="inline-form">
+                                <form method="POST" action="{{ url('/admin/alumni/'.(int) $user['id'].'/approval') }}" class="inline-form">
 @csrf
-                                    <input type="hidden" name="user_id" value="<?php 
-        echo (int) $user['id'];
-        ?>">
-                                    <input type="hidden" name="action" value="approve">
+@method('PATCH')
                                     <button type="submit" class="btn btn-approve">Approve</button>
                                 </form>
 
-                                <form method="POST" action="{{ route('admin.alumni.approval.update') }}" class="inline-form">
+                                <form method="POST" action="{{ url('/admin/alumni/'.(int) $user['id'].'/rejection') }}" class="inline-form">
 @csrf
-                                    <input type="hidden" name="user_id" value="<?php 
-        echo (int) $user['id'];
-        ?>">
-                                    <input type="hidden" name="action" value="reject">
+@method('PATCH')
                                     <button type="submit" class="btn btn-reject" onclick="return confirm('Reject this alumni account?')">Reject</button>
                                 </form>
                             </td>

@@ -873,8 +873,9 @@ if (! empty($applications)) {
                                                 Interview
                                             </a>
 
-                                            <form method="POST" style="display:inline;">
+                                            <form method="POST" action="{{ url('/applications/'.(int) $row['application_id'].'/status') }}" style="display:inline;">
 @csrf
+@method('PATCH')
                                                 <input type="hidden" name="application_id" value="<?php
             echo (int) $row['application_id'];
             ?>">
@@ -912,8 +913,9 @@ if (! empty($applications)) {
                                                 Interview
                                             </a>
 
-                                            <form method="POST" style="display:inline;">
+                                            <form method="POST" action="{{ url('/applications/'.(int) $row['application_id'].'/status') }}" style="display:inline;">
 @csrf
+@method('PATCH')
                                                 <input type="hidden" name="application_id" value="<?php
             echo (int) $row['application_id'];
             ?>">
@@ -1187,8 +1189,9 @@ foreach ($applications as $row) {
         </div>
 
         <div class="action-modal-body">
-            <form method="POST" id="actionForm">
+            <form method="POST" id="actionForm" data-action-template="{{ url('/applications/__APPLICATION__/status') }}">
 @csrf
+@method('PATCH')
                 <input type="hidden" name="application_id" id="actionApplicationId" value="">
                 <input type="hidden" name="action" id="actionType" value="">
 
@@ -1307,6 +1310,7 @@ foreach ($applications as $row) {
 
     function openActionModal(mode, applicationId, applicantName, jobTitle) {
         actionApplicationId.value = applicationId;
+        document.getElementById('actionForm').action = document.getElementById('actionForm').dataset.actionTemplate.replace('__APPLICATION__', applicationId);
         actionType.value = mode;
 
         if (mode === 'interview') {

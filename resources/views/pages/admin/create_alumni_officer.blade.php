@@ -206,7 +206,7 @@ if ($error) {
 }
             ?>
 
-            <form method="POST">
+            <form method="POST" action="{{ route('admin.alumni-officers.store') }}">
 @csrf
                 <div class="form-grid">
                     <div class="form-group full">

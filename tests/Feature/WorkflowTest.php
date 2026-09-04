@@ -48,7 +48,8 @@ final class WorkflowTest extends TestCase
         $this->actingAs($this->user('admin'));
         foreach (['employer', 'alumni_officer'] as $role) {
             $data = ['fullname' => 'Test Account', 'company' => 'Test Company', 'email' => $role.'@example.test', 'username' => 'created_'.$role, 'password' => 'created-password', 'confirm_password' => 'created-password', 'is_active' => 1];
-            $this->post('/admin/create_'.$role.'.php', $data)->assertOk();
+            $endpoint = $role === 'employer' ? '/admin/employers' : '/admin/alumni-officers';
+            $this->post($endpoint, $data)->assertRedirect();
             $u = User::where('username', 'created_'.$role)->firstOrFail();
             $this->assertSame($role, $u->role);
             $this->assertTrue(Hash::check('created-password', $u->password));
@@ -57,7 +58,7 @@ final class WorkflowTest extends TestCase
         $alumni->is_active = 0;
         $alumni->status = 'pending';
         $alumni->save();
-        $this->post('/admin/pending_alumni.php', ['user_id' => $alumni->id, 'action' => 'approve'])->assertRedirect();
+        $this->patch('/admin/alumni/'.$alumni->id.'/approval')->assertRedirect();
         $this->assertSame('approved', $alumni->fresh()->status);
         $this->assertTrue($alumni->fresh()->is_active);
         Mail::assertQueued(AlumniAccountApprovedMail::class);
@@ -92,23 +93,23 @@ final class WorkflowTest extends TestCase
     {
         $this->actingAs($this->user('admin'));
 
-        $this->post('/admin/create_employer.php', [
+        $this->post('/admin/employers', [
             'fullname' => 'Invalid Employer', 'company' => 'Company', 'email' => 'not-an-email',
             'username' => 'invalid_employer', 'password' => 'valid-password',
         ])->assertSessionHasErrors('email');
         $this->assertDatabaseMissing('users', ['username' => 'invalid_employer']);
 
         $existing = $this->user('alumni_officer');
-        $this->post('/admin/create_alumni_officer.php', [
+        $this->post('/admin/alumni-officers', [
             'fullname' => 'Duplicate Officer', 'email' => $existing->email, 'username' => $existing->username,
             'password' => 'valid-password', 'confirm_password' => 'valid-password', 'is_active' => 1,
         ])->assertSessionHasErrors(['email', 'username']);
-        $this->post('/admin/create_alumni_officer.php', [
+        $this->post('/admin/alumni-officers', [
             'fullname' => 'Weak Password', 'email' => 'weak@example.test', 'username' => 'weak_password',
             'password' => 'short', 'confirm_password' => 'short', 'is_active' => 1,
         ])->assertSessionHasErrors('password');
 
-        $this->post('/admin/alumni_create.php', [
+        $this->post('/admin/alumni', [
             'fullname' => 'Invalid Alumni', 'student_id' => 'invalid-course-user', 'email' => 'alumni@example.test',
             'course' => 'Unknown Course', 'batch_year' => date('Y'), 'password' => 'valid-password',
         ])->assertSessionHasErrors('course');
@@ -172,9 +173,9 @@ final class WorkflowTest extends TestCase
         $this->createdFiles[] = $path;
         $this->assertFileExists($path);
         $this->actingAs($employer)->get('/employer/applications.php?view_resume='.urlencode($application->resume_file))->assertOk()->assertHeader('content-type', 'application/pdf');
-        $this->post('/employer/applications.php', ['application_id' => $application->id, 'action' => 'interview', 'action_message' => 'Please attend the interview.'])->assertRedirect();
+        $this->patch('/applications/'.$application->id.'/status', ['action' => 'interview', 'action_message' => 'Please attend the interview.'])->assertRedirect();
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'interview']);
-        $this->actingAs($this->user('employer'))->post('/employer/applications.php', ['application_id' => $application->id, 'action' => 'accept', 'action_message' => 'Unauthorized action'])->assertForbidden();
+        $this->actingAs($this->user('employer'))->patch('/applications/'.$application->id.'/status', ['action' => 'accept', 'action_message' => 'Unauthorized action'])->assertForbidden();
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'interview']);
     }
 
@@ -273,7 +274,7 @@ final class WorkflowTest extends TestCase
         $this->assertNotNull($training);
         $this->get('/admin/trainings_edit.php?id='.$training->id)->assertOk();
         $alumni = $this->user('alumni');
-        $this->actingAs($alumni)->post('/alumni/add_degree.php', ['add_education' => 1, 'school_name' => 'Test College', 'degree' => 'Tertiary', 'start_year' => '2021', 'end_year' => '2025'])->assertRedirect();
+        $this->actingAs($alumni)->post('/profile/education', ['add_education' => 1, 'school_name' => 'Test College', 'degree' => 'Tertiary', 'start_year' => '2021', 'end_year' => '2025'])->assertRedirect();
         $this->assertDatabaseHas('alumni_education', ['user_id' => $alumni->id, 'school_name' => 'Test College']);
     }
 
@@ -469,9 +470,7 @@ final class WorkflowTest extends TestCase
     public function test_employment_history_uses_laravel_transactions(): void
     {
         $alumni = $this->user('alumni');
-        $this->actingAs($alumni)->post('/alumni/employment_history.php', ['add_employment' => 1, 'company_name' => 'Employment Test', 'job_title' => 'Developer', 'start_date' => '2026-01-01', 'end_date' => '', 'employment_type' => 'Full-time', 'location' => 'Calapan', 'job_description' => 'Software development'])->assertRedirect();
+        $this->actingAs($alumni)->post('/profile/employment', ['add_employment' => 1, 'company_name' => 'Employment Test', 'job_title' => 'Developer', 'start_date' => '2026-01-01', 'end_date' => '', 'employment_type' => 'Full-time', 'location' => 'Calapan', 'job_description' => 'Software development'])->assertRedirect();
         $this->assertDatabaseHas('employment_history', ['user_id' => $alumni->id, 'company_name' => 'Employment Test']);
     }
 }
-
-

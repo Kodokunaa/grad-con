@@ -173,7 +173,7 @@ final class MigrationTest extends TestCase
             'payload' => 'expired test session',
             'last_activity' => time(),
         ]);
-        $this->actingAs($user)->post('/alumni/change_password.php', ['old_password' => 'test-password-123', 'new_password' => 'replacement-password', 'confirm_password' => 'replacement-password'])->assertOk();
+        $this->actingAs($user)->put('/profile/password', ['change_password_page' => 1, 'old_password' => 'test-password-123', 'new_password' => 'replacement-password', 'confirm_password' => 'replacement-password'])->assertRedirect(route('alumni.change_password'));
         $this->assertTrue(Hash::check('replacement-password', $user->fresh()->password));
         $this->assertDatabaseMissing('sessions', ['id' => 'another-device-session']);
         $this->assertDatabaseHas('security_logs', ['user_id' => $user->id, 'action' => 'PASSWORD_CHANGED']);

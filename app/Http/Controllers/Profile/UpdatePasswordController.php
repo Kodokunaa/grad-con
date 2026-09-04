@@ -12,6 +12,8 @@ final class UpdatePasswordController extends Controller
     {
         $service->handle($request->user(), $request->input('old_password'), $request->input('new_password'), $request);
 
-        return to_route('profile')->with('status', 'Password changed successfully.');
+        $route = $request->boolean('change_password_page') ? 'alumni.change_password' : 'profile';
+
+        return to_route($route)->with('status', 'Password changed successfully.');
     }
 }

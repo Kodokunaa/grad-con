@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Mail;
 
 final class UpdateApplicationStatusController extends Controller
 {
-    public function __invoke(UpdateApplicationStatusRequest $request)
+    public function __invoke(UpdateApplicationStatusRequest $request, JobApplication $application)
     {
-        $application = JobApplication::with(['job', 'alumni'])->findOrFail($request->integer('application_id'));
+        $application->load(['job', 'alumni']);
         abort_unless($request->user()->can('update', $application), 403);
         abort_if($request->user()->role === 'admin' && $application->job->poster?->role === 'employer', 403);
         abort_if(in_array(strtolower($application->status), ['cancelled', 'canceled'], true), 422, 'This application was cancelled.');

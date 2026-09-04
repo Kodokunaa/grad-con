@@ -279,7 +279,7 @@ echo e($application['employer_company'] ?: $application['company']);
             </div>
         </div>
 
-        <form method="POST">
+        <form method="POST" action="{{ route('interviews.store') }}">
 @csrf
             <input type="hidden" name="application_id" value="<?php
 echo (int) $application_id;
