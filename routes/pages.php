@@ -91,7 +91,6 @@ Route::post('/admin/alumni_create.php', AdminAlumniCreateController::class)->mid
 Route::get('/admin/alumni_edit.php', AdminAlumniEditController::class)->middleware('account:admin')->name('admin.alumni_edit');
 Route::post('/admin/alumni_edit.php', AdminAlumniEditController::class)->middleware('account:admin');
 Route::get('/admin/alumni_list.php', AdminAlumniListController::class)->middleware('account:admin')->name('admin.alumni_list');
-Route::post('/admin/alumni_list.php', AdminAlumniListController::class)->middleware('account:admin');
 Route::get('/admin/alumni_report.php', AdminAlumniReportController::class)->middleware('account:admin')->name('admin.alumni_report');
 Route::get('/admin/applications.php', AdminApplicationsController::class)->middleware('account:admin')->name('admin.applications');
 Route::post('/admin/applications.php', UpdateApplicationStatusController::class)->middleware('account:admin');
