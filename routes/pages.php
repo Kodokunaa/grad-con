@@ -9,6 +9,7 @@ use App\Http\Controllers\Event\ArchiveEventController;
 use App\Http\Controllers\Event\RestoreEventController;
 use App\Http\Controllers\Event\StoreEventController;
 use App\Http\Controllers\Event\UpdateEventController;
+use App\Http\Controllers\Job\SendJobNotificationController;
 use App\Http\Controllers\Job\StoreJobController;
 use App\Http\Controllers\Job\UpdateJobController;
 use App\Http\Controllers\Pages\AdminAdminArchiveController;
@@ -115,7 +116,8 @@ Route::delete('/admin/jobs/{job}', DestroyJobController::class)->middleware('acc
 Route::post('/jobs', StoreJobController::class)->middleware('account:admin,employer')->name('jobs.store');
 Route::put('/jobs/{job}', UpdateJobController::class)->middleware('account:admin,employer')->name('jobs.update');
 Route::get('/admin/jobs_notify.php', AdminJobsNotifyController::class)->middleware('account:admin')->name('admin.jobs_notify');
-Route::post('/admin/jobs_notify.php', AdminJobsNotifyController::class)->middleware('account:admin');
+Route::post('/admin/jobs_notify.php', SendJobNotificationController::class)->middleware('account:admin');
+Route::post('/admin/jobs/{job}/notifications', SendJobNotificationController::class)->middleware('account:admin')->name('admin.jobs.notifications.store');
 Route::get('/admin/offers_history.php', AdminOffersHistoryController::class)->middleware('account:admin')->name('admin.offers_history');
 Route::get('/admin/pending_alumni.php', AdminPendingAlumniController::class)->middleware('account:admin')->name('admin.pending_alumni');
 Route::post('/admin/pending_alumni.php', AdminPendingAlumniController::class)->middleware('account:admin');

@@ -210,8 +210,9 @@ if ($error) {
     <div class="card-custom">
         <div class="section-title">Send Notification</div>
 
-        <form method="POST">
+        <form method="POST" action="{{ route('admin.jobs.notifications.store', $job['id']) }}">
 @csrf
+            <input type="hidden" name="job_id" value="{{ $job['id'] }}">
             <div class="form-group">
                 <label class="form-label">Subject</label>
                 <input
