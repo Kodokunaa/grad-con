@@ -192,43 +192,44 @@
 <div class="content">
     <div class="page-header">
         <h3 class="page-title">Edit Training</h3>
-        <a class="back-btn" href="<?php 
+        <a class="back-btn" href="<?php
 echo \url('');
-?>/admin/trainings_list.php">Back to Trainings List</a>
+        ?>/admin/trainings_list.php">Back to Trainings List</a>
     </div>
 
-    <?php 
+    <?php
 if ($msg) {
     ?>
-        <div class="alert-box alert-success-custom"><?php 
+        <div class="alert-box alert-success-custom"><?php
     echo htmlspecialchars($msg);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+        ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert-box alert-danger-custom"><?php 
+        <div class="alert-box alert-danger-custom"><?php
     echo htmlspecialchars($error);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+        ?>
 
     <div class="form-card">
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('trainings.update', $id) }}" enctype="multipart/form-data">
 @csrf
+            @method('PUT')
             <div class="form-group">
                 <label class="form-label">Training Title</label>
                 <input
                     type="text"
                     name="title"
                     class="form-control-custom"
-                    value="<?php 
-echo htmlspecialchars($training['title'] ?? '');
-?>"
+                    value="<?php
+        echo htmlspecialchars($training['title'] ?? '');
+        ?>"
                     required
                 >
             </div>
@@ -240,9 +241,9 @@ echo htmlspecialchars($training['title'] ?? '');
                     rows="5"
                     class="form-textarea-custom"
                     required
-                ><?php 
-echo htmlspecialchars($training['content'] ?? '');
-?></textarea>
+                ><?php
+        echo htmlspecialchars($training['content'] ?? '');
+        ?></textarea>
             </div>
 
             <div class="row">
@@ -252,9 +253,9 @@ echo htmlspecialchars($training['content'] ?? '');
                         type="date"
                         name="training_date"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars($training['training_date'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars($training['training_date'] ?? '');
+        ?>"
                         required
                     >
                 </div>
@@ -265,9 +266,9 @@ echo htmlspecialchars($training['training_date'] ?? '');
                         type="text"
                         name="location"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars($training['location'] ?? '');
-?>"
+                        value="<?php
+        echo htmlspecialchars($training['location'] ?? '');
+        ?>"
                     >
                 </div>
             </div>
@@ -276,22 +277,22 @@ echo htmlspecialchars($training['location'] ?? '');
                 <label class="form-label">Target Course</label>
                 <select name="target_course" class="form-select-custom" required>
                     <option value="">-- Select Target Course --</option>
-                    <?php 
+                    <?php
 foreach ($allowed_courses as $course) {
     ?>
-                        <option value="<?php 
+                        <option value="<?php
     echo htmlspecialchars($course);
     ?>"
-                            <?php 
+                            <?php
     echo $course === ($training['target_course'] ?? '') ? 'selected' : '';
     ?>>
-                            <?php 
+                            <?php
     echo htmlspecialchars($course);
     ?>
                         </option>
-                    <?php 
+                    <?php
 }
-?>
+        ?>
                 </select>
                 <div class="helper-text">
                     Select BSIS if only BSIS alumni should see this training. Select Open for All if all alumni can see it.
@@ -308,30 +309,30 @@ foreach ($allowed_courses as $course) {
                 >
                 <div class="helper-text">Leave blank if you want to keep the current image.</div>
 
-                <?php 
-if (!empty($training['image'])) {
+                <?php
+if (! empty($training['image'])) {
     ?>
                     <div class="preview-image">
-                        <img src="<?php 
+                        <img src="<?php
     echo \url('');
-    ?>/uploads/trainings/<?php 
+    ?>/uploads/trainings/<?php
     echo htmlspecialchars($training['image']);
     ?>" alt="Training Image">
                     </div>
-                <?php 
+                <?php
 }
-?>
+        ?>
             </div>
 
             <div class="actions">
                 <button type="submit" class="btn-orange">Save Changes</button>
-                <a class="btn-outline-custom" href="<?php 
-echo \url('');
-?>/admin/trainings_list.php">Cancel</a>
+                <a class="btn-outline-custom" href="<?php
+        echo \url('');
+        ?>/admin/trainings_list.php">Cancel</a>
             </div>
         </form>
     </div>
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+        echo \gc_partial('footer', \get_defined_vars());

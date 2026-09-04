@@ -64,6 +64,8 @@ use App\Http\Controllers\Pages\EmployerPostedJobController;
 use App\Http\Controllers\Pages\EmployerPostJobController;
 use App\Http\Controllers\Pages\ProfileController;
 use App\Http\Controllers\Profile\DestroyCertificateController;
+use App\Http\Controllers\Training\StoreTrainingController;
+use App\Http\Controllers\Training\UpdateTrainingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/admin/admin_archive.php', AdminAdminArchiveController::class)->middleware('account:admin')->name('admin.admin_archive');
@@ -111,11 +113,13 @@ Route::get('/admin/pending_alumni.php', AdminPendingAlumniController::class)->mi
 Route::post('/admin/pending_alumni.php', AdminPendingAlumniController::class)->middleware('account:admin');
 Route::get('/admin/reports.php', AdminReportsController::class)->middleware('account:admin')->name('admin.reports');
 Route::get('/admin/trainings_create.php', AdminTrainingsCreateController::class)->middleware('account:admin')->name('admin.trainings_create');
-Route::post('/admin/trainings_create.php', AdminTrainingsCreateController::class)->middleware('account:admin');
+Route::post('/admin/trainings_create.php', StoreTrainingController::class)->middleware('account:admin');
 Route::get('/admin/trainings_edit.php', AdminTrainingsEditController::class)->middleware('account:admin')->name('admin.trainings_edit');
-Route::post('/admin/trainings_edit.php', AdminTrainingsEditController::class)->middleware('account:admin');
+Route::post('/admin/trainings_edit.php', [UpdateTrainingController::class, 'legacy'])->middleware('account:admin');
 Route::get('/admin/trainings_list.php', AdminTrainingsListController::class)->middleware('account:admin')->name('admin.trainings_list');
 Route::delete('/admin/trainings/{training}', DestroyTrainingController::class)->middleware('account:admin')->name('admin.trainings.destroy');
+Route::post('/trainings', StoreTrainingController::class)->middleware('account:admin')->name('trainings.store');
+Route::put('/trainings/{training}', UpdateTrainingController::class)->middleware('account:admin')->name('trainings.update');
 Route::post('/admin/trainings_list.php', AdminTrainingsListController::class)->middleware('account:admin');
 Route::get('/alumni/add_degree.php', AlumniAddDegreeController::class)->middleware('account:alumni')->name('alumni.add_degree');
 Route::post('/alumni/add_degree.php', AlumniAddDegreeController::class)->middleware('account:alumni');

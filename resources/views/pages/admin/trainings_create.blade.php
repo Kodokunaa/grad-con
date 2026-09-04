@@ -180,32 +180,32 @@
         </div>
     </div>
 
-    <?php 
+    <?php
 if ($msg) {
     ?>
         <div class="alert-box alert-success-custom">
-            <?php 
+            <?php
     echo htmlspecialchars($msg);
     ?>
         </div>
-    <?php 
+    <?php
 }
-?>
+    ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
         <div class="alert-box alert-danger-custom">
-            <?php 
+            <?php
     echo htmlspecialchars($error);
     ?>
         </div>
-    <?php 
+    <?php
 }
-?>
+    ?>
 
     <div class="form-card">
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('trainings.store') }}" enctype="multipart/form-data">
 @csrf
 
             <div class="form-group">
@@ -214,9 +214,9 @@ if ($error) {
                     type="text"
                     name="title"
                     class="form-control-custom"
-                    value="<?php 
-echo htmlspecialchars(\gc_context()->post['title'] ?? '');
-?>"
+                    value="<?php
+    echo htmlspecialchars(\gc_context()->post['title'] ?? '');
+    ?>"
                     required
                 >
             </div>
@@ -228,9 +228,9 @@ echo htmlspecialchars(\gc_context()->post['title'] ?? '');
                     rows="5"
                     class="form-textarea-custom"
                     required
-                ><?php 
-echo htmlspecialchars(\gc_context()->post['content'] ?? '');
-?></textarea>
+                ><?php
+    echo htmlspecialchars(\gc_context()->post['content'] ?? '');
+    ?></textarea>
             </div>
 
             <div class="row">
@@ -240,9 +240,9 @@ echo htmlspecialchars(\gc_context()->post['content'] ?? '');
                         type="date"
                         name="training_date"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars(\gc_context()->post['training_date'] ?? '');
-?>"
+                        value="<?php
+    echo htmlspecialchars(\gc_context()->post['training_date'] ?? '');
+    ?>"
                         required
                     >
                 </div>
@@ -253,9 +253,9 @@ echo htmlspecialchars(\gc_context()->post['training_date'] ?? '');
                         type="text"
                         name="location"
                         class="form-control-custom"
-                        value="<?php 
-echo htmlspecialchars(\gc_context()->post['location'] ?? '');
-?>"
+                        value="<?php
+    echo htmlspecialchars(\gc_context()->post['location'] ?? '');
+    ?>"
                         placeholder="Enter training location"
                     >
                 </div>
@@ -265,22 +265,22 @@ echo htmlspecialchars(\gc_context()->post['location'] ?? '');
                 <label class="form-label">Target Course</label>
                 <select name="target_course" class="form-select-custom" required>
                     <option value="">-- Select Target Course --</option>
-                    <?php 
+                    <?php
 foreach ($allowed_courses as $course) {
     ?>
-                        <option value="<?php 
+                        <option value="<?php
     echo htmlspecialchars($course);
     ?>"
-                            <?php 
+                            <?php
     echo $course === (\gc_context()->post['target_course'] ?? '') ? 'selected' : '';
     ?>>
-                            <?php 
+                            <?php
     echo htmlspecialchars($course);
     ?>
                         </option>
-                    <?php 
+                    <?php
 }
-?>
+    ?>
                 </select>
                 <div class="helper-text">
                     Select BSIS if only BSIS unemployed alumni should receive email notification and see this training.
@@ -303,13 +303,13 @@ foreach ($allowed_courses as $course) {
 
             <div class="actions">
                 <button type="submit" class="btn-orange">Post Training</button>
-                <a class="btn-outline-custom" href="<?php 
-echo \url('');
-?>/admin/trainings_list.php">View Trainings</a>
+                <a class="btn-outline-custom" href="<?php
+    echo \url('');
+    ?>/admin/trainings_list.php">View Trainings</a>
             </div>
         </form>
     </div>
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+    echo \gc_partial('footer', \get_defined_vars());
