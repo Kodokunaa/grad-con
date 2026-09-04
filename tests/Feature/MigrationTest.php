@@ -115,6 +115,23 @@ final class MigrationTest extends TestCase
         $this->get('/employer/jobl_list.php')->assertRedirect('/employer/posted_job.php');
     }
 
+    public function test_read_only_pages_and_compatibility_redirects_reject_post_requests(): void
+    {
+        $cases = [
+            'admin' => ['/admin/dashboard.php', '/admin/alumni_report.php', '/admin/graduates_list.php', '/admin/graduates_report.php', '/admin/graduates_stats.php', '/admin/jobs_list.php', '/admin/offers_history.php', '/admin/reports.php', '/admin/employer_list.php'],
+            'alumni' => ['/alumni/dashboard.php', '/alumni/jobs.php'],
+            'alumni_officer' => ['/alumni_officer/dashboard.php', '/archive.php'],
+            'employer' => ['/employer/dashboard.php', '/employer/my_jobs.php', '/employer/job_list.php', '/employer/jobl_list.php'],
+        ];
+
+        foreach ($cases as $role => $paths) {
+            $this->actingAs($this->user($role));
+            foreach ($paths as $path) {
+                $this->post($path)->assertMethodNotAllowed();
+            }
+        }
+    }
+
     public function test_all_login_aliases_use_the_same_guard_and_block_inactive_accounts(): void
     {
         $user = $this->user('employer');

@@ -37,6 +37,6 @@ The review covered every application route, 54 migrated page controllers and Bla
 
 - Much of the feature layer remains mechanically migrated procedural PHP using raw PDO and large controllers. Prepared statements limit injection risk, but future changes should move validation into Form Requests and database work into services or Eloquent models.
 - Many pages depend on public CDNs and a remote Bing background image. The interface can lose styling or scripts offline, and a strict Content Security Policy cannot be introduced until these assets are self-hosted or explicitly allowlisted.
-- Several legacy routes accept both GET and POST so historical URLs continue to work. Destructive query-string actions are protected by a CSRF confirmation step, but new endpoints should use explicit HTTP methods.
+- Read-only pages and compatibility redirects accept GET only. Retained mutation pages still use paired GET and POST routes while their legacy forms are separated into resource actions. Destructive query-string actions are protected by a CSRF confirmation step during that transition.
 - Production requires a persistent queue worker for email delivery. Without it, mail jobs remain in the `queue_jobs` table.
 - The exact legacy source archive may contain the old Gmail app password. It remains ignored and outside the web root, but that credential should be rotated.

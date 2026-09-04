@@ -65,7 +65,6 @@ Route::post('/admin/alumni_edit.php', AdminAlumniEditController::class)->middlew
 Route::get('/admin/alumni_list.php', AdminAlumniListController::class)->middleware('account:admin')->name('admin.alumni_list');
 Route::post('/admin/alumni_list.php', AdminAlumniListController::class)->middleware('account:admin');
 Route::get('/admin/alumni_report.php', AdminAlumniReportController::class)->middleware('account:admin')->name('admin.alumni_report');
-Route::post('/admin/alumni_report.php', AdminAlumniReportController::class)->middleware('account:admin');
 Route::get('/admin/applications.php', AdminApplicationsController::class)->middleware('account:admin')->name('admin.applications');
 Route::post('/admin/applications.php', AdminApplicationsController::class)->middleware('account:admin');
 Route::get('/admin/create_alumni_officer.php', AdminCreateAlumniOfficerController::class)->middleware('account:admin')->name('admin.create_alumni_officer');
@@ -73,7 +72,6 @@ Route::post('/admin/create_alumni_officer.php', AdminCreateAlumniOfficerControll
 Route::get('/admin/create_employer.php', AdminCreateEmployerController::class)->middleware('account:admin')->name('admin.create_employer');
 Route::post('/admin/create_employer.php', AdminCreateEmployerController::class)->middleware('account:admin');
 Route::get('/admin/dashboard.php', AdminDashboardController::class)->middleware('account:admin')->name('admin.dashboard');
-Route::post('/admin/dashboard.php', AdminDashboardController::class)->middleware('account:admin');
 Route::get('/admin/events_create.php', AdminEventsCreateController::class)->middleware('account:admin')->name('admin.events_create');
 Route::post('/admin/events_create.php', AdminEventsCreateController::class)->middleware('account:admin');
 Route::get('/admin/events_delete.php', AdminEventsDeleteController::class)->middleware('account:admin')->name('admin.events_delete');
@@ -85,11 +83,8 @@ Route::post('/admin/events_list.php', AdminEventsListController::class)->middlew
 Route::get('/admin/forward_to_company.php', AdminForwardToCompanyController::class)->middleware('account:admin')->name('admin.forward_to_company');
 Route::post('/admin/forward_to_company.php', AdminForwardToCompanyController::class)->middleware('account:admin');
 Route::get('/admin/graduates_list.php', AdminGraduatesListController::class)->middleware('account:admin')->name('admin.graduates_list');
-Route::post('/admin/graduates_list.php', AdminGraduatesListController::class)->middleware('account:admin');
 Route::get('/admin/graduates_report.php', AdminGraduatesReportController::class)->middleware('account:admin')->name('admin.graduates_report');
-Route::post('/admin/graduates_report.php', AdminGraduatesReportController::class)->middleware('account:admin');
 Route::get('/admin/graduates_stats.php', AdminGraduatesStatsController::class)->middleware('account:admin')->name('admin.graduates_stats');
-Route::post('/admin/graduates_stats.php', AdminGraduatesStatsController::class)->middleware('account:admin');
 Route::get('/admin/interview.php', AdminInterviewController::class)->middleware('account:admin')->name('admin.interview');
 Route::post('/admin/interview.php', AdminInterviewController::class)->middleware('account:admin');
 Route::get('/admin/jobs_create.php', AdminJobsCreateController::class)->middleware('account:admin')->name('admin.jobs_create');
@@ -97,15 +92,12 @@ Route::post('/admin/jobs_create.php', AdminJobsCreateController::class)->middlew
 Route::get('/admin/jobs_edit.php', AdminJobsEditController::class)->middleware('account:admin')->name('admin.jobs_edit');
 Route::post('/admin/jobs_edit.php', AdminJobsEditController::class)->middleware('account:admin');
 Route::get('/admin/jobs_list.php', AdminJobsListController::class)->middleware('account:admin')->name('admin.jobs_list');
-Route::post('/admin/jobs_list.php', AdminJobsListController::class)->middleware('account:admin');
 Route::get('/admin/jobs_notify.php', AdminJobsNotifyController::class)->middleware('account:admin')->name('admin.jobs_notify');
 Route::post('/admin/jobs_notify.php', AdminJobsNotifyController::class)->middleware('account:admin');
 Route::get('/admin/offers_history.php', AdminOffersHistoryController::class)->middleware('account:admin')->name('admin.offers_history');
-Route::post('/admin/offers_history.php', AdminOffersHistoryController::class)->middleware('account:admin');
 Route::get('/admin/pending_alumni.php', AdminPendingAlumniController::class)->middleware('account:admin')->name('admin.pending_alumni');
 Route::post('/admin/pending_alumni.php', AdminPendingAlumniController::class)->middleware('account:admin');
 Route::get('/admin/reports.php', AdminReportsController::class)->middleware('account:admin')->name('admin.reports');
-Route::post('/admin/reports.php', AdminReportsController::class)->middleware('account:admin');
 Route::get('/admin/trainings_create.php', AdminTrainingsCreateController::class)->middleware('account:admin')->name('admin.trainings_create');
 Route::post('/admin/trainings_create.php', AdminTrainingsCreateController::class)->middleware('account:admin');
 Route::get('/admin/trainings_edit.php', AdminTrainingsEditController::class)->middleware('account:admin')->name('admin.trainings_edit');
@@ -119,7 +111,6 @@ Route::post('/alumni/apply.php', AlumniApplyController::class)->middleware('acco
 Route::get('/alumni/change_password.php', AlumniChangePasswordController::class)->middleware('account:alumni')->name('alumni.change_password');
 Route::post('/alumni/change_password.php', AlumniChangePasswordController::class)->middleware('account:alumni');
 Route::get('/alumni/dashboard.php', AlumniDashboardController::class)->middleware('account:alumni')->name('alumni.dashboard');
-Route::post('/alumni/dashboard.php', AlumniDashboardController::class)->middleware('account:alumni');
 Route::get('/alumni/edit_profile.php', AlumniEditProfileController::class)->middleware('account:alumni')->name('alumni.edit_profile');
 Route::post('/alumni/edit_profile.php', AlumniEditProfileController::class)->middleware('account:alumni');
 Route::get('/alumni/employment_history.php', AlumniEmploymentHistoryController::class)->middleware('account:alumni')->name('alumni.employment_history');
@@ -131,7 +122,6 @@ Route::post('/alumni/job_details.php', AlumniJobDetailsController::class)->middl
 Route::get('/alumni/job_offers.php', AlumniJobOffersController::class)->middleware('account:alumni')->name('alumni.job_offers');
 Route::post('/alumni/job_offers.php', AlumniJobOffersController::class)->middleware('account:alumni');
 Route::get('/alumni/jobs.php', AlumniJobsController::class)->middleware('account:alumni')->name('alumni.jobs');
-Route::post('/alumni/jobs.php', AlumniJobsController::class)->middleware('account:alumni');
 Route::get('/alumni/my_applications.php', AlumniMyApplicationsController::class)->middleware('account:alumni')->name('alumni.my_applications');
 Route::post('/alumni/my_applications.php', AlumniMyApplicationsController::class)->middleware('account:alumni');
 Route::get('/alumni_officer/alumni_list.php', AlumniOfficerAlumniListController::class)->middleware('account:alumni_officer')->name('alumni_officer.alumni_list');
@@ -139,7 +129,6 @@ Route::post('/alumni_officer/alumni_list.php', AlumniOfficerAlumniListController
 Route::get('/alumni_officer/archive.php', AlumniOfficerArchiveController::class)->middleware('account:alumni_officer')->name('alumni_officer.archive');
 Route::post('/alumni_officer/archive.php', AlumniOfficerArchiveController::class)->middleware('account:alumni_officer');
 Route::get('/alumni_officer/dashboard.php', AlumniOfficerDashboardController::class)->middleware('account:alumni_officer')->name('alumni_officer.dashboard');
-Route::post('/alumni_officer/dashboard.php', AlumniOfficerDashboardController::class)->middleware('account:alumni_officer');
 Route::get('/alumni_officer/events_create.php', AlumniOfficerEventsCreateController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_create');
 Route::post('/alumni_officer/events_create.php', AlumniOfficerEventsCreateController::class)->middleware('account:alumni_officer');
 Route::get('/alumni_officer/events_edit.php', AlumniOfficerEventsEditController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_edit');
@@ -151,7 +140,6 @@ Route::post('/employer/alumni_list.php', EmployerAlumniListController::class)->m
 Route::get('/employer/applications.php', EmployerApplicationsController::class)->middleware('account:employer')->name('employer.applications');
 Route::post('/employer/applications.php', EmployerApplicationsController::class)->middleware('account:employer');
 Route::get('/employer/dashboard.php', EmployerDashboardController::class)->middleware('account:employer')->name('employer.dashboard');
-Route::post('/employer/dashboard.php', EmployerDashboardController::class)->middleware('account:employer');
 Route::get('/employer/interview.php', EmployerInterviewController::class)->middleware('account:employer')->name('employer.interview');
 Route::post('/employer/interview.php', EmployerInterviewController::class)->middleware('account:employer');
 Route::get('/employer/job_offers.php', EmployerJobOffersController::class)->middleware('account:employer')->name('employer.job_offers');
@@ -163,4 +151,3 @@ Route::post('/employer/posted_job.php', EmployerPostedJobController::class)->mid
 Route::get('/profile.php', ProfileController::class)->middleware('account')->name('profile');
 Route::post('/profile.php', ProfileController::class)->middleware('account');
 Route::get('/archive.php', ArchiveController::class)->middleware('account:alumni_officer')->name('archive');
-Route::post('/archive.php', ArchiveController::class)->middleware('account:alumni_officer');
