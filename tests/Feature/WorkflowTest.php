@@ -283,7 +283,7 @@ final class WorkflowTest extends TestCase
     {
         Mail::fake();
         $admin = $this->user('admin');
-        $this->actingAs($admin)->post('/admin/events_create.php', ['title' => 'Workflow event', 'content' => 'Event description'])->assertOk();
+        $this->actingAs($admin)->post('/admin/events_create.php', ['title' => 'Workflow event', 'content' => 'Event description'])->assertRedirect(route('admin.events_create'));
         $this->assertDatabaseHas('events', ['title' => 'Workflow event', 'posted_by' => $admin->id]);
         $this->post('/admin/trainings_create.php', ['title' => 'Workflow training', 'content' => 'Training description', 'training_date' => date('Y-m-d'), 'target_course' => 'BSIS', 'location' => 'Campus'])->assertOk();
         $training = DB::table('trainings')->where('title', 'Workflow training')->first();
@@ -292,6 +292,32 @@ final class WorkflowTest extends TestCase
         $alumni = $this->user('alumni');
         $this->actingAs($alumni)->post('/alumni/add_degree.php', ['add_education' => 1, 'school_name' => 'Test College', 'degree' => 'Tertiary', 'start_year' => '2021', 'end_year' => '2025'])->assertOk();
         $this->assertDatabaseHas('alumni_education', ['user_id' => $alumni->id, 'school_name' => 'Test College']);
+    }
+
+    public function test_event_requests_validate_dates_and_enforce_update_policy(): void
+    {
+        $admin = $this->user('admin');
+        $officer = $this->user('alumni_officer');
+
+        $this->actingAs($admin)->post(route('events.store'), [
+            'title' => 'Invalid scheduled event', 'content' => 'Test',
+            'post_start_date' => '2026-10-10 10:00:00',
+            'post_end_date' => '2026-10-09 10:00:00',
+        ])->assertSessionHasErrors('post_end_date');
+        $this->assertDatabaseMissing('events', ['title' => 'Invalid scheduled event']);
+
+        $eventId = DB::table('events')->insertGetId([
+            'title' => 'Admin owned event', 'content' => 'Original', 'posted_by' => $admin->id,
+        ]);
+        $this->actingAs($officer)->put(route('events.update', $eventId), [
+            'title' => 'Unauthorized update', 'content' => 'Changed',
+        ])->assertForbidden();
+        $this->assertDatabaseHas('events', ['id' => $eventId, 'title' => 'Admin owned event']);
+
+        $this->actingAs($admin)->put(route('events.update', $eventId), [
+            'title' => 'Updated event', 'content' => 'Changed',
+        ])->assertRedirect(route('admin.events_edit', ['id' => $eventId]));
+        $this->assertDatabaseHas('events', ['id' => $eventId, 'title' => 'Updated event']);
     }
 
     public function test_admin_training_deletion_uses_the_named_delete_route(): void

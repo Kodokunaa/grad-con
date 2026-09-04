@@ -3,68 +3,18 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
-use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 final class AdminEventsCreateController extends PageController
 {
     public function __invoke(Request $request)
     {
         return $this->renderPage(function () {
-            $pdo = gc_context()->pdo();
-
             \gc_require_role('admin');
-            $msg = '';
-            $error = '';
-            if (\request()->server->all()['REQUEST_METHOD'] === 'POST') {
-                $title = trim(\gc_context()->post['title'] ?? '');
-                $content = trim(\gc_context()->post['content'] ?? '');
-                $post_start_date = trim(\gc_context()->post['post_start_date'] ?? '');
-                $post_end_date = trim(\gc_context()->post['post_end_date'] ?? '');
-                $image_name = null;
-                $startDateForDb = $post_start_date !== '' ? date('Y-m-d H:i:s', strtotime($post_start_date)) : null;
-                $endDateForDb = $post_end_date !== '' ? date('Y-m-d H:i:s', strtotime($post_end_date)) : null;
-                if ($title === '' || $content === '') {
-                    $error = 'Title and content are required.';
-                } elseif ($post_start_date !== '' && strtotime($post_start_date) === false) {
-                    $error = 'Invalid post start date.';
-                } elseif ($post_end_date !== '' && strtotime($post_end_date) === false) {
-                    $error = 'Invalid post end date.';
-                } elseif ($startDateForDb && $endDateForDb && strtotime($endDateForDb) <= strtotime($startDateForDb)) {
-                    $error = 'Post end date must be later than post start date.';
-                } else {
-                    if (! empty(\gc_files()['image']['name'])) {
-                        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                        $ext = strtolower(pathinfo(\gc_files()['image']['name'], PATHINFO_EXTENSION));
-                        if (! in_array($ext, $allowed, true)) {
-                            $error = 'Invalid image type. Allowed: jpg, jpeg, png, gif, webp.';
-                        } elseif ((\gc_files()['image']['size'] ?? 0) > 3 * 1024 * 1024) {
-                            $error = 'Image too large. Max 3MB.';
-                        } else {
-                            $image_name = 'event_'.Str::uuid().'.'.$ext;
-                            if (! PrivateUploads::store(request()->file('image'), 'events', $image_name)) {
-                                $error = 'Image upload failed.';
-                            }
-                        }
-                    }
-                    if ($error === '') {
-                        try {
-                            $stmt = $pdo->prepare('INSERT INTO events(title, content, image, post_start_date, post_end_date, posted_by) VALUES(?, ?, ?, ?, ?, ?)');
-                            $stmt->execute([$title, $content, $image_name, $startDateForDb, $endDateForDb, \gc_context()->session['user']['id']]);
-                            $msg = 'Event posted successfully!';
-                            \gc_context()->post = [];
-                        } catch (\Throwable $ex) {
-                            if ($ex instanceof PageResponse) {
-                                throw $ex;
-                            }
-                            $error = 'Post error: '.\gc_public_error($ex);
-                        }
-                    }
-                }
-            }
-            echo \gc_partial('header', \get_defined_vars());
-            echo \gc_partial('admin_sidebar', \get_defined_vars());
+            $msg = (string) session('status', '');
+            $error = session('errors')?->first() ?? '';
+            echo \gc_partial('header', get_defined_vars());
+            echo \gc_partial('admin_sidebar', get_defined_vars());
 
             return $this->pageView('pages.admin.events_create', get_defined_vars());
         });

@@ -327,25 +327,25 @@
             </div>
         </section>
 
-        <?php 
+        <?php
 if ($msg) {
     ?>
-            <div class="alert-box alert-success-custom"><?php 
+            <div class="alert-box alert-success-custom"><?php
     echo \gc_e($msg);
     ?></div>
-        <?php 
+        <?php
 }
-?>
+        ?>
 
-        <?php 
+        <?php
 if ($error) {
     ?>
-            <div class="alert-box alert-danger-custom"><?php 
+            <div class="alert-box alert-danger-custom"><?php
     echo \gc_e($error);
     ?></div>
-        <?php 
+        <?php
 }
-?>
+        ?>
 
         <section class="form-card">
             <div class="form-topbar">
@@ -357,7 +357,7 @@ if ($error) {
             </div>
 
             <div class="form-body">
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
 @csrf
                     <div class="form-group">
                         <label class="form-label">Title</label>
@@ -365,9 +365,9 @@ if ($error) {
                             type="text"
                             name="title"
                             class="form-control-custom"
-                            value="<?php 
-echo \gc_e(\gc_context()->post['title'] ?? '');
-?>"
+                            value="<?php
+        echo \gc_e(\gc_context()->post['title'] ?? '');
+        ?>"
                             placeholder="Enter event title"
                             required
                         >
@@ -381,9 +381,9 @@ echo \gc_e(\gc_context()->post['title'] ?? '');
                             class="form-textarea-custom"
                             placeholder="Write the event announcement, details, requirements, or reminders..."
                             required
-                        ><?php 
-echo \gc_e(\gc_context()->post['content'] ?? '');
-?></textarea>
+                        ><?php
+        echo \gc_e(\gc_context()->post['content'] ?? '');
+        ?></textarea>
                     </div>
 
                     <div class="schedule-box">
@@ -399,9 +399,9 @@ echo \gc_e(\gc_context()->post['content'] ?? '');
                                     type="datetime-local"
                                     name="post_start_date"
                                     class="form-control-custom"
-                                    value="<?php 
-echo \gc_e(\gc_context()->post['post_start_date'] ?? '');
-?>"
+                                    value="<?php
+        echo \gc_e(\gc_context()->post['post_start_date'] ?? '');
+        ?>"
                                 >
                                 <div class="helper-text">The post becomes visible to alumni on this date and time.</div>
                             </div>
@@ -412,9 +412,9 @@ echo \gc_e(\gc_context()->post['post_start_date'] ?? '');
                                     type="datetime-local"
                                     name="post_end_date"
                                     class="form-control-custom"
-                                    value="<?php 
-echo \gc_e(\gc_context()->post['post_end_date'] ?? '');
-?>"
+                                    value="<?php
+        echo \gc_e(\gc_context()->post['post_end_date'] ?? '');
+        ?>"
                                 >
                                 <div class="helper-text">The post will no longer appear in alumni feed after this date and time.</div>
                             </div>
@@ -434,9 +434,9 @@ echo \gc_e(\gc_context()->post['post_end_date'] ?? '');
 
                     <div class="actions">
                         <button type="submit" class="btn-orange">📤 Post Event</button>
-                        <a class="btn-outline-custom" href="<?php 
-echo \url('');
-?>/admin/events_list.php">← View Posts</a>
+                        <a class="btn-outline-custom" href="<?php
+        echo \url('');
+        ?>/admin/events_list.php">← View Posts</a>
                     </div>
                 </form>
             </div>
@@ -444,5 +444,5 @@ echo \url('');
     </div>
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+        echo \gc_partial('footer', \get_defined_vars());

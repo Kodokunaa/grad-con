@@ -302,6 +302,7 @@ final class MigrationTest extends TestCase
         $application = DB::table('applications')->find($applicationId);
         $eventId = DB::table('events')->insertGetId(['title' => 'Inventory event', 'content' => 'Test', 'posted_by' => $users['admin']->id]);
         $event = DB::table('events')->find($eventId);
+        $officerEventId = DB::table('events')->insertGetId(['title' => 'Officer inventory event', 'content' => 'Test', 'posted_by' => $users['alumni_officer']->id]);
         $trainingId = DB::table('trainings')->insertGetId(['title' => 'Inventory training', 'content' => 'Test', 'training_date' => date('Y-m-d'), 'target_course' => 'BSIS', 'posted_by' => $users['admin']->id]);
         $failures = [];
         $this->withoutExceptionHandling();
@@ -314,7 +315,7 @@ final class MigrationTest extends TestCase
                 $query['id'] = $users['alumni']->id;
             }
             if (str_contains($path, 'events_edit') || str_contains($path, 'events_delete')) {
-                $query['id'] = $event->id;
+                $query['id'] = $role === 'alumni_officer' ? $officerEventId : $event->id;
             }
             if (str_contains($path, 'jobs_edit') || str_contains($path, 'job_details')) {
                 $query['id'] = $job->id;

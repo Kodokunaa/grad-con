@@ -243,28 +243,28 @@
         </div>
     </div>
 
-    <?php 
+    <?php
 if ($msg) {
     ?>
-        <div class="alert-box alert-success-custom"><?php 
+        <div class="alert-box alert-success-custom"><?php
     echo \gc_e($msg);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+    ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert-box alert-danger-custom"><?php 
+        <div class="alert-box alert-danger-custom"><?php
     echo \gc_e($error);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+    ?>
 
     <div class="form-card">
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
 @csrf
             <div class="form-group">
                 <label class="form-label">Title</label>
@@ -272,9 +272,9 @@ if ($error) {
                     type="text"
                     name="title"
                     class="form-control-custom"
-                    value="<?php 
-echo \gc_e(\gc_context()->post['title'] ?? '');
-?>"
+                    value="<?php
+    echo \gc_e(\gc_context()->post['title'] ?? '');
+    ?>"
                     required
                 >
             </div>
@@ -286,9 +286,9 @@ echo \gc_e(\gc_context()->post['title'] ?? '');
                     rows="5"
                     class="form-textarea-custom"
                     required
-                ><?php 
-echo \gc_e(\gc_context()->post['content'] ?? '');
-?></textarea>
+                ><?php
+    echo \gc_e(\gc_context()->post['content'] ?? '');
+    ?></textarea>
             </div>
 
             <div class="advance-box">
@@ -304,9 +304,9 @@ echo \gc_e(\gc_context()->post['content'] ?? '');
                             type="datetime-local"
                             name="post_start_date"
                             class="form-control-custom"
-                            value="<?php 
-echo \gc_e(\gc_context()->post['post_start_date'] ?? '');
-?>"
+                            value="<?php
+    echo \gc_e(\gc_context()->post['post_start_date'] ?? '');
+    ?>"
                         >
                         <div class="helper-text">The post will appear in the alumni feed starting from this date and time.</div>
                     </div>
@@ -317,9 +317,9 @@ echo \gc_e(\gc_context()->post['post_start_date'] ?? '');
                             type="datetime-local"
                             name="post_end_date"
                             class="form-control-custom"
-                            value="<?php 
-echo \gc_e(\gc_context()->post['post_end_date'] ?? '');
-?>"
+                            value="<?php
+    echo \gc_e(\gc_context()->post['post_end_date'] ?? '');
+    ?>"
                         >
                         <div class="helper-text">After this date and time, the post will no longer appear in the alumni feed.</div>
                     </div>
@@ -341,13 +341,13 @@ echo \gc_e(\gc_context()->post['post_end_date'] ?? '');
 
             <div class="actions">
                 <button type="submit" class="btn-orange">Post</button>
-                <a class="btn-outline-custom" href="<?php 
-echo \url('');
-?>/alumni_officer/events_list.php">View Posts</a>
+                <a class="btn-outline-custom" href="<?php
+    echo \url('');
+    ?>/alumni_officer/events_list.php">View Posts</a>
             </div>
         </form>
     </div>
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+    echo \gc_partial('footer', \get_defined_vars());

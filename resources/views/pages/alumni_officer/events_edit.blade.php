@@ -286,70 +286,71 @@
         <p class="page-subtitle">Update the selected event.</p>
     </div>
 
-    <?php 
+    <?php
 if ($msg) {
     ?>
-        <div class="alert-box alert-success-custom"><?php 
+        <div class="alert-box alert-success-custom"><?php
     echo htmlspecialchars($msg);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+    ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
-        <div class="alert-box alert-danger-custom"><?php 
+        <div class="alert-box alert-danger-custom"><?php
     echo htmlspecialchars($error);
     ?></div>
-    <?php 
+    <?php
 }
-?>
+    ?>
 
     <div class="form-card">
-        <form method="POST" enctype="multipart/form-data">
-@csrf
+        <form method="POST" action="{{ route('events.update', $id) }}" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
             <div class="form-group">
                 <label class="form-label">Title</label>
-                <input type="text" name="title" class="form-control-custom" value="<?php 
-echo htmlspecialchars($event["title"]);
-?>" required>
+                <input type="text" name="title" class="form-control-custom" value="<?php
+    echo htmlspecialchars($event['title']);
+    ?>" required>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Content</label>
-                <textarea name="content" rows="5" class="form-textarea-custom" required><?php 
-echo htmlspecialchars($event["content"]);
-?></textarea>
+                <textarea name="content" rows="5" class="form-textarea-custom" required><?php
+    echo htmlspecialchars($event['content']);
+    ?></textarea>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Replace Image (optional)</label>
                 <input type="file" name="image" class="form-file-custom" accept="image/*">
-                <?php 
-if (!empty($event["image"])) {
+                <?php
+if (! empty($event['image'])) {
     ?>
                     <div class="preview-wrapper">
-                        <img src="<?php 
+                        <img src="<?php
     echo \url('');
-    ?>/uploads/events/<?php 
-    echo htmlspecialchars($event["image"]);
+    ?>/uploads/events/<?php
+    echo htmlspecialchars($event['image']);
     ?>" class="preview-img" alt="Preview">
                     </div>
-                <?php 
+                <?php
 }
-?>
+    ?>
             </div>
 
             <div class="actions">
                 <button type="submit" class="btn-orange">Update Event</button>
-                <a href="<?php 
-echo \url('');
-?>/alumni_officer/events_list.php" class="btn-outline-custom">Back</a>
+                <a href="<?php
+    echo \url('');
+    ?>/alumni_officer/events_list.php" class="btn-outline-custom">Back</a>
             </div>
         </form>
     </div>
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+    echo \gc_partial('footer', \get_defined_vars());

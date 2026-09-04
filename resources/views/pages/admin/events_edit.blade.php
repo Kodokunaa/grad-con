@@ -229,38 +229,39 @@
 <div class="content">
     <div class="page-header">
         <h3 class="page-title">Edit Event</h3>
-        <a class="back-btn" href="<?php 
+        <a class="back-btn" href="<?php
 echo \url('');
-?>/admin/events_list.php">Back</a>
+        ?>/admin/events_list.php">Back</a>
     </div>
 
-    <?php 
+    <?php
 if ($msg) {
     ?>
         <div class="alert-box alert-success-custom">
-            <?php 
+            <?php
     echo htmlspecialchars($msg);
     ?>
         </div>
-    <?php 
+    <?php
 }
-?>
+        ?>
 
-    <?php 
+    <?php
 if ($error) {
     ?>
         <div class="alert-box alert-danger-custom">
-            <?php 
+            <?php
     echo htmlspecialchars($error);
     ?>
         </div>
-    <?php 
+    <?php
 }
-?>
+        ?>
 
     <div class="form-card">
-        <form method="POST" enctype="multipart/form-data">
-@csrf
+        <form method="POST" action="{{ route('events.update', $id) }}" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
 
             <div class="form-group">
                 <label class="form-label">Title</label>
@@ -268,9 +269,9 @@ if ($error) {
                     type="text"
                     name="title"
                     class="form-control-custom"
-                    value="<?php 
-echo htmlspecialchars($event["title"] ?? "");
-?>"
+                    value="<?php
+        echo htmlspecialchars($event['title'] ?? '');
+        ?>"
                     required
                 >
             </div>
@@ -282,9 +283,9 @@ echo htmlspecialchars($event["title"] ?? "");
                     rows="6"
                     class="form-textarea-custom"
                     required
-                ><?php 
-echo htmlspecialchars($event["content"] ?? "");
-?></textarea>
+                ><?php
+        echo htmlspecialchars($event['content'] ?? '');
+        ?></textarea>
             </div>
 
             <div class="form-group">
@@ -298,17 +299,17 @@ echo htmlspecialchars($event["content"] ?? "");
                 <div class="helper-text">Max 3MB • JPG / JPEG / PNG / WEBP</div>
             </div>
 
-            <?php 
-if (!empty($event["image"])) {
+            <?php
+if (! empty($event['image'])) {
     ?>
                 <div class="image-preview-wrap">
                     <div class="image-preview-title">Current Image</div>
 
                     <img
-                        src="<?php 
+                        src="<?php
     echo \url('');
-    ?>/uploads/events/<?php 
-    echo htmlspecialchars($event["image"]);
+    ?>/uploads/events/<?php
+    echo htmlspecialchars($event['image']);
     ?>"
                         alt="Current event image"
                         class="event-preview-image"
@@ -319,20 +320,20 @@ if (!empty($event["image"])) {
                         <label for="remove_image">Remove current image</label>
                     </div>
                 </div>
-            <?php 
+            <?php
 }
-?>
+        ?>
 
             <div class="actions">
                 <button type="submit" class="btn-orange">Save Changes</button>
-                <a class="btn-outline-custom" href="<?php 
-echo \url('');
-?>/admin/events_list.php">Cancel</a>
+                <a class="btn-outline-custom" href="<?php
+        echo \url('');
+        ?>/admin/events_list.php">Cancel</a>
             </div>
 
         </form>
     </div>
 </div>
 
-<?php 
-echo \gc_partial('footer', \get_defined_vars());
+<?php
+        echo \gc_partial('footer', \get_defined_vars());
