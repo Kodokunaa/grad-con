@@ -265,7 +265,7 @@ if ($error) {
 }
         ?>
 
-        <form method="POST">
+        <form method="POST" action="{{ route('alumni.employment.store') }}">
 @csrf
             <div class="row g-3">
                 <div class="col-md-4">

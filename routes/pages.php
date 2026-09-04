@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UpdateAlumniApprovalController;
 use App\Http\Controllers\Alumni\DestroyEmploymentController;
 use App\Http\Controllers\Alumni\RespondToOfferController;
 use App\Http\Controllers\Alumni\StoreEducationController;
+use App\Http\Controllers\Alumni\StoreEmploymentController;
 use App\Http\Controllers\Application\UpdateApplicationStatusController;
 use App\Http\Controllers\Employer\AlumniDirectoryActionController;
 use App\Http\Controllers\Event\ArchiveEventController;
@@ -146,7 +147,7 @@ Route::get('/alumni/dashboard.php', AlumniDashboardController::class)->middlewar
 Route::get('/alumni/edit_profile.php', AlumniEditProfileController::class)->middleware('account:alumni')->name('alumni.edit_profile');
 Route::post('/alumni/edit_profile.php', AlumniEditProfileController::class)->middleware('account:alumni');
 Route::get('/alumni/employment_history.php', AlumniEmploymentHistoryController::class)->middleware('account:alumni')->name('alumni.employment_history');
-Route::post('/alumni/employment_history.php', AlumniEmploymentHistoryController::class)->middleware('account:alumni');
+Route::post('/alumni/employment_history.php', StoreEmploymentController::class)->middleware('account:alumni')->name('alumni.employment.store');
 Route::delete('/alumni/employment/{employment}', DestroyEmploymentController::class)->middleware('account:alumni')->name('alumni.employment.destroy');
 Route::get('/alumni/feed.php', AlumniFeedController::class)->middleware('account:alumni')->name('alumni.feed');
 Route::post('/alumni/feed.php', AlumniFeedController::class)->middleware('account:alumni');

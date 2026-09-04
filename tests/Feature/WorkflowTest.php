@@ -468,7 +468,7 @@ final class WorkflowTest extends TestCase
     public function test_employment_history_uses_laravel_transactions(): void
     {
         $alumni = $this->user('alumni');
-        $this->actingAs($alumni)->post('/alumni/employment_history.php', ['add_employment' => 1, 'company_name' => 'Employment Test', 'job_title' => 'Developer', 'start_date' => '2026-01-01', 'end_date' => '', 'employment_type' => 'Full-time', 'location' => 'Calapan', 'job_description' => 'Software development'])->assertOk();
+        $this->actingAs($alumni)->post('/alumni/employment_history.php', ['add_employment' => 1, 'company_name' => 'Employment Test', 'job_title' => 'Developer', 'start_date' => '2026-01-01', 'end_date' => '', 'employment_type' => 'Full-time', 'location' => 'Calapan', 'job_description' => 'Software development'])->assertRedirect();
         $this->assertDatabaseHas('employment_history', ['user_id' => $alumni->id, 'company_name' => 'Employment Test']);
     }
 }
