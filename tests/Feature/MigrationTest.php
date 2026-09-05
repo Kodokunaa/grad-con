@@ -99,6 +99,7 @@ final class MigrationTest extends TestCase
         $this->assertStringContainsString('DocumentRoot /var/www/html/public', file_get_contents(base_path('docker/apache-vhost.conf')));
         $this->assertStringContainsString('php artisan migrate --force', $startup);
         $this->assertStringContainsString('php artisan gradconn:check --database --mail', $startup);
+        $this->assertStringContainsString('php artisan db:seed --class=AdminSeeder --force', $startup);
         $this->assertStringContainsString('chown www-data:www-data storage/certs/aiven-ca.pem', $startup);
         $this->assertStringContainsString('chmod 640 storage/certs/aiven-ca.pem', $startup);
         $this->assertStringContainsString('php artisan config:clear', $startup);

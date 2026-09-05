@@ -16,6 +16,9 @@ fi
 
 php artisan config:clear
 php artisan migrate --force
+if [ -n "${ADMIN_SEED_PASSWORD:-}" ]; then
+    php artisan db:seed --class=AdminSeeder --force
+fi
 php artisan gradconn:check --database --mail
 php artisan optimize
 

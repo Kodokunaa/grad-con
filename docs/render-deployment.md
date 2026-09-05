@@ -50,9 +50,10 @@ php artisan gradconn:check --database --mail
 php artisan gradconn:test-mail your-address@gmail.com
 ```
 
-To create the administrator, temporarily supply `ADMIN_SEED_*` and run
-`php artisan db:seed --class=AdminUserSeeder --force`. Remove the seed password from
-the environment afterward.
+To create the administrator without a Render Shell, temporarily supply the
+`ADMIN_SEED_*` environment variables and deploy. Startup runs `AdminSeeder` when
+`ADMIN_SEED_PASSWORD` is present. Remove the password from the environment after
+the account has been created so later deployments cannot reset it.
 
 ## Troubleshooting
 
