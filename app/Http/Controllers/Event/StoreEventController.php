@@ -15,8 +15,8 @@ final class StoreEventController extends Controller
     {
         $data = $request->safe()->except('image');
         $data['posted_by'] = $request->user()->id;
-        $data['post_start_date'] = $request->date('post_start_date');
-        $data['post_end_date'] = $request->date('post_end_date');
+        $data['post_start_date'] = $request->filled('post_start_date') ? $request->date('post_start_date') : null;
+        $data['post_end_date'] = $request->filled('post_end_date') ? $request->date('post_end_date') : null;
 
         if ($file = $request->file('image')) {
             $data['image'] = 'event_'.Str::uuid().'.'.$file->extension();

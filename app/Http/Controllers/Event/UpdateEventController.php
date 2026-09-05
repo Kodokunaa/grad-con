@@ -16,8 +16,8 @@ final class UpdateEventController extends Controller
     {
         Gate::authorize('update', $event);
         $data = $request->safe()->except(['image', 'remove_image']);
-        $data['post_start_date'] = $request->date('post_start_date');
-        $data['post_end_date'] = $request->date('post_end_date');
+        $data['post_start_date'] = $request->filled('post_start_date') ? $request->date('post_start_date') : null;
+        $data['post_end_date'] = $request->filled('post_end_date') ? $request->date('post_end_date') : null;
         $oldImage = $event->image;
         $newImage = null;
 

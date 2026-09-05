@@ -265,7 +265,12 @@ final class WorkflowTest extends TestCase
     {
         Mail::fake();
         $admin = $this->user('admin');
-        $this->actingAs($admin)->post('/events', ['title' => 'Workflow event', 'content' => 'Event description'])->assertRedirect(route('admin.events_create'));
+        $this->actingAs($admin)->post('/events', [
+            'title' => 'Workflow event',
+            'content' => 'Event description',
+            'post_start_date' => '',
+            'post_end_date' => '',
+        ])->assertRedirect(route('admin.events_create'));
         $this->assertDatabaseHas('events', ['title' => 'Workflow event', 'posted_by' => $admin->id]);
         $alumni = $this->user('alumni');
         $this->actingAs($alumni)->post('/profile/education', ['add_education' => 1, 'school_name' => 'Test College', 'degree' => 'Tertiary', 'start_year' => '2021', 'end_year' => '2025'])->assertRedirect();
@@ -294,6 +299,7 @@ final class WorkflowTest extends TestCase
 
         $this->actingAs($admin)->put(route('events.update', $eventId), [
             'title' => 'Updated event', 'content' => 'Changed',
+            'post_start_date' => '', 'post_end_date' => '',
         ])->assertRedirect(route('admin.events_edit', ['id' => $eventId]));
         $this->assertDatabaseHas('events', ['id' => $eventId, 'title' => 'Updated event']);
     }
