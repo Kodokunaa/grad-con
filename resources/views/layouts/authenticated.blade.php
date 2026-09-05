@@ -22,7 +22,7 @@
         @endif
     </nav>
 </aside>
-<header class="app-header"><strong>@yield('heading', 'GradConn')</strong><div>{{ auth()->user()->fullname }} <button type="button" data-logout-open>Log out</button></div></header>
+<header class="app-header"><strong>@yield('heading', 'GradConn')</strong><div class="app-user">{{ auth()->user()->fullname }} <button type="button" data-logout-trigger>Log out</button></div></header>
 <main class="app-main">
     @if(session('status'))<div class="flash success">{{ session('status') }}</div>@endif
     @if($errors->any())<div class="flash error">{{ $errors->first() }}</div>@endif

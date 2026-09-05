@@ -21,5 +21,11 @@
         <form method="POST" action="{{ url('/feed/'.$post['post_type'].'/'.$post['id'].'/comments') }}" class="comment-form">@csrf<textarea name="comment" required maxlength="3000" placeholder="Write a comment"></textarea><button>Post</button></form>
         @if($manageEvents && $post['post_type']==='event')<form method="POST" action="{{ route('events.archive',$post['id']) }}">@csrf @method('PATCH')<button class="danger">Archive event</button></form>@endif
     </article>
-@empty <div class="empty">No posts are available.</div> @endforelse
+@empty
+    <div class="empty-state">
+        <div class="empty-state__icon" aria-hidden="true">◇</div>
+        <h2>No posts yet</h2>
+        <p>Events and training announcements will appear here when they are published.</p>
+    </div>
+@endforelse
 </div>

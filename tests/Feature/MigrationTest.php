@@ -209,6 +209,8 @@ final class MigrationTest extends TestCase
             ->assertSuccessful()
             ->assertSee('action="/auth/logout.php"', false)
             ->assertSee('href="/css/authenticated.css"', false)
+            ->assertSee('data-logout-trigger', false)
+            ->assertSee('class="empty-state"', false)
             ->assertDontSee('action="http://', false);
     }
 
