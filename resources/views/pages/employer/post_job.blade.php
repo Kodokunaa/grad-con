@@ -283,6 +283,8 @@
 </head>
 <body>
 
+@include('partials.role-navbar')
+
 <?php echo view('partials.employer_sidebar', \get_defined_vars()); ?>
 
 <div class="content">

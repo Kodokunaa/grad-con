@@ -295,13 +295,8 @@
 </head>
 <body>
 
-<div class="app-header">
-    <div class="header-brand"><a href="<?php
-echo \url('');
-    ?>">GradConn</a></div>
-    <button class="mobile-sidebar-toggle" type="button" onclick="toggleSidebar(true)">☰</button>
-</div>
-<div class="mobile-sidebar-overlay" onclick="toggleSidebar(false)"></div>
+@include('partials.role-navbar')
+@include('partials.admin_sidebar')
 
 <div class="page">
     <div class="container">
@@ -369,45 +364,6 @@ if ($error) {
     </div>
 </div>
 
-<script>
-    function toggleSidebar(show) {
-        const sidebar = document.querySelector('.sidebar');
-        const overlay = document.querySelector('.mobile-sidebar-overlay');
-        const toggleBtn = document.querySelector('.mobile-sidebar-toggle');
-        if (!sidebar || !overlay || !toggleBtn) return;
-
-        const open = typeof show === 'boolean' ? show : !sidebar.classList.contains('open');
-        if (open) {
-            sidebar.classList.add('open');
-            overlay.classList.add('visible');
-            document.body.classList.add('sidebar-open');
-            toggleBtn.style.display = 'none';
-        } else {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('visible');
-            document.body.classList.remove('sidebar-open');
-            toggleBtn.style.display = 'inline-flex';
-        }
-    }
-
-    function refreshSidebarToggle() {
-        const toggleBtn = document.querySelector('.mobile-sidebar-toggle');
-        if (!toggleBtn) return;
-
-        if (window.innerWidth <= 992) {
-            toggleBtn.style.display = 'inline-flex';
-        } else {
-            toggleBtn.style.display = 'none';
-            document.querySelector('.sidebar')?.classList.remove('open');
-            document.querySelector('.mobile-sidebar-overlay')?.classList.remove('visible');
-            document.body.classList.remove('sidebar-open');
-        }
-    }
-
-    window.addEventListener('resize', refreshSidebarToggle);
-    window.addEventListener('load', refreshSidebarToggle);
-</script>
-
-    @include('partials.logout-modal')
+@include('partials.logout-modal')
 </body>
 </html>

@@ -14,7 +14,7 @@ final class AlumniEditProfileController extends PageController
             $msg = session('status', '');
             $error = '';
             echo view('partials.header', get_defined_vars());
-            echo view('partials.navbar', get_defined_vars());
+            echo view('partials.alumni_sidebar', get_defined_vars());
 
             return $this->pageView('pages.alumni.edit_profile', get_defined_vars());
         });

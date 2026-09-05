@@ -8,8 +8,7 @@
 </head>
 <body>
 @include('partials.role-sidebar')
-<header class="app-header"><div class="header-left"><button class="mobile-sidebar-toggle" type="button" data-sidebar-toggle aria-controls="appSidebar" aria-expanded="false">☰</button><strong>@yield('heading', 'GradConn')</strong></div><div class="app-user">{{ auth()->user()->fullname }} <button type="button" data-logout-trigger>Log out</button></div></header>
-<div class="mobile-sidebar-overlay" aria-hidden="true"></div>
+@include('partials.role-navbar')
 <main class="app-main">
     @if(session('status'))<div class="flash success">{{ session('status') }}</div>@endif
     @if($errors->any())<div class="flash error">{{ $errors->first() }}</div>@endif

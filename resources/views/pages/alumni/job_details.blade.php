@@ -21,6 +21,7 @@
     .container{
         max-width:900px;
         margin:40px auto;
+        transform:translateX(135px);
         padding:0 20px;
     }
 
@@ -184,6 +185,12 @@
         cursor:not-allowed;
     }
 
+    @media (max-width: 992px){
+        .container{
+            transform:none;
+        }
+    }
+
     @media (max-width: 768px){
         .grid{
             grid-template-columns:1fr;
@@ -202,6 +209,9 @@
     <script src="/js/request-security.js" defer></script>
 </head>
 <body>
+
+@include('partials.role-navbar')
+@include('partials.alumni_sidebar')
 
 <div class="container">
 

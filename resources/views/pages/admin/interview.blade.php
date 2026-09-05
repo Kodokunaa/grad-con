@@ -219,6 +219,8 @@ td {
 
 <body>
 
+@include('partials.role-navbar')
+
 <?php echo view('partials.admin_sidebar', \get_defined_vars()); ?>
 
 <div class="content">

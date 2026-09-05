@@ -464,6 +464,14 @@ final class MigrationTest extends TestCase
                 $response = $this->actingAs($user)->get($path.($query ? '?'.http_build_query($query) : ''));
                 if ($response->status() >= 500 || str_contains((string) $response->getContent(), 'SQLSTATE[')) {
                     $failures[] = $path.' failed: '.strip_tags(substr((string) $response->getContent(), 0, 350));
+                } elseif ($response->isSuccessful() && str_contains((string) $response->headers->get('Content-Type'), 'text/html')) {
+                    $content = (string) $response->getContent();
+                    if (! str_contains($content, 'class="sidebar gradconn-sidebar"')) {
+                        $failures[] = $path.' is missing the shared role sidebar.';
+                    }
+                    if (! str_contains($content, 'class="app-header gradconn-navbar"')) {
+                        $failures[] = $path.' is missing the shared authenticated navbar.';
+                    }
                 }
             } catch (\Throwable $e) {
                 $failures[] = $path.': '.$e->getMessage();
@@ -486,6 +494,8 @@ final class MigrationTest extends TestCase
             $response->assertSee('class="sidebar gradconn-sidebar"', false)
                 ->assertSee('href="/css/sidebar.css"', false)
                 ->assertSee('src="/js/sidebar.js"', false)
+                ->assertSee('class="app-header gradconn-navbar"', false)
+                ->assertSee('href="/css/navbar.css"', false)
                 ->assertSee($panel)
                 ->assertSee($link);
             $this->assertSame(1, substr_count($response->getContent(), 'class="sidebar gradconn-sidebar"'));

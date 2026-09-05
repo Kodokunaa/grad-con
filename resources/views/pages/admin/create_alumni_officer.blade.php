@@ -180,6 +180,9 @@
 </head>
 <body>
 
+@include('partials.role-navbar')
+@include('partials.admin_sidebar')
+
 <div class="page">
     <div class="container">
         <div class="card">
