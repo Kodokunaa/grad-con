@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'GradConn')</title>
-    <link rel="stylesheet" href="{{ asset('css/authenticated.css') }}">
+    <link rel="stylesheet" href="/css/authenticated.css">
     @stack('styles')
 </head>
 <body>
@@ -29,7 +29,7 @@
     @yield('content')
 </main>
 @include('partials.logout-modal')
-<script src="{{ asset('js/request-security.js') }}" defer></script>
-<script src="{{ asset('js/feed.js') }}" defer></script>
+<script src="/js/request-security.js" defer></script>
+<script src="/js/feed.js" defer></script>
 @stack('scripts')
 </body></html>

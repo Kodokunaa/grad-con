@@ -201,13 +201,14 @@ final class MigrationTest extends TestCase
 
     public function test_logout_form_stays_https_behind_a_trusted_proxy(): void
     {
-        $admin = $this->user('admin');
+        $alumni = $this->user('alumni');
 
-        $this->actingAs($admin)
+        $this->actingAs($alumni)
             ->withHeader('X-Forwarded-Proto', 'https')
-            ->get('/admin/dashboard.php')
+            ->get('/alumni/feed.php')
             ->assertSuccessful()
             ->assertSee('action="/auth/logout.php"', false)
+            ->assertSee('href="/css/authenticated.css"', false)
             ->assertDontSee('action="http://', false);
     }
 

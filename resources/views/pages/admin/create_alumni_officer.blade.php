@@ -176,7 +176,7 @@
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="{{ asset('js/request-security.js') }}" defer></script>
+    <script src="/js/request-security.js" defer></script>
 </head>
 <body>
 
