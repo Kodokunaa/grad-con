@@ -33,11 +33,19 @@ services:
       - key: AIVEN_CA_BASE64
         sync: false
       - key: SESSION_DRIVER
-        value: database
+        value: cookie
       - key: CACHE_STORE
         value: file
       - key: QUEUE_CONNECTION
-        value: sync
+        value: database
+      - key: DB_QUEUE_TABLE
+        value: queue_jobs
+      - key: PERFORMANCE_FEED_LIMIT
+        value: "30"
+      - key: PERFORMANCE_FEED_CACHE_SECONDS
+        value: "5"
+      - key: PERFORMANCE_DIRECTORY_CACHE_SECONDS
+        value: "30"
       - key: PRIVATE_UPLOADS_DISK
         value: s3
       - key: AWS_ACCESS_KEY_ID

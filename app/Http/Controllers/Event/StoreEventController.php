@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEventRequest;
 use App\Models\Event;
 use App\Support\PrivateUploads;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 final class StoreEventController extends Controller
@@ -29,6 +30,7 @@ final class StoreEventController extends Controller
             PrivateUploads::delete('events', $data['image'] ?? null);
             throw $exception;
         }
+        Cache::forget('feed.events.v1');
 
         $route = $request->user()->role === 'admin' ? 'admin.events_create' : 'alumni_officer.events_create';
 

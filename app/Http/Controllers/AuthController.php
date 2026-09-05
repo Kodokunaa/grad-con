@@ -6,6 +6,7 @@ use App\Http\Requests\LoginRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -66,6 +67,8 @@ final class AuthController extends Controller
         $user->is_active = false;
         $user->status = 'pending';
         $user->save();
+        Cache::forget('feed.mention-users.v1');
+        Cache::forget('sidebar.pending-alumni.v1');
 
         return redirect('/register.php')->with('status', 'Registration successful. Your account is pending admin approval.');
     }

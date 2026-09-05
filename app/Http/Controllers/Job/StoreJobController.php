@@ -7,6 +7,7 @@ use App\Http\Requests\StoreJobRequest;
 use App\Mail\JobOpportunityMail;
 use App\Models\Job;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 
 final class StoreJobController extends Controller
@@ -28,6 +29,7 @@ final class StoreJobController extends Controller
         }
         $job = new Job;
         $job->forceFill($data)->save();
+        Cache::forget('feed.sidebar-jobs.v1');
         User::query()->where('role', 'alumni')->where('is_active', 1)
             ->where(fn ($query) => $query->where('receive_update_notifications', 1)->orWhereNull('receive_update_notifications'))
             ->whereNotNull('email')->where('email', '<>', '')->eachById(function (User $recipient) use ($job) {

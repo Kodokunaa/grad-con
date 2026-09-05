@@ -21,6 +21,7 @@ Set the real `DB_*` values before migrating. Standard XAMPP MySQL uses port `330
 - [Render deployment](docs/render-deployment.md)
 - [Backup and restore](docs/backup-restore.md)
 - [Testing](docs/testing.md)
+- [Performance and load testing](docs/performance.md)
 - [Troubleshooting](docs/troubleshooting.md)
 
 Run `php artisan gradconn:check --database` and `composer verify` before deployment. Point the production web root to `public/`. Private files remain under `storage/app/private/files/uploads` and are served only through authorized routes.

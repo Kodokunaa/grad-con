@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libcurl4-openssl-dev libicu-dev libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-install bcmath curl dom intl mbstring pdo_mysql xml zip opcache \
     && a2enmod rewrite headers expires deflate \
+    && sed -ri 's/^\s*StartServers\s+.*/StartServers 2/; s/^\s*MinSpareServers\s+.*/MinSpareServers 2/; s/^\s*MaxSpareServers\s+.*/MaxSpareServers 5/; s/^\s*MaxRequestWorkers\s+.*/MaxRequestWorkers 16/; s/^\s*MaxConnectionsPerChild\s+.*/MaxConnectionsPerChild 1000/' /etc/apache2/mods-available/mpm_prefork.conf \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /var/www/html

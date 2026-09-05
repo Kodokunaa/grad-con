@@ -41,7 +41,12 @@ address must be authenticated in the same Brevo account.
 
 The container builds frontend assets, installs production packages, decodes the
 Aiven certificate, migrates the database, caches Laravel configuration, and starts
-Apache on Render's assigned port. It does not seed users automatically.
+Apache on Render's assigned port. It also runs the database-backed Laravel queue
+worker used for email delivery. It does not seed users automatically.
+
+Production uses encrypted cookie sessions to avoid a database query on every
+request. Existing users may need to sign in once after the first deployment that
+switches from database sessions.
 
 In Render Shell, run:
 
@@ -63,3 +68,5 @@ the account has been created so later deployments cannot reset it.
 - For an initial 500, inspect Render Logs and check `APP_KEY`, database variables,
   and migration output.
 - A free Render service can sleep while idle, so its first request may be slower.
+- If email remains pending, inspect the Render logs for the queue worker and run
+  `php artisan queue:failed` in Render Shell.

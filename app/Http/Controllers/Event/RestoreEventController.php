@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Event;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 
 final class RestoreEventController extends Controller
@@ -14,6 +15,7 @@ final class RestoreEventController extends Controller
         abort_unless($event->is_archived, 422, 'Event is not archived.');
 
         $event->forceFill(['is_archived' => false, 'archived_at' => null])->save();
+        Cache::forget('feed.events.v1');
 
         $route = request()->user()->role === 'admin' ? 'admin.admin_archive' : 'alumni_officer.archive';
 

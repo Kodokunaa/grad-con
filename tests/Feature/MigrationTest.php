@@ -120,6 +120,7 @@ final class MigrationTest extends TestCase
         $this->assertStringContainsString('chown www-data:www-data storage/certs/aiven-ca.pem', $startup);
         $this->assertStringContainsString('chmod 640 storage/certs/aiven-ca.pem', $startup);
         $this->assertStringContainsString('php artisan config:clear', $startup);
+        $this->assertStringContainsString('php artisan queue:work', $startup);
         $this->assertStringNotContainsString('php artisan optimize:clear', $startup);
         $this->assertStringContainsString('if [ -n "${ADMIN_SEED_PASSWORD:-}" ]', $startup);
         $this->assertStringContainsString('composer install --no-dev', $dockerfile);
@@ -127,6 +128,9 @@ final class MigrationTest extends TestCase
         $this->assertStringContainsString('docker-php-ext-install bcmath curl dom intl mbstring pdo_mysql xml zip', $dockerfile);
         $this->assertStringContainsString('BREVO_API_KEY', $blueprint);
         $this->assertMatchesRegularExpression('/key: CACHE_STORE\s+value: file/', $blueprint);
+        $this->assertMatchesRegularExpression('/key: SESSION_DRIVER\s+value: cookie/', $blueprint);
+        $this->assertMatchesRegularExpression('/key: QUEUE_CONNECTION\s+value: database/', $blueprint);
+        $this->assertStringContainsString('MaxRequestWorkers 16', $dockerfile);
         $this->assertMatchesRegularExpression('/key: DB_PORT\s+sync: false/', $blueprint);
         $this->assertStringNotContainsString('api-key-', $blueprint);
         $this->assertStringNotContainsString('ADD COLUMN IF NOT EXISTS', file_get_contents(database_path('schema/gradconn.json')));

@@ -1,7 +1,7 @@
 @php
     $role = auth()->user()->role;
     $pendingCount = $role === 'admin'
-        ? \App\Models\User::query()->where('role', 'alumni')->where('status', 'pending')->count()
+        ? \Illuminate\Support\Facades\Cache::remember('sidebar.pending-alumni.v1', 10, fn () => \App\Models\User::query()->where('role', 'alumni')->where('status', 'pending')->count())
         : 0;
 
     $menus = [

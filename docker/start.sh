@@ -22,4 +22,11 @@ fi
 php artisan gradconn:check --database --mail
 php artisan optimize
 
+(
+    while true; do
+        su -s /bin/sh www-data -c 'php artisan queue:work --sleep=1 --tries=3 --timeout=90 --memory=96' || true
+        sleep 1
+    done
+) &
+
 exec apache2-foreground

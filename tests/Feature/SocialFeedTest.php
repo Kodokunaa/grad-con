@@ -6,7 +6,10 @@ use App\Models\Event;
 use App\Models\PostComment;
 use App\Models\PostReaction;
 use App\Models\User;
+use App\Services\SocialFeedService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 final class SocialFeedTest extends TestCase
@@ -49,5 +52,24 @@ final class SocialFeedTest extends TestCase
         $this->actingAs($alumni)->postJson('/feed/event/'.$event->id.'/reaction', ['reaction_type' => 'invalid'])->assertUnprocessable();
         $this->postJson('/feed/event/'.$event->id.'/reaction', ['reaction_type' => 'like'])->assertNotFound();
         $this->assertSame(0, PostReaction::where('post_id', $event->id)->count());
+    }
+
+    public function test_feed_is_bounded_and_reuses_its_short_lived_cache(): void
+    {
+        Cache::forget('feed.events.v1');
+        $officer = $this->user('alumni_officer');
+        $alumni = $this->user('alumni');
+        foreach (range(1, 35) as $number) {
+            Event::forceCreate(['title' => 'Cached event '.$number, 'content' => 'Performance test', 'posted_by' => $officer->id, 'is_archived' => false, 'created_at' => now()->subSeconds($number)]);
+        }
+        $feed = app(SocialFeedService::class);
+
+        $this->assertCount(config('performance.feed_limit'), $feed->postsFor($alumni));
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->assertCount(config('performance.feed_limit'), $feed->postsFor($alumni));
+        $this->assertSame([], DB::getQueryLog());
+        DB::disableQueryLog();
+        Cache::forget('feed.events.v1');
     }
 }

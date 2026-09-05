@@ -9,6 +9,7 @@ use App\Models\PostNotification;
 use App\Models\PostReaction;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 final class SocialFeedService
@@ -17,12 +18,18 @@ final class SocialFeedService
 
     public function postsFor(User $user): array
     {
-        $events = Event::query()->where('is_archived', false)
+        $events = Cache::remember('feed.events.v1', config('performance.feed_cache_seconds'), fn () => Event::query()
+            ->where('is_archived', false)
             ->where(fn ($q) => $q->whereNull('post_start_date')->orWhere('post_start_date', '<=', now()))
             ->where(fn ($q) => $q->whereNull('post_end_date')->orWhere('post_end_date', '>=', now()))
-            ->with(['author', 'reactions', 'comments.author'])->get()->map(fn ($event) => $this->postArray($event, 'event'));
+            ->with(['author', 'reactions', 'comments.author'])
+            ->latest('created_at')
+            ->limit(config('performance.feed_limit'))
+            ->get()
+            ->map(fn ($event) => $this->postArray($event, 'event'))
+            ->all());
 
-        return $events->sortByDesc('created_at')->values()->map(function ($post) use ($user) {
+        return collect($events)->map(function ($post) use ($user) {
             $post['user_reaction'] = collect($post['reactions'])->firstWhere('user_id', $user->id)['reaction_type'] ?? '';
             unset($post['reactions']);
 
@@ -32,19 +39,22 @@ final class SocialFeedService
 
     public function sidebarJobs(): array
     {
-        return Job::query()->where('is_open', true)->latest('id')->limit(5)->get(['id', 'title', 'employer_company', 'location', 'description'])->toArray();
+        return Cache::remember('feed.sidebar-jobs.v1', config('performance.directory_cache_seconds'), fn () => Job::query()
+            ->where('is_open', true)->latest('id')->limit(5)->get(['id', 'title', 'employer_company', 'location', 'description'])->toArray());
     }
 
     public function mentionUsers(): array
     {
-        return User::query()->whereNotNull('fullname')->where('fullname', '<>', '')->orderBy('fullname')->get(['id', 'fullname'])->map(fn ($u) => ['id' => $u->id, 'name' => $u->fullname])->all();
+        return Cache::remember('feed.mention-users.v1', config('performance.directory_cache_seconds'), fn () => User::query()
+            ->whereNotNull('fullname')->where('fullname', '<>', '')->orderBy('fullname')->get(['id', 'fullname'])
+            ->map(fn ($u) => ['id' => $u->id, 'name' => $u->fullname])->all());
     }
 
     public function toggleReaction(User $user, string $type, int $id, string $reaction): array
     {
         $this->post($type, $id);
 
-        return DB::transaction(function () use ($user, $type, $id, $reaction) {
+        $result = DB::transaction(function () use ($user, $type, $id, $reaction) {
             $existing = PostReaction::where(['post_type' => $type, 'post_id' => $id, 'user_id' => $user->id])->first();
             if ($existing?->reaction_type === $reaction) {
                 $existing->delete();
@@ -57,13 +67,16 @@ final class SocialFeedService
 
             return ['reaction' => $selected, 'counts' => $this->reactionCounts($type, $id)];
         });
+        Cache::forget('feed.events.v1');
+
+        return $result;
     }
 
     public function comment(User $user, string $type, int $id, string $text, ?int $parentId): PostComment
     {
         $post = $this->post($type, $id);
 
-        return DB::transaction(function () use ($user, $type, $id, $text, $parentId, $post) {
+        $comment = DB::transaction(function () use ($user, $type, $id, $text, $parentId, $post) {
             $parent = $parentId ? PostComment::where(['id' => $parentId, 'post_type' => $type, 'post_id' => $id])->firstOrFail() : null;
             if ($parent?->parent_comment_id) {
                 $parent = $parent->parent;
@@ -78,6 +91,9 @@ final class SocialFeedService
 
             return $comment;
         });
+        Cache::forget('feed.events.v1');
+
+        return $comment;
     }
 
     public function deleteComment(User $user, PostComment $comment): void
@@ -87,6 +103,7 @@ final class SocialFeedService
             $comment->replies()->delete();
             $comment->delete();
         });
+        Cache::forget('feed.events.v1');
     }
 
     private function post(string $type, int $id): Event
