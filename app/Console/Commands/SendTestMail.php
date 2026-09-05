@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\DeliveryTestMail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -27,9 +28,7 @@ final class SendTestMail extends Command
         }
 
         try {
-            Mail::raw('GradConn email delivery is working.', function ($message) use ($recipient) {
-                $message->to($recipient)->subject('GradConn email test');
-            });
+            Mail::to($recipient)->send(new DeliveryTestMail);
         } catch (\Throwable $exception) {
             report($exception);
             $this->components->error('Delivery failed: '.$exception->getMessage());

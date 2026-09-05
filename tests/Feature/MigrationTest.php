@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Mail\AlumniAccountApprovedMail;
+use App\Mail\DeliveryTestMail;
 use App\Models\JobApplication;
 use App\Models\User;
 use App\Notifications\ResetPassword;
@@ -32,7 +33,20 @@ final class MigrationTest extends TestCase
 
         $this->assertStringContainsString('GradConn', $html);
         $this->assertStringContainsString('#f97316', $html);
+        $this->assertStringContainsString('linear-gradient(135deg,#f97316 0%,#ea580c 100%)', $html);
+        $this->assertStringContainsString('Alumni Account Update', $html);
         $this->assertStringContainsString('Account approved', $html);
+    }
+
+    public function test_delivery_command_sends_the_branded_html_template(): void
+    {
+        Mail::fake();
+        config(['mail.default' => 'brevo']);
+
+        $this->artisan('gradconn:test-mail recipient@example.com')->assertSuccessful();
+
+        Mail::assertSent(DeliveryTestMail::class, fn (DeliveryTestMail $mail) => str_contains($mail->render(), 'Email Delivery Confirmed')
+            && str_contains($mail->render(), '#f97316'));
     }
 
     public function test_shared_html_escaping_helper_preserves_legacy_behavior(): void

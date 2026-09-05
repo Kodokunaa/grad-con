@@ -1,4 +1,4 @@
-<x-mail::message>
+<x-mail::message title="Account Approved" eyebrow="Alumni Account Update">
 # Account approved
 
 Dear {{ $alumni->fullname }},

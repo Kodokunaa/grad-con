@@ -1,4 +1,4 @@
-<x-mail::message>
+<x-mail::message :title="$action === 'accept' ? 'Application Accepted' : 'Interview Selection'" eyebrow="Application Update">
 # {{ $action === 'accept' ? 'Application accepted' : 'Interview selection' }}
 
 Hello {{ $application->alumni->fullname }},

@@ -1,4 +1,4 @@
-<x-mail::message>
+<x-mail::message title="Interview Invitation" eyebrow="Schedule Update">
 # Interview invitation
 
 Hello {{ $interview->alumni->fullname }},

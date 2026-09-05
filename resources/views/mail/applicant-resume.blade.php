@@ -1,4 +1,4 @@
-<x-mail::message>
+<x-mail::message title="New Applicant Résumé" eyebrow="Application Update">
 # New applicant resume
 
 The resume for **{{ $application->alumni->fullname }}** is attached to this email.

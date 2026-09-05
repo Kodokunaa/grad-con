@@ -1,4 +1,4 @@
-<x-mail::message>
+<x-mail::message title="Job Offer" eyebrow="Career Opportunity">
 # {{ $offer->subject }}
 
 Hello {{ $offer->alumni->fullname ?: 'Alumni' }},
