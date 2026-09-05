@@ -104,7 +104,7 @@ final class MigrationTest extends TestCase
         $this->assertStringContainsString('chmod 640 storage/certs/aiven-ca.pem', $startup);
         $this->assertStringContainsString('php artisan config:clear', $startup);
         $this->assertStringNotContainsString('php artisan optimize:clear', $startup);
-        $this->assertStringNotContainsString('db:seed', $startup);
+        $this->assertStringContainsString('if [ -n "${ADMIN_SEED_PASSWORD:-}" ]', $startup);
         $this->assertStringContainsString('composer install --no-dev', $dockerfile);
         $this->assertStringContainsString('FROM php:8.3-cli AS vendor', $dockerfile);
         $this->assertStringContainsString('docker-php-ext-install bcmath curl dom intl mbstring pdo_mysql xml zip', $dockerfile);
