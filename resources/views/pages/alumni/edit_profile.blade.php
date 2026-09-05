@@ -101,7 +101,7 @@ echo ($user['job_aligned'] ?? '') === 'No' ? 'selected' : '';
                         <button class="btn btn-dark">Save Changes</button>
                         <a class="btn btn-outline-dark" href="<?php 
 echo \url('');
-?>/alumni/feed.php">Back to Feed</a>
+?>/alumni/feed">Back to Feed</a>
                     </div>
                 </form>
             </div>

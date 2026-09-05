@@ -299,7 +299,7 @@
         <h3 class="page-title">Job List</h3>
         <a class="post-btn" href="<?php 
 echo \url('');
-?>/admin/jobs_create.php">Post Job</a>
+?>/admin/jobs_create">Post Job</a>
     </div>
 
     <div class="row g-3">
@@ -393,7 +393,7 @@ if (count($jobs) === 0) {
                                 <a class="btn-outline-custom"
                                    href="<?php 
             echo \url('');
-            ?>/admin/applications.php?job_id=<?php 
+            ?>/admin/applications?job_id=<?php 
             echo (int) $j['id'];
             ?>&readonly=1">
                                     Monitor Applications
@@ -404,7 +404,7 @@ if (count($jobs) === 0) {
                                 <a class="btn-orange"
                                    href="<?php 
             echo \url('');
-            ?>/admin/applications.php?job_id=<?php 
+            ?>/admin/applications?job_id=<?php 
             echo (int) $j['id'];
             ?>">
                                     View Applications
@@ -437,7 +437,7 @@ if (count($jobs) === 0) {
     <div class="back-wrap">
         <a class="back-link" href="<?php 
 echo \url('');
-?>/admin/dashboard.php">← Back to Dashboard</a>
+?>/admin/dashboard">← Back to Dashboard</a>
     </div>
 
 </div>

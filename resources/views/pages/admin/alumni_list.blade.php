@@ -789,10 +789,10 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control:before{
         <div class="header-actions">
             <a class="report-btn" href="<?php 
 echo \url('');
-?>/admin/alumni_report.php">Report</a>
+?>/admin/alumni_report">Report</a>
             <a class="create-btn" href="<?php 
 echo \url('');
-?>/admin/alumni_create.php">Create Alumni</a>
+?>/admin/alumni_create">Create Alumni</a>
         </div>
     </div>
 
@@ -922,7 +922,7 @@ foreach ($alumni as $a) {
                         <td>
                             <a class="edit-btn" href="<?php 
     echo \url('');
-    ?>/admin/alumni_edit.php?id=<?php 
+    ?>/admin/alumni_edit?id=<?php 
     echo (int) $a['id'];
     ?>">Edit</a>
                         </td>

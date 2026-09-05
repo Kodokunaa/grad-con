@@ -24,7 +24,7 @@
 
         document.addEventListener('click', (event) => {
             const element = event.target instanceof Element ? event.target : event.target?.parentElement;
-            const logoutTrigger = element?.closest('[data-logout-trigger], a[href$="/auth/logout.php"]');
+            const logoutTrigger = element?.closest('[data-logout-trigger], a[href$="/auth/logout"]');
             if (logoutTrigger) {
                 event.preventDefault();
                 event.stopPropagation();

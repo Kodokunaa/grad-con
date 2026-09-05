@@ -197,7 +197,7 @@ final class MigrationTest extends TestCase
 
     public function test_registration_hashes_password_and_requires_approval(): void
     {
-        $this->post('/register.php', ['fullname' => 'New Graduate', 'student_id' => 'migration-registration', 'email' => 'registration@example.test', 'course' => 'BSIS', 'batch_year' => '2025', 'password' => 'new-password-123', 'confirm_password' => 'new-password-123'])->assertRedirect('/register.php');
+        $this->post('/register', ['fullname' => 'New Graduate', 'student_id' => 'migration-registration', 'email' => 'registration@example.test', 'course' => 'BSIS', 'batch_year' => '2025', 'password' => 'new-password-123', 'confirm_password' => 'new-password-123'])->assertRedirect('/register');
         $user = User::where('username', 'migration-registration')->firstOrFail();
         $this->assertTrue(Hash::check('new-password-123', $user->password));
         $this->assertFalse($user->is_active);
@@ -208,7 +208,7 @@ final class MigrationTest extends TestCase
 
     public function test_validation_redirects_retain_safe_form_input(): void
     {
-        $this->from('/register.php')->post('/register.php', [
+        $this->from('/register')->post('/register', [
             'fullname' => 'Remembered Graduate',
             'student_id' => '',
             'email' => 'remembered@example.test',
@@ -216,9 +216,9 @@ final class MigrationTest extends TestCase
             'batch_year' => '2025',
             'password' => 'new-password-123',
             'confirm_password' => 'new-password-123',
-        ])->assertRedirect('/register.php');
+        ])->assertRedirect('/register');
 
-        $this->get('/register.php')
+        $this->get('/register')
             ->assertSee('Remembered Graduate')
             ->assertSee('remembered@example.test');
     }
@@ -240,7 +240,7 @@ final class MigrationTest extends TestCase
         $admin = $this->user('admin');
 
         $response = $this->actingAs($admin)
-            ->get('/admin/dashboard.php')
+            ->get('/admin/dashboard')
             ->assertOk()
             ->assertSee('id="logoutLightbox"', false)
             ->assertSee('data-logout-trigger', false)
@@ -249,9 +249,9 @@ final class MigrationTest extends TestCase
         $this->assertSame(1, substr_count($response->getContent(), 'id="logoutLightbox"'));
         $this->assertSame(1, substr_count($response->getContent(), 'js/request-security.js'));
 
-        $this->get('/auth/logout.php')->assertRedirect('/');
+        $this->get('/auth/logout')->assertRedirect('/');
         $this->assertAuthenticatedAs($admin);
-        $this->post('/auth/logout.php')->assertRedirect('/');
+        $this->post('/auth/logout')->assertRedirect('/');
         $this->assertGuest();
     }
 
@@ -261,9 +261,9 @@ final class MigrationTest extends TestCase
 
         $this->actingAs($alumni)
             ->withHeader('X-Forwarded-Proto', 'https')
-            ->get('/alumni/feed.php')
+            ->get('/alumni/feed')
             ->assertSuccessful()
-            ->assertSee('action="/auth/logout.php"', false)
+            ->assertSee('action="/auth/logout"', false)
             ->assertSee('href="/css/authenticated.css"', false)
             ->assertSee('href="/css/logout-modal.css"', false)
             ->assertSee('src="/js/logout-modal.js"', false)
@@ -274,36 +274,38 @@ final class MigrationTest extends TestCase
 
     public function test_public_auth_links_and_legacy_page_aliases_route_correctly(): void
     {
-        $this->get('/auth/admin_login.php')
+        $this->get('/')
             ->assertOk()
             ->assertSee('src="/ccc3d.png"', false)
             ->assertSee('rel="icon" type="image/png" href="/ccc3d.png?v=2"', false)
             ->assertSee(route('password.request'), false)
             ->assertSee(route('register'), false);
 
-        $this->get('/register.php')->assertOk()->assertSee(route('login'), false)->assertSee('/ccc3d.png?v=2', false);
-        $this->get('/reset_password.php')->assertOk()->assertSee(route('login'), false)->assertSee('/ccc3d.png?v=2', false);
+        $this->get('/register')->assertOk()->assertSee(route('login'), false)->assertSee('/ccc3d.png?v=2', false);
+        $this->get('/reset-password')->assertOk()->assertSee(route('login'), false)->assertSee('/ccc3d.png?v=2', false);
+        $this->get('/auth/admin_login.php')->assertRedirect('/', 301);
+        $this->get('/alumni/feed.php?from=bookmark')->assertRedirect('/alumni/feed?from=bookmark', 301);
 
         $admin = $this->user('admin');
         $this->actingAs($admin)
             ->get('/admin/employer_list.php')
-            ->assertRedirect('/admin/create_employer.php');
+            ->assertRedirect('/admin/create_employer', 301);
 
         $employer = $this->user('employer');
         $this->actingAs($employer)
             ->get('/employer/my_jobs.php')
-            ->assertRedirect('/employer/posted_job.php');
-        $this->get('/employer/job_list.php')->assertRedirect('/employer/posted_job.php');
-        $this->get('/employer/jobl_list.php')->assertRedirect('/employer/posted_job.php');
+            ->assertRedirect('/employer/posted_job', 301);
+        $this->get('/employer/job_list.php')->assertRedirect('/employer/posted_job', 301);
+        $this->get('/employer/jobl_list.php')->assertRedirect('/employer/posted_job', 301);
     }
 
     public function test_read_only_pages_and_compatibility_redirects_reject_post_requests(): void
     {
         $cases = [
-            'admin' => ['/admin/dashboard.php', '/admin/alumni_report.php', '/admin/graduates_list.php', '/admin/graduates_report.php', '/admin/graduates_stats.php', '/admin/jobs_list.php', '/admin/offers_history.php', '/admin/reports.php', '/admin/employer_list.php'],
-            'alumni' => ['/alumni/dashboard.php', '/alumni/jobs.php'],
-            'alumni_officer' => ['/alumni_officer/dashboard.php', '/archive.php'],
-            'employer' => ['/employer/dashboard.php', '/employer/my_jobs.php', '/employer/job_list.php', '/employer/jobl_list.php'],
+            'admin' => ['/admin/dashboard', '/admin/alumni_report', '/admin/graduates_list', '/admin/graduates_report', '/admin/graduates_stats', '/admin/jobs_list', '/admin/offers_history', '/admin/reports', '/admin/employer-list'],
+            'alumni' => ['/alumni/dashboard', '/alumni/jobs'],
+            'alumni_officer' => ['/alumni_officer/dashboard', '/archive'],
+            'employer' => ['/employer/dashboard', '/employer/my-jobs', '/employer/job-list'],
         ];
 
         foreach ($cases as $role => $paths) {
@@ -317,11 +319,11 @@ final class MigrationTest extends TestCase
     public function test_all_login_aliases_use_the_same_guard_and_block_inactive_accounts(): void
     {
         $user = $this->user('employer');
-        $this->post('/auth/login.php', ['username' => $user->username, 'password' => 'test-password-123'])->assertRedirect('/employer/dashboard.php');
+        $this->post('/auth/login.php', ['username' => $user->username, 'password' => 'test-password-123'])->assertRedirect('/employer/dashboard');
         $this->assertAuthenticatedAs($user);
         $user->is_active = false;
         $user->save();
-        $this->get('/employer/dashboard.php')->assertRedirect('/');
+        $this->get('/employer/dashboard')->assertRedirect('/');
         $this->assertGuest();
     }
 
@@ -348,7 +350,7 @@ final class MigrationTest extends TestCase
             'old_password' => 'test-password-123',
             'new_password' => 'replacement-admin-password',
             'confirm_password' => 'replacement-admin-password',
-        ])->assertRedirect('/profile.php');
+        ])->assertRedirect('/profile');
 
         $this->assertTrue(Hash::check('replacement-admin-password', $admin->fresh()->password));
         Auth::logout();
@@ -356,7 +358,7 @@ final class MigrationTest extends TestCase
         $this->post('/', [
             'username' => $admin->username,
             'password' => 'replacement-admin-password',
-        ])->assertRedirect('/admin/dashboard.php');
+        ])->assertRedirect('/admin/dashboard');
         $this->assertAuthenticatedAs($admin);
     }
 
@@ -365,7 +367,7 @@ final class MigrationTest extends TestCase
         foreach (['admin', 'alumni', 'employer', 'alumni_officer'] as $role) {
             $this->actingAs($this->user($role));
             foreach (array_diff(['admin', 'alumni', 'employer', 'alumni_officer'], [$role]) as $other) {
-                $this->get('/'.$other.'/dashboard.php')->assertForbidden();
+                $this->get('/'.$other.'/dashboard')->assertForbidden();
             }
         }
     }
@@ -395,7 +397,7 @@ final class MigrationTest extends TestCase
             'status' => 'pending',
         ])->save();
         $application = $application->fresh();
-        $this->actingAs($this->user('employer'))->get('/employer/applications.php?view_resume='.urlencode($application->resume_file))->assertForbidden();
+        $this->actingAs($this->user('employer'))->get('/employer/applications?view_resume='.urlencode($application->resume_file))->assertForbidden();
         $this->actingAs($this->user())->get('/uploads/resumes/'.urlencode($application->resume_file))->assertForbidden();
     }
 
@@ -416,7 +418,7 @@ final class MigrationTest extends TestCase
     {
         $admin = $this->user('admin');
         $id = DB::table('events')->insertGetId(['title' => 'Do not delete on GET', 'content' => 'Test', 'posted_by' => $admin->id]);
-        $this->actingAs($admin)->get('/admin/events_delete.php?id='.$id)->assertRedirect(route('admin.events_list'));
+        $this->actingAs($admin)->get('/admin/events_delete?id='.$id)->assertRedirect(route('admin.events_list'));
         $this->assertTrue(DB::table('events')->where('id', $id)->exists());
     }
 
@@ -424,7 +426,7 @@ final class MigrationTest extends TestCase
     {
         Notification::fake();
         $user = $this->user();
-        $response = $this->post('/forgot_password.php', ['email' => $user->email]);
+        $response = $this->post('/forgot-password', ['email' => $user->email]);
         $response->assertSessionHas('status', 'If that address belongs to an account, a password reset link will be sent.');
         Notification::assertSentTo($user, ResetPassword::class);
     }
@@ -434,9 +436,9 @@ final class MigrationTest extends TestCase
         $user = $this->user();
         $token = Password::createToken($user);
         $data = ['token' => $token, 'email' => $user->email, 'password' => 'reset-password-123', 'confirm_password' => 'reset-password-123'];
-        $this->post('/reset_password.php', $data)->assertRedirect('/');
+        $this->post('/reset-password', $data)->assertRedirect('/');
         $this->assertTrue(Hash::check('reset-password-123', $user->fresh()->password));
-        $this->post('/reset_password.php', $data)->assertSessionHasErrors();
+        $this->post('/reset-password', $data)->assertSessionHasErrors();
     }
 
     public function test_existing_pages_render_for_their_authorized_roles(): void
@@ -480,13 +482,13 @@ final class MigrationTest extends TestCase
             if (str_contains($path, 'jobs_edit') || str_contains($path, 'job_details')) {
                 $query['id'] = $job->id;
             }
-            if ($path === '/admin/applications.php' || str_contains($path, 'jobs_notify') || $path === '/alumni/apply.php') {
+            if ($path === '/admin/applications' || str_contains($path, 'jobs_notify') || $path === '/alumni/apply') {
                 $query['job_id'] = $job->id;
             }
             if (str_contains($path, 'forward_to_company')) {
                 $query['app_id'] = $application->id;
             }
-            if (str_contains($path, 'interview.php')) {
+            if (str_contains($path, 'interview')) {
                 $query['application_id'] = $application->id;
                 if ($role === 'employer') {
                     $owner = DB::table('jobs')->where('id', $application->job_id)->value('posted_by');
@@ -522,10 +524,10 @@ final class MigrationTest extends TestCase
     public function test_every_role_uses_the_same_sidebar_shell(): void
     {
         $pages = [
-            'admin' => ['/admin/dashboard.php', 'Admin Panel', 'Pending Accounts'],
-            'alumni' => ['/alumni/feed.php', 'Alumni Panel', 'Community Feed'],
-            'employer' => ['/employer/dashboard.php', 'Employer Panel', 'Posted Jobs'],
-            'alumni_officer' => ['/alumni_officer/dashboard.php', 'Alumni Officer Panel', 'Events Feed'],
+            'admin' => ['/admin/dashboard', 'Admin Panel', 'Pending Accounts'],
+            'alumni' => ['/alumni/feed', 'Alumni Panel', 'Community Feed'],
+            'employer' => ['/employer/dashboard', 'Employer Panel', 'Posted Jobs'],
+            'alumni_officer' => ['/alumni_officer/dashboard', 'Alumni Officer Panel', 'Events Feed'],
         ];
 
         foreach ($pages as $role => [$path, $panel, $link]) {
@@ -545,9 +547,9 @@ final class MigrationTest extends TestCase
     {
         $alumni = $this->user('alumni');
 
-        $this->actingAs($alumni)->get('/')->assertRedirect('/alumni/feed.php');
-        $this->get('/alumni/dashboard.php')->assertRedirect(route('alumni.feed'));
-        $this->get('/alumni/feed.php')
+        $this->actingAs($alumni)->get('/')->assertRedirect('/alumni/feed');
+        $this->get('/alumni/dashboard')->assertRedirect(route('alumni.feed'));
+        $this->get('/alumni/feed')
             ->assertOk()
             ->assertSee('Community Feed')
             ->assertDontSee('>Dashboard<', false);
@@ -560,8 +562,8 @@ final class MigrationTest extends TestCase
         $this->assertFalse(Schema::hasTable('trainings'));
         $this->assertFalse(Schema::hasColumn('users', 'trainings'));
         $this->assertFalse(Schema::hasColumn('applications', 'applicant_trainings'));
-        $this->actingAs($admin)->get('/admin/trainings_list.php')->assertNotFound();
+        $this->actingAs($admin)->get('/admin/trainings_list')->assertNotFound();
         $this->post('/trainings')->assertNotFound();
-        $this->get('/admin/dashboard.php')->assertOk()->assertDontSee('Training Programs');
+        $this->get('/admin/dashboard')->assertOk()->assertDontSee('Training Programs');
     }
 }

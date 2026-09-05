@@ -403,7 +403,7 @@ if ($search !== '') {
     ?>
                 <a href="<?php 
     echo \url('');
-    ?>/alumni/jobs.php" class="clear-btn">Clear</a>
+    ?>/alumni/jobs" class="clear-btn">Clear</a>
             <?php 
 }
 ?>
@@ -505,7 +505,7 @@ if (count($jobs) === 0) {
 
                         <a class="btn-orange" href="<?php 
         echo \url('');
-        ?>/alumni/apply.php?job_id=<?php 
+        ?>/alumni/apply?job_id=<?php 
         echo (int) $j['id'];
         ?>">
                             Apply Now
@@ -524,7 +524,7 @@ if (count($jobs) === 0) {
 
     <a class="back-link" href="<?php 
 echo \url('');
-?>/alumni/feed.php">← Back to Feed</a>
+?>/alumni/feed">← Back to Feed</a>
 
 </div>
 

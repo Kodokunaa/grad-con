@@ -254,7 +254,7 @@
         <h3 class="page-title">Post Job</h3>
         <a class="back-btn" href="<?php 
 echo \url('');
-?>/admin/jobs_list.php">Back to Job List</a>
+?>/admin/jobs_list">Back to Job List</a>
     </div>
 
     <?php 

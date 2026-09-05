@@ -340,7 +340,7 @@ if (empty($offers)) {
                                     <?php 
         if ($offer['status'] === 'accepted') {
             ?>
-                                        <a class="view-btn" href="interview.php?offer_id=<?php 
+                                        <a class="view-btn" href="interview?offer_id=<?php 
             echo (int) $offer['id'];
             ?>">Set Interview</a>
                                     <?php 

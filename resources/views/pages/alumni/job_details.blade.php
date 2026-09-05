@@ -220,7 +220,7 @@
         <h1 class="page-title">Job Details</h1>
         <a href="<?php
 echo \url('');
-        ?>/alumni/feed.php" class="back-btn">
+        ?>/alumni/feed" class="back-btn">
             <i class="fas fa-arrow-left"></i> Back to Feed
         </a>
     </div>

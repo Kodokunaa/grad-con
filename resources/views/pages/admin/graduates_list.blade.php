@@ -120,7 +120,7 @@ echo htmlspecialchars($title);
 <a class="back-btn"
 href="<?php 
 echo \url('');
-?>/admin/graduates_stats.php">
+?>/admin/graduates_stats">
 Back
 </a>
 

@@ -346,7 +346,7 @@ if (! empty($event['image'])) {
                 <button type="submit" class="btn-orange">Update Event</button>
                 <a href="<?php
     echo \url('');
-    ?>/alumni_officer/events_list.php" class="btn-outline-custom">Back</a>
+    ?>/alumni_officer/events_list" class="btn-outline-custom">Back</a>
             </div>
         </form>
     </div>

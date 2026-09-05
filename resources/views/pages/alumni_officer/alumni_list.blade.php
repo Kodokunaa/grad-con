@@ -1043,7 +1043,7 @@ foreach ($alumni as $a) {
 
     <a class="back-link" href="<?php 
 echo \url('');
-?>/alumni_officer/dashboard.php">← Back to Dashboard</a>
+?>/alumni_officer/dashboard">← Back to Dashboard</a>
 </div>
 
 <div class="modal fade" id="alumniSnapshotModal" tabindex="-1" aria-hidden="true">

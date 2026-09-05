@@ -611,7 +611,7 @@ if ($isEmployerPosted) {
 
         <a class="back-btn" href="<?php 
 echo \url('');
-?>/admin/jobs_list.php">Back to Job List</a>
+?>/admin/jobs_list">Back to Job List</a>
     </div>
 
     <?php 
@@ -765,7 +765,7 @@ if (!empty($applications)) {
             ?>
                                         <a href="<?php 
             echo \url('');
-            ?>/admin/view_resume.php?app_id=<?php 
+            ?>/admin/view_resume?app_id=<?php 
             echo (int) $row['application_id'];
             ?>"
                                            class="btn"
@@ -834,7 +834,7 @@ if (!empty($applications)) {
 
                                                 <a href="<?php 
                 echo \url('');
-                ?>/admin/interview.php?application_id=<?php 
+                ?>/admin/interview?application_id=<?php 
                 echo (int) $row['application_id'];
                 ?>"
                                                    class="btn btn-interview"

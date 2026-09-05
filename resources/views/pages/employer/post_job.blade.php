@@ -508,7 +508,7 @@ echo old('is_open', request()->input('is_open')) !== null || \request()->server-
 
                 <a href="<?php
 echo \url('');
-?>/employer/posted_job.php" class="btn-secondary">
+?>/employer/posted_job" class="btn-secondary">
                     <i class="fas fa-briefcase"></i> View Posted Jobs
                 </a>
             </div>

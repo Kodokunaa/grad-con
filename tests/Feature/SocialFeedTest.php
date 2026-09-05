@@ -31,7 +31,7 @@ final class SocialFeedTest extends TestCase
         $event = new Event;
         $event->forceFill(['title' => 'Shared feed event', 'content' => 'Event details', 'posted_by' => $officer->id, 'is_archived' => false, 'created_at' => now()])->save();
 
-        $this->actingAs($alumni)->get('/alumni/feed.php')->assertOk()->assertSee('Shared feed event');
+        $this->actingAs($alumni)->get('/alumni/feed')->assertOk()->assertSee('Shared feed event');
         $this->postJson('/feed/event/'.$event->id.'/reaction', ['reaction_type' => 'love'])->assertOk()->assertJsonPath('counts.total', 1);
         $this->assertDatabaseHas('post_reactions', ['post_type' => 'event', 'post_id' => $event->id, 'user_id' => $alumni->id, 'reaction_type' => 'love']);
         $this->post('/feed/event/'.$event->id.'/comments', ['comment' => 'Looking forward to this.'])->assertRedirect();

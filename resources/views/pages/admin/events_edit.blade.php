@@ -231,7 +231,7 @@
         <h3 class="page-title">Edit Event</h3>
         <a class="back-btn" href="<?php
 echo \url('');
-        ?>/admin/events_list.php">Back</a>
+        ?>/admin/events_list">Back</a>
     </div>
 
     <?php
@@ -328,7 +328,7 @@ if (! empty($event['image'])) {
                 <button type="submit" class="btn-orange">Save Changes</button>
                 <a class="btn-outline-custom" href="<?php
         echo \url('');
-        ?>/admin/events_list.php">Cancel</a>
+        ?>/admin/events_list">Cancel</a>
             </div>
 
         </form>

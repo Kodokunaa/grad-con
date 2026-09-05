@@ -869,7 +869,7 @@ if (! empty($applications)) {
                                                 Accept
                                             </button>
 
-                                            <a href="interview.php?application_id=<?php
+                                            <a href="interview?application_id=<?php
             echo (int) $row['application_id'];
             ?>"
                                                class="btn btn-interview">
@@ -909,7 +909,7 @@ if (! empty($applications)) {
                                                 Accept
                                             </button>
 
-                                            <a href="interview.php?application_id=<?php
+                                            <a href="interview?application_id=<?php
             echo (int) $row['application_id'];
             ?>"
                                                class="btn btn-interview">

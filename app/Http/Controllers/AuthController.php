@@ -48,7 +48,7 @@ final class AuthController extends Controller
     private function destination(User $user): string
     {
         return url(match ($user->role) {
-            'admin' => '/admin/dashboard.php', 'employer' => '/employer/dashboard.php', 'alumni_officer' => '/alumni_officer/dashboard.php', default => '/alumni/feed.php'
+            'admin' => '/admin/dashboard', 'employer' => '/employer/dashboard', 'alumni_officer' => '/alumni_officer/dashboard', default => '/alumni/feed'
         });
     }
 
@@ -70,7 +70,7 @@ final class AuthController extends Controller
         Cache::forget('feed.mention-users.v1');
         Cache::forget('sidebar.pending-alumni.v1');
 
-        return redirect('/register.php')->with('status', 'Registration successful. Your account is pending admin approval.');
+        return redirect('/register')->with('status', 'Registration successful. Your account is pending admin approval.');
     }
 
     public function forgotForm(Request $request)

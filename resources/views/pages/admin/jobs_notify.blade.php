@@ -241,7 +241,7 @@ echo htmlspecialchars(old('message', request()->input('message')) ?? '');
                 <button type="submit" class="btn-orange">Send Email</button>
                 <a class="btn-outline-custom" href="<?php 
 echo \url('');
-?>/admin/jobs_list.php">Back to Job List</a>
+?>/admin/jobs_list">Back to Job List</a>
             </div>
         </form>
     </div>

@@ -256,7 +256,7 @@ if ($error) {
                     <button type="submit" class="btn btn-primary">Create Alumni Officer</button>
                     <a href="<?php
             echo \url('');
-            ?>/admin/dashboard.php" class="btn btn-secondary">Back to Dashboard</a>
+            ?>/admin/dashboard" class="btn btn-secondary">Back to Dashboard</a>
                 </div>
             </form>
         </div>

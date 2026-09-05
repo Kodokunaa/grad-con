@@ -343,7 +343,7 @@ if ($error) {
                 <button type="submit" class="btn-orange">Post</button>
                 <a class="btn-outline-custom" href="<?php
     echo \url('');
-    ?>/alumni_officer/events_list.php">View Posts</a>
+    ?>/alumni_officer/events_list">View Posts</a>
             </div>
         </form>
     </div>

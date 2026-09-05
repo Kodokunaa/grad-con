@@ -251,7 +251,7 @@ body{
         <div class="top-actions">
             <a class="action-btn" href="<?php 
 echo \url('');
-?>/admin/graduates_stats.php">Back</a>
+?>/admin/graduates_stats">Back</a>
             <button class="action-btn" onclick="window.print()">Print Report</button>
         </div>
     </div>

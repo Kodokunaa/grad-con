@@ -21,10 +21,10 @@ echo e($fullname);
             <div class="top-actions">
                 <a href="<?php 
 echo \url('');
-?>/employer/post_job.php" class="btn-main">+ Post Job</a>
+?>/employer/post_job" class="btn-main">+ Post Job</a>
                 <a href="<?php 
 echo \url('');
-?>/employer/posted_job.php" class="btn-soft">View My Jobs</a>
+?>/employer/posted_job" class="btn-soft">View My Jobs</a>
             </div>
         </div>
 
@@ -88,7 +88,7 @@ echo number_format($offersDeclinedCount);
                     </div>
                     <a href="<?php 
 echo \url('');
-?>/employer/posted_job.php" class="btn-soft">Manage Jobs</a>
+?>/employer/posted_job" class="btn-soft">Manage Jobs</a>
                 </div>
 
                 <?php 
@@ -143,7 +143,7 @@ if (count($latest) === 0) {
         ?></span></td>
                                         <td><a class="manage-btn" href="<?php 
         echo \url('');
-        ?>/employer/applications.php?job_id=<?php 
+        ?>/employer/applications?job_id=<?php 
         echo (int) $a['job_id'];
         ?>">Manage</a></td>
                                     </tr>
@@ -192,13 +192,13 @@ echo number_format($offersCount);
                 <div class="quick-links">
                     <a class="quick-link" href="<?php 
 echo \url('');
-?>/employer/post_job.php"><span>Post New Job</span><span>→</span></a>
+?>/employer/post_job"><span>Post New Job</span><span>→</span></a>
                     <a class="quick-link" href="<?php 
 echo \url('');
-?>/employer/posted_job.php"><span>View My Jobs</span><span>→</span></a>
+?>/employer/posted_job"><span>View My Jobs</span><span>→</span></a>
                     <a class="quick-link" href="<?php 
 echo \url('');
-?>/employer/job_offers.php"><span>Manage Job Offers</span><span>→</span></a>
+?>/employer/job_offers"><span>Manage Job Offers</span><span>→</span></a>
                 </div>
             </aside>
         </section>
@@ -212,7 +212,7 @@ echo \url('');
                     </div>
                     <a href="<?php 
 echo \url('');
-?>/employer/job_offers.php" class="btn-soft">View All Offers</a>
+?>/employer/job_offers" class="btn-soft">View All Offers</a>
                 </div>
 
                 <?php 
@@ -263,7 +263,7 @@ if (count($latestOffers) === 0) {
         ?></span></td>
                                         <td><a class="manage-btn" href="<?php 
         echo \url('');
-        ?>/employer/job_offers.php">Manage</a></td>
+        ?>/employer/job_offers">Manage</a></td>
                                     </tr>
                                 <?php 
     }
@@ -298,7 +298,7 @@ echo number_format($offersDeclinedCount);
                 <div class="quick-links">
                     <a class="quick-link" href="<?php 
 echo \url('');
-?>/employer/job_offers.php"><span>Manage Offers</span><span>→</span></a>
+?>/employer/job_offers"><span>Manage Offers</span><span>→</span></a>
                 </div>
             </aside>
         </section>

@@ -245,7 +245,7 @@ body {
             <h2 class="page-title">Pending Alumni Registrations</h2>
             <a href="<?php 
 echo \url('');
-?>/admin/dashboard.php" class="back-link">Back to Dashboard</a>
+?>/admin/dashboard" class="back-link">Back to Dashboard</a>
         </div>
 
         <div class="card">

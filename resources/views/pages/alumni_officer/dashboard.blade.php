@@ -417,10 +417,10 @@ echo e($fullname);
                 <div class="hero-actions">
                     <a href="<?php 
 echo \url('');
-?>/alumni_officer/events_create.php" class="btn-create">+ Create Event</a>
+?>/alumni_officer/events_create" class="btn-create">+ Create Event</a>
                     <a href="<?php 
 echo \url('');
-?>/alumni_officer/events_list.php" class="btn-secondary">View Events</a>
+?>/alumni_officer/events_list" class="btn-secondary">View Events</a>
                 </div>
             </div>
         </section>
@@ -475,7 +475,7 @@ echo number_format($scheduledEvents);
                 </div>
                 <a href="<?php 
 echo \url('');
-?>/alumni_officer/events_list.php" class="view-all-link">View all events →</a>
+?>/alumni_officer/events_list" class="view-all-link">View all events →</a>
             </div>
 
             <?php 
@@ -531,12 +531,12 @@ if (count($recentEvents) === 0) {
                                         <div class="action-group">
                                             <a href="<?php 
         echo \url('');
-        ?>/alumni_officer/events_edit.php?id=<?php 
+        ?>/alumni_officer/events_edit?id=<?php 
         echo (int) $event['id'];
         ?>" class="btn-action btn-edit">Edit</a>
                                             <a href="<?php 
         echo \url('');
-        ?>/alumni_officer/events_list.php?delete=<?php 
+        ?>/alumni_officer/events_list?delete=<?php 
         echo (int) $event['id'];
         ?>" class="btn-action btn-delete" onclick="return confirm('Delete this event?');">Delete</a>
                                         </div>

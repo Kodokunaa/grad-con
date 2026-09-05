@@ -442,7 +442,7 @@ echo e($adminName);
             <div class="top-actions">
                 <a href="<?php 
 echo \url('');
-?>/admin/alumni_list.php" class="btn-soft">Manage Alumni</a>
+?>/admin/alumni_list" class="btn-soft">Manage Alumni</a>
                 <button type="button" class="btn-primary" onclick="printEmploymentReport()">🖨 Print Report</button>
             </div>
         </div>
@@ -583,16 +583,16 @@ echo number_format($notAlignedCount);
                 <div class="quick-links">
                     <a class="quick-link" href="<?php 
 echo \url('');
-?>/admin/alumni_list.php"><span>Manage Alumni</span><span class="quick-arrow">→</span></a>
+?>/admin/alumni_list"><span>Manage Alumni</span><span class="quick-arrow">→</span></a>
                     <a class="quick-link" href="<?php 
 echo \url('');
-?>/admin/create_employer.php"><span>Add Employer</span><span class="quick-arrow">→</span></a>
+?>/admin/create_employer"><span>Add Employer</span><span class="quick-arrow">→</span></a>
                     <a class="quick-link" href="<?php 
 echo \url('');
-?>/admin/jobs_list.php"><span>View Jobs</span><span class="quick-arrow">→</span></a>
+?>/admin/jobs_list"><span>View Jobs</span><span class="quick-arrow">→</span></a>
                     <a class="quick-link" href="<?php 
 echo \url('');
-?>/admin/graduates_stats.php"><span>Employment Statistics</span><span class="quick-arrow">→</span></a>
+?>/admin/graduates_stats"><span>Employment Statistics</span><span class="quick-arrow">→</span></a>
                 </div>
             </aside>
         </section>

@@ -257,13 +257,13 @@
     <div class="header-actions">
       <a class="report-btn" href="<?php 
 echo \url('');
-?>/admin/graduates_report.php">
+?>/admin/graduates_report">
         Report
       </a>
 
       <a class="back-btn" href="<?php 
 echo \url('');
-?>/admin/dashboard.php">
+?>/admin/dashboard">
         Back
       </a>
     </div>
@@ -275,7 +275,7 @@ echo $view === 'batch' ? 'active' : '';
 ?>"
        href="<?php 
 echo \url('');
-?>/admin/graduates_stats.php?view=batch">
+?>/admin/graduates_stats?view=batch">
       Per Batch
     </a>
 
@@ -284,7 +284,7 @@ echo $view === 'department' ? 'active' : '';
 ?>"
        href="<?php 
 echo \url('');
-?>/admin/graduates_stats.php?view=department">
+?>/admin/graduates_stats?view=department">
       Per Department
     </a>
   </div>
@@ -325,7 +325,7 @@ if ($view === 'batch') {
                   <a class="view-btn"
                      href="<?php 
             echo \url('');
-            ?>/admin/graduates_list.php?batch_year=<?php 
+            ?>/admin/graduates_list?batch_year=<?php 
             echo urlencode($b['batch_year']);
             ?>">
                     View List
@@ -378,7 +378,7 @@ if ($view === 'batch') {
                   <a class="view-btn"
                      href="<?php 
             echo \url('');
-            ?>/admin/graduates_list.php?course=<?php 
+            ?>/admin/graduates_list?course=<?php 
             echo urlencode($d['course']);
             ?>">
                     View List

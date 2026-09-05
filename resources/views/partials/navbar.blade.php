@@ -6,7 +6,7 @@ null;
   <div class="container">
     <a class="navbar-brand fw-bold" href="<?php 
 echo \url('');
-?>/index.php">CCC Job Portal</a>
+?>/index">CCC Job Portal</a>
 
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
@@ -16,7 +16,7 @@ if (auth()->check()) {
           <li class="nav-item">
             <a class="nav-link" href="<?php 
     echo \url('');
-    ?>/profile.php">My Profile</a>
+    ?>/profile">My Profile</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#" data-logout-trigger>Logout</a>

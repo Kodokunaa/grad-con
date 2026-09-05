@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Password::defaults(fn () => Password::min(8));
-        ResetPassword::createUrlUsing(fn ($user, $token) => url('/reset_password.php').'?'.http_build_query(['token' => $token, 'email' => $user->email]));
+        ResetPassword::createUrlUsing(fn ($user, $token) => url('/reset_password').'?'.http_build_query(['token' => $token, 'email' => $user->email]));
         RateLimiter::for('login', fn ($request) => [Limit::perMinute(20)->by($request->ip()), Limit::perMinute(5)->by(strtolower((string) $request->input('username', $request->input('student_id'))).'|'.$request->ip())]);
         RateLimiter::for('recovery', fn ($request) => Limit::perMinute(3)->by($request->ip()));
     }

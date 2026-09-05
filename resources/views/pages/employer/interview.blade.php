@@ -338,7 +338,7 @@ echo e($interview['message'] ?? 'Good day! We are inviting you for an interview.
 
             <div class="actions">
                 <button type="submit" class="btn btn-primary">Send Interview Email</button>
-                <a href="applications.php" class="btn btn-secondary">Back</a>
+                <a href="applications" class="btn btn-secondary">Back</a>
             </div>
         </form>
     </div>

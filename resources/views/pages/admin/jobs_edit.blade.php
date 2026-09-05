@@ -224,7 +224,7 @@
         <h3 class="page-title">Edit Job</h3>
         <a class="back-btn" href="<?php
 echo \url('');
-        ?>/admin/jobs_list.php">Back to Job List</a>
+        ?>/admin/jobs_list">Back to Job List</a>
     </div>
 
     <?php
@@ -355,7 +355,7 @@ if ($error) {
                     <button type="submit" class="btn-orange">Save Changes</button>
                     <a class="btn-outline-custom" href="<?php
         echo \url('');
-        ?>/admin/jobs_list.php">Cancel</a>
+        ?>/admin/jobs_list">Cancel</a>
                     <button class="btn-delete" type="submit" form="deleteJobForm" onclick="return confirm('Delete this job? This cannot be undone.');">Delete Job</button>
                 </div>
 

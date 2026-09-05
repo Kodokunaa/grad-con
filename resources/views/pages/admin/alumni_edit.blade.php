@@ -196,7 +196,7 @@
         <h3 class="page-title">Edit Alumni</h3>
         <a class="back-btn" href="<?php 
 echo \url('');
-?>/admin/alumni_list.php">Back to Alumni List</a>
+?>/admin/alumni_list">Back to Alumni List</a>
     </div>
 
     <?php 
@@ -301,7 +301,7 @@ echo (int) $user['is_active'] === 0 ? 'selected' : '';
                     <button type="submit" class="btn-orange">Save Changes</button>
                     <a class="btn-outline-custom" href="<?php 
 echo \url('');
-?>/admin/alumni_list.php">Cancel</a>
+?>/admin/alumni_list">Cancel</a>
                     <button type="button" class="btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">Delete Account</button>
                 </div>
 

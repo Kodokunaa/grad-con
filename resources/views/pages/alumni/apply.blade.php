@@ -597,7 +597,7 @@ echo old('agree_terms', request()->input('agree_terms')) !== null ? 'checked' : 
                 <button type="submit" class="btn-orange" id="submitBtn">Submit Application</button>
                 <a class="btn-outline-custom" href="<?php 
 echo \url('');
-?>/alumni/jobs.php">Back</a>
+?>/alumni/jobs">Back</a>
             </div>
         </form>
     </div>
@@ -718,7 +718,7 @@ function closeValidationModal() {
 function goToEditProfile() {
     window.location.href = '<?php 
 echo \url('');
-?>/profile.php';
+?>/profile';
 }
 
 /**

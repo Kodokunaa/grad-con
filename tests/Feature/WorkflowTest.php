@@ -137,7 +137,7 @@ final class WorkflowTest extends TestCase
             'batch_year' => '2025',
             'is_active' => '1',
             'password' => 'replacement-password',
-        ])->assertRedirect('/admin/alumni_edit.php?id='.$alumni->id);
+        ])->assertRedirect('/admin/alumni_edit?id='.$alumni->id);
 
         $alumni->refresh();
         $this->assertSame('Updated Graduate', $alumni->fullname);
@@ -170,7 +170,7 @@ final class WorkflowTest extends TestCase
         $path = storage_path('app/private/files/uploads/resumes/'.$application->resume_file);
         $this->createdFiles[] = $path;
         $this->assertFileExists($path);
-        $this->actingAs($employer)->get('/employer/applications.php?view_resume='.urlencode($application->resume_file))->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->actingAs($employer)->get('/employer/applications?view_resume='.urlencode($application->resume_file))->assertOk()->assertHeader('content-type', 'application/pdf');
         $this->patch('/applications/'.$application->id.'/status', ['action' => 'interview', 'action_message' => 'Please attend the interview.'])->assertRedirect();
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'interview']);
         $this->actingAs($this->user('employer'))->patch('/applications/'.$application->id.'/status', ['action' => 'accept', 'action_message' => 'Unauthorized action'])->assertForbidden();
@@ -191,10 +191,10 @@ final class WorkflowTest extends TestCase
             'is_open' => 1,
         ]);
 
-        $this->actingAs($alumni)->get('/alumni/job_details.php?id='.$jobId)
-            ->assertOk()->assertSee('/alumni/apply.php?job_id='.$jobId, false);
+        $this->actingAs($alumni)->get('/alumni/job_details?id='.$jobId)
+            ->assertOk()->assertSee('/alumni/apply?job_id='.$jobId, false);
 
-        $this->post('/alumni/job_details.php?id='.$jobId)->assertMethodNotAllowed();
+        $this->post('/alumni/job_details?id='.$jobId)->assertMethodNotAllowed();
 
         $this->assertDatabaseMissing('applications', ['job_id' => $jobId, 'alumni_id' => $alumni->id]);
     }
@@ -217,7 +217,7 @@ final class WorkflowTest extends TestCase
             ]));
 
             $this->actingAs($alumni)
-                ->get('/alumni/apply.php?job_id='.$jobId)
+                ->get('/alumni/apply?job_id='.$jobId)
                 ->assertOk()
                 ->assertSee('This job is not currently accepting applications.');
         }
@@ -453,7 +453,7 @@ final class WorkflowTest extends TestCase
         Mail::fake();
         $employer = $this->user('employer');
         $alumni = $this->user('alumni');
-        $this->actingAs($employer)->get('/employer/alumni_list.php')->assertOk();
+        $this->actingAs($employer)->get('/employer/alumni_list')->assertOk();
         $this->post('/employer/offers', ['email_alumni_id' => $alumni->id, 'email_subject' => 'Test offer', 'email_message' => 'A test job offer.'])->assertRedirect();
         $offer = DB::table('job_offers')->where('employer_id', $employer->id)->where('alumni_id', $alumni->id)->first();
         $this->assertNotNull($offer);

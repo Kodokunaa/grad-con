@@ -14,7 +14,7 @@ final class AdminEventsDeleteController extends Controller
     {
         $event = Event::find($request->integer('id'));
         if (! $event) {
-            return redirect('/admin/events_list.php');
+            return redirect('/admin/events_list');
         }
         Gate::authorize('delete', $event);
 
@@ -23,6 +23,6 @@ final class AdminEventsDeleteController extends Controller
             PrivateUploads::delete('events', $event->image);
         }
 
-        return redirect('/admin/events_list.php?deleted=1');
+        return redirect('/admin/events_list?deleted=1');
     }
 }

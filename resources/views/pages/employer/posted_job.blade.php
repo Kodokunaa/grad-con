@@ -250,13 +250,13 @@ tbody tr:hover{
         <div class="header-actions">
             <a href="<?php
 echo \url('');
-?>/employer/post_job.php" class="btn-header btn-orange">
+?>/employer/post_job" class="btn-header btn-orange">
                 <i class="fas fa-plus"></i> Post New Job
             </a>
 
             <a href="<?php
 echo \url('');
-?>/employer/applications.php" class="btn-header">
+?>/employer/applications" class="btn-header">
                 <i class="fas fa-users"></i> Applications
             </a>
         </div>
@@ -393,7 +393,7 @@ if (! empty($posted_jobs)) {
                 <br>
                 <a href="<?php
     echo \url('');
-    ?>/employer/post_job.php" class="btn-header btn-orange">
+    ?>/employer/post_job" class="btn-header btn-orange">
                     <i class="fas fa-plus"></i> Post New Job
                 </a>
             </div>

@@ -463,7 +463,7 @@
         <h3 class="page-title">My Applications</h3>
         <a class="browse-btn" href="<?php 
 echo \url('');
-?>/alumni/jobs.php">Browse Jobs</a>
+?>/alumni/jobs">Browse Jobs</a>
     </div>
 
     <?php 
