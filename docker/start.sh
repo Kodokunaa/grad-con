@@ -13,7 +13,7 @@ if [ -n "${AIVEN_CA_BASE64:-}" ]; then
     chmod 600 storage/certs/aiven-ca.pem
 fi
 
-php artisan optimize:clear
+php artisan config:clear
 php artisan migrate --force
 php artisan optimize
 
