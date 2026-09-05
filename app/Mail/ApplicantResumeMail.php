@@ -30,7 +30,7 @@ final class ApplicantResumeMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
-        return new Content(view: 'mail.applicant-resume');
+        return new Content(markdown: 'mail.applicant-resume');
     }
 
     public function attachments(): array

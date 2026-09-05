@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Mail\AlumniAccountApprovedMail;
 use App\Models\JobApplication;
 use App\Models\User;
 use App\Notifications\ResetPassword;
@@ -23,6 +24,15 @@ final class MigrationTest extends TestCase
     use DatabaseTransactions;
 
     private array $createdFiles = [];
+
+    public function test_transactional_email_uses_the_orange_gradconn_theme(): void
+    {
+        $html = (new AlumniAccountApprovedMail($this->user('alumni')))->render();
+
+        $this->assertStringContainsString('GradConn', $html);
+        $this->assertStringContainsString('#f97316', $html);
+        $this->assertStringContainsString('Account approved', $html);
+    }
 
     public function test_shared_html_escaping_helper_preserves_legacy_behavior(): void
     {

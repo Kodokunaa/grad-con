@@ -29,6 +29,6 @@ final class TrainingOpportunityMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
-        return new Content(view: 'mail.training-opportunity', text: 'mail.training-opportunity-text');
+        return new Content(markdown: 'mail.training-opportunity', text: 'mail.training-opportunity-text');
     }
 }
