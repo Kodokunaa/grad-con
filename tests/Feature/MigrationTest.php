@@ -11,6 +11,7 @@ use App\Support\PrivateUploads;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -36,6 +37,25 @@ final class MigrationTest extends TestCase
         $this->assertStringContainsString('linear-gradient(135deg,#f97316 0%,#ea580c 100%)', $html);
         $this->assertStringContainsString('Alumni Account Update', $html);
         $this->assertStringContainsString('Account approved', $html);
+    }
+
+    public function test_admin_dashboard_reuses_its_warm_query_snapshot(): void
+    {
+        $admin = $this->user('admin');
+        Cache::forget('dashboard.admin.metrics.v1');
+        Cache::forget('sidebar.pending-alumni.v1');
+
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
+
+        $queries = DB::getQueryLog();
+        $this->assertCount(1, $queries);
+        $this->assertStringContainsString('from `users`', $queries[0]['query']);
+        DB::disableQueryLog();
+        Cache::forget('dashboard.admin.metrics.v1');
+        Cache::forget('sidebar.pending-alumni.v1');
     }
 
     public function test_delivery_command_sends_the_branded_html_template(): void

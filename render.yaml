@@ -46,6 +46,10 @@ services:
         value: "5"
       - key: PERFORMANCE_DIRECTORY_CACHE_SECONDS
         value: "30"
+      - key: PERFORMANCE_DASHBOARD_CACHE_SECONDS
+        value: "10"
+      - key: PERFORMANCE_REPORT_CACHE_SECONDS
+        value: "30"
       - key: PRIVATE_UPLOADS_DISK
         value: s3
       - key: AWS_ACCESS_KEY_ID

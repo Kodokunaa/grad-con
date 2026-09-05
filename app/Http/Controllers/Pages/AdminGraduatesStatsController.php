@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 final class AdminGraduatesStatsController extends PageController
@@ -15,13 +16,19 @@ final class AdminGraduatesStatsController extends PageController
             if (! in_array($view, ['batch', 'department'], true)) {
                 $view = 'batch';
             }
-            $base = DB::table('users')->where('role', 'alumni')->where('is_active', true);
-            $batches = (clone $base)->whereNotNull('batch_year')->where('batch_year', '<>', '')
-                ->select('batch_year', DB::raw('COUNT(*) as total'))->groupBy('batch_year')
-                ->orderByDesc('batch_year')->get()->map(fn ($row) => (array) $row)->all();
-            $departments = (clone $base)->whereNotNull('course')->where('course', '<>', '')
-                ->select('course', DB::raw('COUNT(*) as total'))->groupBy('course')
-                ->orderByDesc('total')->orderBy('course')->get()->map(fn ($row) => (array) $row)->all();
+            $snapshot = Cache::remember('reports.graduate-groups.v1', config('performance.report_cache_seconds'), function () {
+                $base = DB::table('users')->where('role', 'alumni')->where('is_active', true);
+                $batches = (clone $base)->whereNotNull('batch_year')->where('batch_year', '<>', '')
+                    ->select('batch_year', DB::raw('COUNT(*) as total'))->groupBy('batch_year')
+                    ->orderByDesc('batch_year')->get()->map(fn ($row) => (array) $row)->all();
+                $departments = (clone $base)->whereNotNull('course')->where('course', '<>', '')
+                    ->select('course', DB::raw('COUNT(*) as total'))->groupBy('course')
+                    ->orderByDesc('total')->orderBy('course')->get()->map(fn ($row) => (array) $row)->all();
+
+                return compact('batches', 'departments');
+            });
+            $batches = $snapshot['batches'];
+            $departments = $snapshot['departments'];
             echo view('partials.header', \get_defined_vars());
             echo view('partials.admin_sidebar', \get_defined_vars());
 

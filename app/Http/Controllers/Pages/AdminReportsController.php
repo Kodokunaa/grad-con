@@ -7,6 +7,7 @@ use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 final class AdminReportsController extends PageController
 {
@@ -21,15 +22,19 @@ final class AdminReportsController extends PageController
             $error = '';
             $monthStart = $selectedMonth.'-01';
             $monthEnd = date('Y-m-d', strtotime('+1 month', strtotime($monthStart)));
-            $report['vacancies'] = Job::query()->count();
-            $report['employer_jobs'] = Job::query()->whereHas('poster', fn ($query) => $query->where('role', 'employer'))->count();
-            $report['admin_jobs'] = Job::query()->whereHas('poster', fn ($query) => $query->where('role', 'admin'))->count();
-            $report['enrolled_alumni'] = User::query()->where('role', 'alumni')->where('is_active', true)->count();
-            $report['applicants'] = JobApplication::query()->count();
-            $report['using_alumni'] = JobApplication::query()->distinct('alumni_id')->count('alumni_id');
-            $report['hired_alumni'] = JobApplication::query()->whereRaw('LOWER(TRIM(status)) = ?', ['hired'])->distinct('alumni_id')->count('alumni_id');
-            $report['monthly_active_users'] = User::query()->whereBetween('created_at', [$monthStart, $monthEnd])->where('created_at', '<', $monthEnd)->count();
-            $report['monthly_employers'] = Job::query()->whereHas('poster', fn ($query) => $query->where('role', 'employer'))->where('created_at', '>=', $monthStart)->where('created_at', '<', $monthEnd)->distinct('posted_by')->count('posted_by');
+            $report = Cache::remember('reports.admin.'.$selectedMonth.'.v1', config('performance.report_cache_seconds'), function () use ($monthStart, $monthEnd) {
+                return [
+                    'vacancies' => Job::query()->count(),
+                    'employer_jobs' => Job::query()->whereHas('poster', fn ($query) => $query->where('role', 'employer'))->count(),
+                    'admin_jobs' => Job::query()->whereHas('poster', fn ($query) => $query->where('role', 'admin'))->count(),
+                    'enrolled_alumni' => User::query()->where('role', 'alumni')->where('is_active', true)->count(),
+                    'applicants' => JobApplication::query()->count(),
+                    'using_alumni' => JobApplication::query()->distinct('alumni_id')->count('alumni_id'),
+                    'hired_alumni' => JobApplication::query()->whereRaw('LOWER(TRIM(status)) = ?', ['hired'])->distinct('alumni_id')->count('alumni_id'),
+                    'monthly_active_users' => User::query()->whereBetween('created_at', [$monthStart, $monthEnd])->where('created_at', '<', $monthEnd)->count(),
+                    'monthly_employers' => Job::query()->whereHas('poster', fn ($query) => $query->where('role', 'employer'))->where('created_at', '>=', $monthStart)->where('created_at', '<', $monthEnd)->distinct('posted_by')->count('posted_by'),
+                ];
+            });
             $monthLabel = date('F Y', strtotime($selectedMonth.'-01'));
             echo view('partials.header', \get_defined_vars());
             echo view('partials.admin_sidebar', \get_defined_vars());
