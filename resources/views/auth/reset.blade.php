@@ -11,8 +11,8 @@
 body{
     min-height:100vh;
     background:
-    linear-gradient(rgba(15,23,42,0.75),rgba(15,23,42,0.75)),
-    url("https://tse3.mm.bing.net/th/id/OIP.5BSmLxFdl_QxgTyHv8nQYAHaER?rs=1&pid=ImgDetMain&o=7&rm=3");
+    radial-gradient(circle at 20% 20%,rgba(249,115,22,.30),transparent 35%),
+    linear-gradient(135deg,#0f172a,#334155);
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
@@ -129,7 +129,7 @@ input:focus{
     <div class="reset-card">
 
         <div class="logo">
-            <img src="ccc3d.png" alt="Logo">
+            <img src="/ccc3d.png" alt="Logo">
         </div>
 
         <h2>Reset Password</h2>

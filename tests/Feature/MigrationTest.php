@@ -209,6 +209,8 @@ final class MigrationTest extends TestCase
             ->assertSuccessful()
             ->assertSee('action="/auth/logout.php"', false)
             ->assertSee('href="/css/authenticated.css"', false)
+            ->assertSee('href="/css/logout-modal.css"', false)
+            ->assertSee('src="/js/logout-modal.js"', false)
             ->assertSee('data-logout-trigger', false)
             ->assertSee('class="empty-state"', false)
             ->assertDontSee('action="http://', false);
@@ -218,6 +220,7 @@ final class MigrationTest extends TestCase
     {
         $this->get('/auth/admin_login.php')
             ->assertOk()
+            ->assertSee('src="/ccc3d.png"', false)
             ->assertSee(route('password.request'), false)
             ->assertSee(route('register'), false);
 
