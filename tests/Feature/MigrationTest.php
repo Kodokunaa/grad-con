@@ -471,4 +471,24 @@ final class MigrationTest extends TestCase
         }
         $this->assertSame([], $failures, implode("\n", $failures));
     }
+
+    public function test_every_role_uses_the_same_sidebar_shell(): void
+    {
+        $pages = [
+            'admin' => ['/admin/dashboard.php', 'Admin Panel', 'Pending Accounts'],
+            'alumni' => ['/alumni/dashboard.php', 'Alumni Panel', 'Community Feed'],
+            'employer' => ['/employer/dashboard.php', 'Employer Panel', 'Posted Jobs'],
+            'alumni_officer' => ['/alumni_officer/dashboard.php', 'Alumni Officer Panel', 'Events Feed'],
+        ];
+
+        foreach ($pages as $role => [$path, $panel, $link]) {
+            $response = $this->actingAs($this->user($role))->get($path)->assertSuccessful();
+            $response->assertSee('class="sidebar gradconn-sidebar"', false)
+                ->assertSee('href="/css/sidebar.css"', false)
+                ->assertSee('src="/js/sidebar.js"', false)
+                ->assertSee($panel)
+                ->assertSee($link);
+            $this->assertSame(1, substr_count($response->getContent(), 'class="sidebar gradconn-sidebar"'));
+        }
+    }
 }
