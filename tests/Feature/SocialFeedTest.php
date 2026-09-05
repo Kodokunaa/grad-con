@@ -8,7 +8,6 @@ use App\Models\PostReaction;
 use App\Models\User;
 use App\Services\SocialFeedService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -54,9 +53,23 @@ final class SocialFeedTest extends TestCase
         $this->assertSame(0, PostReaction::where('post_id', $event->id)->count());
     }
 
+    public function test_management_feed_shows_scheduled_and_expired_events_without_exposing_them_to_alumni(): void
+    {
+        $admin = $this->user('admin');
+        $officer = $this->user('alumni_officer');
+        $alumni = $this->user('alumni');
+        Event::forceCreate(['title' => 'Scheduled management event', 'content' => 'Future', 'posted_by' => $admin->id, 'is_archived' => false, 'post_start_date' => now()->addDay(), 'created_at' => now()]);
+        Event::forceCreate(['title' => 'Expired management event', 'content' => 'Past', 'posted_by' => $admin->id, 'is_archived' => false, 'post_end_date' => now()->subDay(), 'created_at' => now()]);
+        SocialFeedService::forgetEventCache();
+
+        $this->actingAs($admin)->get(route('admin.events_list'))->assertOk()->assertSee('Scheduled management event')->assertSee('Expired management event');
+        $this->actingAs($officer)->get(route('alumni_officer.events_list'))->assertOk()->assertSee('Scheduled management event')->assertSee('Expired management event');
+        $this->actingAs($alumni)->get(route('alumni.feed'))->assertOk()->assertDontSee('Scheduled management event')->assertDontSee('Expired management event');
+    }
+
     public function test_feed_is_bounded_and_reuses_its_short_lived_cache(): void
     {
-        Cache::forget('feed.events.v1');
+        SocialFeedService::forgetEventCache();
         $officer = $this->user('alumni_officer');
         $alumni = $this->user('alumni');
         foreach (range(1, 35) as $number) {
@@ -70,6 +83,6 @@ final class SocialFeedTest extends TestCase
         $this->assertCount(config('performance.feed_limit'), $feed->postsFor($alumni));
         $this->assertSame([], DB::getQueryLog());
         DB::disableQueryLog();
-        Cache::forget('feed.events.v1');
+        SocialFeedService::forgetEventCache();
     }
 }

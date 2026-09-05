@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Event;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
+use App\Services\SocialFeedService;
 use App\Support\PrivateUploads;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -42,7 +42,7 @@ final class UpdateEventController extends Controller
         if (array_key_exists('image', $data) && $data['image'] !== $oldImage) {
             PrivateUploads::delete('events', $oldImage);
         }
-        Cache::forget('feed.events.v1');
+        SocialFeedService::forgetEventCache();
 
         $route = $request->user()->role === 'admin' ? 'admin.events_edit' : 'alumni_officer.events_edit';
 

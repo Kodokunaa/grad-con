@@ -16,18 +16,26 @@ final class SocialFeedService
 {
     public const REACTIONS = ['like' => ['emoji' => '👍', 'label' => 'Like'], 'love' => ['emoji' => '❤️', 'label' => 'Love'], 'haha' => ['emoji' => '😂', 'label' => 'Haha'], 'angry' => ['emoji' => '😡', 'label' => 'Angry']];
 
+    private const EVENT_CACHE_KEYS = ['feed.events.public.v2', 'feed.events.management.v2'];
+
     public function postsFor(User $user): array
     {
-        $events = Cache::remember('feed.events.v1', config('performance.feed_cache_seconds'), fn () => Event::query()
-            ->where('is_archived', false)
-            ->where(fn ($q) => $q->whereNull('post_start_date')->orWhere('post_start_date', '<=', now()))
-            ->where(fn ($q) => $q->whereNull('post_end_date')->orWhere('post_end_date', '>=', now()))
-            ->with(['author', 'reactions', 'comments.author'])
-            ->latest('created_at')
-            ->limit(config('performance.feed_limit'))
-            ->get()
-            ->map(fn ($event) => $this->postArray($event, 'event'))
-            ->all());
+        $canManage = in_array($user->role, ['admin', 'alumni_officer'], true);
+        $cacheKey = $canManage ? self::EVENT_CACHE_KEYS[1] : self::EVENT_CACHE_KEYS[0];
+        $events = Cache::remember($cacheKey, config('performance.feed_cache_seconds'), function () use ($canManage) {
+            $query = Event::query()->where('is_archived', false);
+            if (! $canManage) {
+                $query->where(fn ($q) => $q->whereNull('post_start_date')->orWhere('post_start_date', '<=', now()))
+                    ->where(fn ($q) => $q->whereNull('post_end_date')->orWhere('post_end_date', '>=', now()));
+            }
+
+            return $query->with(['author', 'reactions', 'comments.author'])
+                ->latest('created_at')
+                ->limit(config('performance.feed_limit'))
+                ->get()
+                ->map(fn ($event) => $this->postArray($event, 'event'))
+                ->all();
+        });
 
         return collect($events)->map(function ($post) use ($user) {
             $post['user_reaction'] = collect($post['reactions'])->firstWhere('user_id', $user->id)['reaction_type'] ?? '';
@@ -67,7 +75,7 @@ final class SocialFeedService
 
             return ['reaction' => $selected, 'counts' => $this->reactionCounts($type, $id)];
         });
-        Cache::forget('feed.events.v1');
+        self::forgetEventCache();
 
         return $result;
     }
@@ -91,7 +99,7 @@ final class SocialFeedService
 
             return $comment;
         });
-        Cache::forget('feed.events.v1');
+        self::forgetEventCache();
 
         return $comment;
     }
@@ -103,7 +111,14 @@ final class SocialFeedService
             $comment->replies()->delete();
             $comment->delete();
         });
-        Cache::forget('feed.events.v1');
+        self::forgetEventCache();
+    }
+
+    public static function forgetEventCache(): void
+    {
+        foreach (self::EVENT_CACHE_KEYS as $key) {
+            Cache::forget($key);
+        }
     }
 
     private function post(string $type, int $id): Event

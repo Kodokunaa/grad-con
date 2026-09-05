@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Event;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEventRequest;
 use App\Models\Event;
+use App\Services\SocialFeedService;
 use App\Support\PrivateUploads;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -33,7 +33,7 @@ final class StoreEventController extends Controller
             PrivateUploads::delete('events', $data['image'] ?? null);
             throw $exception;
         }
-        Cache::forget('feed.events.v1');
+        SocialFeedService::forgetEventCache();
 
         $route = $request->user()->role === 'admin' ? 'admin.events_create' : 'alumni_officer.events_create';
 
