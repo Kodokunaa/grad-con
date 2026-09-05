@@ -171,7 +171,7 @@ Update Password
 <a class="btn-outline-custom"
 href="<?php 
 echo \url('');
-?>/alumni/dashboard.php">
+?>/alumni/feed.php">
 Back
 </a>
 

@@ -168,12 +168,6 @@
         "role": "alumni"
     },
     {
-        "source": "alumni/dashboard.php",
-        "controller": "AlumniDashboardController",
-        "view": "pages.alumni.dashboard",
-        "role": "alumni"
-    },
-    {
         "source": "alumni/edit_profile.php",
         "controller": "AlumniEditProfileController",
         "view": "pages.alumni.edit_profile",

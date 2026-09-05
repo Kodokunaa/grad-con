@@ -33,7 +33,6 @@
         ],
         'alumni' => [
             ['Overview', [
-                ['alumni.dashboard', 'fa-chart-line', 'Dashboard'],
                 ['alumni.feed', 'fa-calendar-days', 'Community Feed'],
             ]],
             ['Career', [

@@ -524,7 +524,7 @@ if (count($jobs) === 0) {
 
     <a class="back-link" href="<?php 
 echo \url('');
-?>/alumni/dashboard.php">← Back to Dashboard</a>
+?>/alumni/feed.php">← Back to Feed</a>
 
 </div>
 

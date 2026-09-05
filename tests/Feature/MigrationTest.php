@@ -485,7 +485,7 @@ final class MigrationTest extends TestCase
     {
         $pages = [
             'admin' => ['/admin/dashboard.php', 'Admin Panel', 'Pending Accounts'],
-            'alumni' => ['/alumni/dashboard.php', 'Alumni Panel', 'Community Feed'],
+            'alumni' => ['/alumni/feed.php', 'Alumni Panel', 'Community Feed'],
             'employer' => ['/employer/dashboard.php', 'Employer Panel', 'Posted Jobs'],
             'alumni_officer' => ['/alumni_officer/dashboard.php', 'Alumni Officer Panel', 'Events Feed'],
         ];
@@ -501,6 +501,18 @@ final class MigrationTest extends TestCase
                 ->assertSee($link);
             $this->assertSame(1, substr_count($response->getContent(), 'class="sidebar gradconn-sidebar"'));
         }
+    }
+
+    public function test_alumni_directory_lands_on_the_community_feed(): void
+    {
+        $alumni = $this->user('alumni');
+
+        $this->actingAs($alumni)->get('/')->assertRedirect('/alumni/feed.php');
+        $this->get('/alumni/dashboard.php')->assertRedirect(route('alumni.feed'));
+        $this->get('/alumni/feed.php')
+            ->assertOk()
+            ->assertSee('Community Feed')
+            ->assertDontSee('>Dashboard<', false);
     }
 
     public function test_training_program_is_removed_from_the_application(): void

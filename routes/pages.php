@@ -50,7 +50,6 @@ use App\Http\Controllers\Pages\AdminReportsController;
 use App\Http\Controllers\Pages\AlumniAddDegreeController;
 use App\Http\Controllers\Pages\AlumniApplyController;
 use App\Http\Controllers\Pages\AlumniChangePasswordController;
-use App\Http\Controllers\Pages\AlumniDashboardController;
 use App\Http\Controllers\Pages\AlumniEditProfileController;
 use App\Http\Controllers\Pages\AlumniEmploymentHistoryController;
 use App\Http\Controllers\Pages\AlumniFeedController;
@@ -125,7 +124,7 @@ Route::post('/profile/education', StoreEducationController::class)->middleware('
 Route::get('/alumni/apply.php', AlumniApplyController::class)->middleware('account:alumni')->name('alumni.apply');
 Route::post('/alumni/jobs/{job}/applications', StoreApplicationController::class)->middleware('account:alumni')->name('applications.store');
 Route::get('/alumni/change_password.php', AlumniChangePasswordController::class)->middleware('account:alumni')->name('alumni.change_password');
-Route::get('/alumni/dashboard.php', AlumniDashboardController::class)->middleware('account:alumni')->name('alumni.dashboard');
+Route::get('/alumni/dashboard.php', fn () => to_route('alumni.feed'))->middleware('account:alumni')->name('alumni.dashboard');
 Route::get('/alumni/edit_profile.php', AlumniEditProfileController::class)->middleware('account:alumni')->name('alumni.edit_profile');
 Route::put('/profile/details', UpdateOwnProfileController::class)->middleware('account:alumni')->name('alumni.profile.update');
 Route::get('/alumni/employment_history.php', AlumniEmploymentHistoryController::class)->middleware('account:alumni')->name('alumni.employment_history');
