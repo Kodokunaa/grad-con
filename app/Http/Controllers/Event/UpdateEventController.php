@@ -9,6 +9,7 @@ use App\Support\PrivateUploads;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 final class UpdateEventController extends Controller
 {
@@ -23,7 +24,9 @@ final class UpdateEventController extends Controller
 
         if ($file = $request->file('image')) {
             $newImage = 'event_'.$event->id.'_'.Str::uuid().'.'.$file->extension();
-            abort_unless(PrivateUploads::store($file, 'events', $newImage), 500, 'Image upload failed.');
+            if (! PrivateUploads::store($file, 'events', $newImage)) {
+                throw ValidationException::withMessages(['image' => 'The event image could not be stored. Please try again.']);
+            }
             $data['image'] = $newImage;
         } elseif ($request->boolean('remove_image')) {
             $data['image'] = null;

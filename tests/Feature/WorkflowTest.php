@@ -277,6 +277,46 @@ final class WorkflowTest extends TestCase
         $this->assertDatabaseHas('alumni_education', ['user_id' => $alumni->id, 'school_name' => 'Test College']);
     }
 
+    public function test_event_upload_storage_failure_returns_a_form_error(): void
+    {
+        $admin = $this->user('admin');
+        $originalDisk = config('filesystems.uploads_disk');
+        config(['filesystems.uploads_disk' => 'unconfigured-test-disk']);
+
+        try {
+            $this->actingAs($admin)->from(route('admin.events_create'))->post(route('events.store'), [
+                'title' => 'Event with unavailable storage',
+                'content' => 'The event must not be partially created.',
+                'post_start_date' => '',
+                'post_end_date' => '',
+                'image' => UploadedFile::fake()->createWithContent(
+                    'event.png',
+                    base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', true)
+                ),
+            ])->assertRedirect(route('admin.events_create'))->assertSessionHasErrors('image');
+        } finally {
+            config(['filesystems.uploads_disk' => $originalDisk]);
+        }
+
+        $this->assertDatabaseMissing('events', ['title' => 'Event with unavailable storage']);
+    }
+
+    public function test_profile_update_tolerates_omitted_optional_employment_status(): void
+    {
+        $alumni = $this->user('alumni');
+        $alumni->forceFill(['employment_status' => 'Unemployed'])->save();
+
+        $this->actingAs($alumni)->put(route('profile.update'), [
+            'fullname' => 'Updated Alumni Name',
+        ])->assertRedirect(route('profile'));
+
+        $this->assertDatabaseHas('users', [
+            'id' => $alumni->id,
+            'fullname' => 'Updated Alumni Name',
+            'employment_status' => 'Unemployed',
+        ]);
+    }
+
     public function test_event_requests_validate_dates_and_enforce_update_policy(): void
     {
         $admin = $this->user('admin');

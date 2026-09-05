@@ -9,6 +9,7 @@ use App\Models\SecurityLog;
 use App\Support\PrivateUploads;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 final class StoreCertificateController extends Controller
 {
@@ -16,7 +17,9 @@ final class StoreCertificateController extends Controller
     {
         $file = $request->file('certificate_image');
         $name = 'cert_'.$request->user()->id.'_'.Str::uuid().'.'.$file->extension();
-        abort_unless(PrivateUploads::store($file, 'certificates', $name), 500, 'Certificate upload failed.');
+        if (! PrivateUploads::store($file, 'certificates', $name)) {
+            throw ValidationException::withMessages(['certificate_image' => 'The certificate image could not be stored. Please try again.']);
+        }
         try {
             DB::transaction(function () use ($request, $name) {
                 $cert = new AlumniCertificate;

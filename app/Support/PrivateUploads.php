@@ -12,7 +12,13 @@ final class PrivateUploads
 
     public static function store(UploadedFile $file, string $category, string $filename): bool
     {
-        return $file->storeAs(self::directory($category), basename($filename), self::diskName()) !== false;
+        try {
+            return $file->storeAs(self::directory($category), basename($filename), self::diskName()) !== false;
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
     }
 
     public static function delete(string $category, ?string $filename): bool
@@ -21,12 +27,28 @@ final class PrivateUploads
             return true;
         }
 
-        return self::disk()->delete(self::path($category, $filename));
+        try {
+            return self::disk()->delete(self::path($category, $filename));
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
     }
 
     public static function exists(string $category, ?string $filename): bool
     {
-        return $filename !== null && self::disk()->exists(self::path($category, $filename));
+        if ($filename === null) {
+            return false;
+        }
+
+        try {
+            return self::disk()->exists(self::path($category, $filename));
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
     }
 
     public static function diskName(): string

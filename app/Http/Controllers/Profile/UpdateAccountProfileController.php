@@ -7,8 +7,10 @@ use App\Http\Requests\UpdateAccountProfileRequest;
 use App\Models\SecurityLog;
 use App\Support\PrivateUploads;
 use App\Support\ViewFormatter;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 final class UpdateAccountProfileController extends Controller
 {
@@ -19,7 +21,8 @@ final class UpdateAccountProfileController extends Controller
         $data['has_multiple_branches'] = $request->boolean('has_multiple_branches');
         if ($user->role === 'alumni') {
             $data['age'] = $request->filled('birthdate') ? $request->date('birthdate')->age : null;
-            $data['job_aligned'] = $data['employment_status'] === 'Employed' ? ViewFormatter::profile_analyze_course_job_alignment((string) $user->course, (string) $user->employmentHistory()->latest('start_date')->value('job_title'), (string) $user->employmentHistory()->latest('start_date')->value('job_description'))['value'] : null;
+            $employmentStatus = $data['employment_status'] ?? $user->employment_status;
+            $data['job_aligned'] = $employmentStatus === 'Employed' ? ViewFormatter::profile_analyze_course_job_alignment((string) $user->course, (string) $user->employmentHistory()->latest('start_date')->value('job_title'), (string) $user->employmentHistory()->latest('start_date')->value('job_description'))['value'] : null;
             $data['has_multiple_branches'] = 0;
             $data['branch_location'] = null;
         } elseif ($user->role === 'employer') {
@@ -33,7 +36,9 @@ final class UpdateAccountProfileController extends Controller
         $new = $old;
         if ($file = $request->file('profile_picture')) {
             $new = 'u'.$user->id.'_'.Str::uuid().'.'.$file->extension();
-            abort_unless(PrivateUploads::store($file, 'profiles', $new), 500, 'Profile upload failed.');
+            if (! PrivateUploads::store($file, 'profiles', $new)) {
+                throw ValidationException::withMessages(['profile_picture' => 'The profile picture could not be stored. Please try again.']);
+            }
             $data['profile_picture'] = $new;
         }
         try {
@@ -49,6 +54,7 @@ final class UpdateAccountProfileController extends Controller
         }if ($new !== $old) {
             PrivateUploads::delete('profiles', $old);
         }
+        Cache::forget('feed.mention-users.v1');
 
         return to_route('profile')->with('status', 'Profile updated successfully.');
     }

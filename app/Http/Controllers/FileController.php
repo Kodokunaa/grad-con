@@ -49,9 +49,15 @@ final class FileController extends Controller
     private function serve(string $relative, bool $resume)
     {
         $relative = 'files/uploads/'.trim($relative, '/');
-        $disk = PrivateUploads::disk();
-        abort_unless($disk->exists($relative), 404);
-        $stream = $disk->readStream($relative);
+        try {
+            $disk = PrivateUploads::disk();
+            $exists = $disk->exists($relative);
+            $stream = $exists ? $disk->readStream($relative) : false;
+        } catch (\Throwable $exception) {
+            report($exception);
+            abort(503, 'File storage is temporarily unavailable.');
+        }
+        abort_unless($exists, 404);
         abort_if($stream === false, 404);
         $prefix = fread($stream, 8192);
         $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($prefix) ?: 'application/octet-stream';

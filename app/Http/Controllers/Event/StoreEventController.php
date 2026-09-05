@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Support\PrivateUploads;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 final class StoreEventController extends Controller
 {
@@ -20,7 +21,9 @@ final class StoreEventController extends Controller
 
         if ($file = $request->file('image')) {
             $data['image'] = 'event_'.Str::uuid().'.'.$file->extension();
-            abort_unless(PrivateUploads::store($file, 'events', $data['image']), 500, 'Image upload failed.');
+            if (! PrivateUploads::store($file, 'events', $data['image'])) {
+                throw ValidationException::withMessages(['image' => 'The event image could not be stored. Please try again.']);
+            }
         }
 
         try {

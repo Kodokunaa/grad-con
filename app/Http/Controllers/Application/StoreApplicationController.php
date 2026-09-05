@@ -25,7 +25,9 @@ final class StoreApplicationController extends Controller
             }
         }
         $filename = 'resume_job'.$job->id.'_u'.$alumni->id.'_'.now()->timestamp.'_'.bin2hex(random_bytes(4)).'.pdf';
-        abort_unless(PrivateUploads::store($request->file('resume'), 'resumes', $filename), 500, 'Unable to store the resume.');
+        if (! PrivateUploads::store($request->file('resume'), 'resumes', $filename)) {
+            throw ValidationException::withMessages(['resume' => 'The résumé could not be stored. Please try again.']);
+        }
         try {
             $application = new JobApplication;
             $application->forceFill([
