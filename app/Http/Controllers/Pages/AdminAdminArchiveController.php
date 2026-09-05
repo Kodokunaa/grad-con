@@ -19,8 +19,10 @@ final class AdminAdminArchiveController extends PageController
                 $row['comments'] = $event->comments->map(function ($comment) {
                     $row = $comment->toArray();
                     $row['fullname'] = $comment->author?->fullname;
+
                     return $row;
                 })->all();
+
                 return $row;
             })->all();
             echo view('partials.header', \get_defined_vars());

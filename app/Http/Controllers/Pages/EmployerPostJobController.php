@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
+use App\Support\ViewFormatter;
 use Illuminate\Http\Request;
 
 final class EmployerPostJobController extends PageController
@@ -17,7 +18,7 @@ final class EmployerPostJobController extends PageController
             $employer_fullname = $user->fullname;
             $employer_email = $user->email;
             $employer_profile_address = (string) $user->address;
-            $employer_branches = \App\Support\ViewFormatter::employer_post_job_parse_branch_locations((string) $user->branch_location);
+            $employer_branches = ViewFormatter::employer_post_job_parse_branch_locations((string) $user->branch_location);
             $default_location = $employer_profile_address;
             $selected_branch_location = old('branch_location', '');
             $display_location = $selected_branch_location ?: old('location', $default_location);

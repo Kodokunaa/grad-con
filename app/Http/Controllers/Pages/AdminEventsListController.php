@@ -13,4 +13,3 @@ final class AdminEventsListController extends Controller
         return view('pages.admin.events_list', ['posts' => $feed->postsFor(request()->user(), true), 'mentionUsers' => $feed->mentionUsers()]);
     }
 }
-

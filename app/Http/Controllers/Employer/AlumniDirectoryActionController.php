@@ -19,6 +19,7 @@ final class AlumniDirectoryActionController extends Controller
         $data = $request->validated();
         $log = new EmployerActivityLog;
         $log->forceFill(['employer_id' => $request->user()->id, 'action' => 'SEARCH_ALUMNI', 'details' => 'Alumni directory search', 'course_filter' => $data['course_filter'] ?? '', 'batch_filter' => $data['batch_filter'] ?? '', 'skill_search' => $data['skills_search'] ?? '', 'result_count' => $data['result_count']])->save();
+
         return response()->json(['status' => 'ok']);
     }
 

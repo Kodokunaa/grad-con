@@ -15,6 +15,7 @@ final class AlumniApplicationActionController extends Controller
         Gate::authorize('update', $application);
         abort_if(in_array(strtolower(trim((string) $application->status)), ['accepted', 'hired', 'rejected', 'cancelled'], true), 422, 'This application can no longer be cancelled.');
         $application->forceFill(['status' => 'cancelled', 'cancel_reason' => $request->string('cancel_reason')->trim()->toString(), 'cancelled_at' => now()])->save();
+
         return to_route('alumni.my_applications')->with('status', 'Application cancelled successfully.');
     }
 
@@ -23,6 +24,7 @@ final class AlumniApplicationActionController extends Controller
         Gate::authorize('delete', $application);
         abort_unless(strtolower(trim((string) $application->status)) === 'cancelled', 422, 'Only cancelled applications can be removed.');
         $application->delete();
+
         return to_route('alumni.my_applications')->with('status', 'Cancelled application removed successfully.');
     }
 }

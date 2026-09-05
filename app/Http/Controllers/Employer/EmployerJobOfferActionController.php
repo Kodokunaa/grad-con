@@ -14,6 +14,7 @@ final class EmployerJobOfferActionController extends Controller
     {
         Gate::authorize('update', $offer);
         $offer->update(['status' => OfferStatus::Done]);
+
         return to_route('employer.job_offers')->with('status', 'Offer marked as done.');
     }
 
@@ -21,6 +22,7 @@ final class EmployerJobOfferActionController extends Controller
     {
         Gate::authorize('delete', $offer);
         $offer->delete();
+
         return to_route('employer.job_offers')->with('status', 'Offer removed successfully.');
     }
 }

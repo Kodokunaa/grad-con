@@ -26,4 +26,3 @@ final class AdminJobsListController extends PageController
         });
     }
 }
-

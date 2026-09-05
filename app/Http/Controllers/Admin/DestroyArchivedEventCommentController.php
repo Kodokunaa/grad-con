@@ -16,6 +16,7 @@ final class DestroyArchivedEventCommentController extends Controller
         Gate::authorize('update', $event);
         $comment->replies()->delete();
         $comment->delete();
+
         return to_route('admin.admin_archive')->with('status', 'Comment deleted successfully.');
     }
 }

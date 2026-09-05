@@ -40,6 +40,7 @@ final class StoreApplicationController extends Controller
             PrivateUploads::delete('resumes', $filename);
             throw $exception;
         }
+
         return to_route('alumni.apply', ['job_id' => $job->id])->with('status', 'Application submitted successfully!');
     }
 }

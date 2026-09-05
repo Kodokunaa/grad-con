@@ -25,6 +25,7 @@ final class AlumniMyApplicationsController extends PageController
                 $row['company'] = $application->job?->company;
                 $row['location'] = $application->job?->location;
                 $row['job_type'] = $application->job?->job_type;
+
                 return $row;
             })->all();
             echo view('partials.header', \get_defined_vars());

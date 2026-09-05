@@ -27,5 +27,8 @@ class JobApplication extends Model
         return $this->belongsTo(User::class, 'alumni_id');
     }
 
-    public function interviews() { return $this->hasMany(Interview::class, 'application_id'); }
+    public function interviews()
+    {
+        return $this->hasMany(Interview::class, 'application_id');
+    }
 }

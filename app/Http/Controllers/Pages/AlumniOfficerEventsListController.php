@@ -13,4 +13,3 @@ final class AlumniOfficerEventsListController extends Controller
         return view('pages.alumni_officer.events_list', ['posts' => $feed->postsFor(request()->user(), true), 'mentionUsers' => $feed->mentionUsers()]);
     }
 }
-

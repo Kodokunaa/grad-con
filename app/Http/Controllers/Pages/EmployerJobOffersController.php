@@ -19,6 +19,7 @@ final class EmployerJobOffersController extends PageController
                 $row['alumni_name'] = $offer->alumni?->fullname;
                 $row['alumni_email'] = $offer->alumni?->email;
                 $row['course'] = $offer->alumni?->course;
+
                 return $row;
             })->all();
             // Calculate statistics

@@ -7,7 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 final class Training extends Model
 {
     public $timestamps = false;
+
     protected $guarded = ['id', 'posted_by', 'created_at'];
-    protected function casts(): array { return ['training_date' => 'date', 'created_at' => 'datetime']; }
-    public function author() { return $this->belongsTo(User::class, 'posted_by'); }
+
+    protected function casts(): array
+    {
+        return ['training_date' => 'date', 'created_at' => 'datetime'];
+    }
+
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'posted_by');
+    }
 }

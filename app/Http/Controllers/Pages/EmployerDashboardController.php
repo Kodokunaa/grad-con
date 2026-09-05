@@ -52,14 +52,17 @@ final class EmployerDashboardController extends PageController
                 $row['email'] = $application->alumni?->email;
                 $row['title'] = $application->job?->title;
                 $row['job_id'] = $application->job_id;
+
                 return $row;
             })->all();
             $latestOffers = (clone $offers)->with('alumni')->latest('id')->limit(5)->get()->map(function ($offer) {
                 $row = $offer->toArray();
                 $row['fullname'] = $offer->alumni?->fullname;
                 $row['email'] = $offer->alumni?->email;
+
                 return $row;
-            })->all();            echo view('partials.header', \get_defined_vars());
+            })->all();
+            echo view('partials.header', \get_defined_vars());
             echo view('partials.employer_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.employer.dashboard', get_defined_vars());

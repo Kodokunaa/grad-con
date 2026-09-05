@@ -11,7 +11,7 @@ final class AdminAlumniEditController extends PageController
 {
     public function __invoke(Request $request)
     {
-        return $this->renderPage(function () use ($request) {
+        return $this->renderPage(function () {
             $id = (int) (request()->query('id') ?? 0);
             $account = User::query()->whereKey($id)->where('role', 'alumni')->first();
             if (! $account) {

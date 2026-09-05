@@ -37,13 +37,23 @@ return new class extends Migration
             Schema::table('users', fn (Blueprint $table) => $table->boolean('is_active')->default(true));
         }
         Schema::table('events', function (Blueprint $table) {
-            if (! Schema::hasColumn('events', 'post_start_date')) $table->dateTime('post_start_date')->nullable();
-            if (! Schema::hasColumn('events', 'post_end_date')) $table->dateTime('post_end_date')->nullable();
-            if (! Schema::hasColumn('events', 'is_archived')) $table->boolean('is_archived')->default(false);
-            if (! Schema::hasColumn('events', 'archived_at')) $table->dateTime('archived_at')->nullable();
+            if (! Schema::hasColumn('events', 'post_start_date')) {
+                $table->dateTime('post_start_date')->nullable();
+            }
+            if (! Schema::hasColumn('events', 'post_end_date')) {
+                $table->dateTime('post_end_date')->nullable();
+            }
+            if (! Schema::hasColumn('events', 'is_archived')) {
+                $table->boolean('is_archived')->default(false);
+            }
+            if (! Schema::hasColumn('events', 'archived_at')) {
+                $table->dateTime('archived_at')->nullable();
+            }
         });
         Schema::table('interviews', function (Blueprint $table) {
-            if (! Schema::hasColumn('interviews', 'offer_id')) $table->unsignedInteger('offer_id')->nullable();
+            if (! Schema::hasColumn('interviews', 'offer_id')) {
+                $table->unsignedInteger('offer_id')->nullable();
+            }
         });
         DB::statement('ALTER TABLE interviews MODIFY application_id INT NULL, MODIFY job_id INT NULL');
     }

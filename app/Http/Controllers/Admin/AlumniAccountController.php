@@ -20,6 +20,7 @@ final class AlumniAccountController extends Controller
             $alumni->password = $data['password'];
         }
         $alumni->save();
+
         return to_route('admin.alumni_edit', ['id' => $alumni->id])->with('status', 'Updated successfully!');
     }
 
@@ -28,6 +29,7 @@ final class AlumniAccountController extends Controller
         abort_unless($alumni->role === 'alumni', 404);
         Gate::authorize('delete', $alumni);
         $alumni->delete();
+
         return to_route('admin.alumni_list')->with('status', 'Alumni deleted successfully.');
     }
 }

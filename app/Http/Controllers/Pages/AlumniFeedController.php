@@ -13,4 +13,3 @@ final class AlumniFeedController extends Controller
         return view('pages.alumni.feed', ['posts' => $feed->postsFor(request()->user()), 'sidebarJobs' => $feed->sidebarJobs(), 'mentionUsers' => $feed->mentionUsers()]);
     }
 }
-

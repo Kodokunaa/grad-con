@@ -25,7 +25,18 @@ class Job extends Model
         return $this->belongsTo(User::class, 'posted_by');
     }
 
-    public function poster() { return $this->belongsTo(User::class, 'posted_by'); }
-    public function assignedEmployer() { return $this->belongsTo(User::class, 'employer_id'); }
-    public function interviews() { return $this->hasMany(Interview::class); }
+    public function poster()
+    {
+        return $this->belongsTo(User::class, 'posted_by');
+    }
+
+    public function assignedEmployer()
+    {
+        return $this->belongsTo(User::class, 'employer_id');
+    }
+
+    public function interviews()
+    {
+        return $this->hasMany(Interview::class);
+    }
 }

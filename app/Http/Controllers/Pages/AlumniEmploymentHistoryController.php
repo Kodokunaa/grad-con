@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
+use App\Support\ViewFormatter;
 use Illuminate\Http\Request;
 
 final class AlumniEmploymentHistoryController extends PageController
@@ -12,7 +13,7 @@ final class AlumniEmploymentHistoryController extends PageController
         return $this->renderPage(function () use ($request) {
             $model = $request->user()->load(['employmentHistory' => fn ($q) => $q->orderByRaw('end_date IS NULL DESC')->orderByDesc('end_date')->orderByDesc('start_date')->orderByDesc('id')]);
             $user = $model->getAttributes();
-            $alumniCourse = \App\Support\ViewFormatter::alumni_employment_history_get_alumni_course($user);
+            $alumniCourse = ViewFormatter::alumni_employment_history_get_alumni_course($user);
             $msg = session('status', '');
             $error = '';
             $employment_list = $model->employmentHistory->map->getAttributes()->all();
