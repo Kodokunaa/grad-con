@@ -5,13 +5,17 @@ namespace Tests\Feature;
 use App\Models\JobApplication;
 use App\Models\User;
 use App\Notifications\ResetPassword;
+use App\Support\PrivateUploads;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoApiTransport;
 use Tests\TestCase;
 
 final class MigrationTest extends TestCase
@@ -64,6 +68,40 @@ final class MigrationTest extends TestCase
 
         config()->set('mail.mailers.smtp.username', 'account@smtp-brevo.com');
         $this->artisan('gradconn:check --mail')->assertSuccessful();
+    }
+
+    public function test_brevo_api_mailer_and_private_cloud_uploads_are_configurable(): void
+    {
+        config()->set('mail.default', 'brevo');
+        config()->set('mail.mailers.brevo.key', 'test-api-key');
+        config()->set('services.brevo.key', 'test-api-key');
+        config()->set('mail.from.address', 'verified@example.test');
+
+        $this->artisan('gradconn:check --mail')->assertSuccessful();
+        $this->assertInstanceOf(BrevoApiTransport::class, Mail::mailer('brevo')->getSymfonyTransport());
+
+        config()->set('filesystems.uploads_disk', 's3');
+        Storage::fake('s3');
+        $upload = UploadedFile::fake()->create('resume.pdf', 20, 'application/pdf');
+
+        $this->assertTrue(PrivateUploads::store($upload, 'resumes', 'candidate.pdf'));
+        Storage::disk('s3')->assertExists('files/uploads/resumes/candidate.pdf');
+        $this->assertTrue(PrivateUploads::delete('resumes', 'candidate.pdf'));
+        Storage::disk('s3')->assertMissing('files/uploads/resumes/candidate.pdf');
+    }
+
+    public function test_render_container_keeps_secrets_external_and_runs_safe_startup_tasks(): void
+    {
+        $dockerfile = file_get_contents(base_path('Dockerfile'));
+        $startup = file_get_contents(base_path('docker/start.sh'));
+        $blueprint = file_get_contents(base_path('render.yaml'));
+
+        $this->assertStringContainsString('DocumentRoot /var/www/html/public', file_get_contents(base_path('docker/apache-vhost.conf')));
+        $this->assertStringContainsString('php artisan migrate --force', $startup);
+        $this->assertStringNotContainsString('db:seed', $startup);
+        $this->assertStringContainsString('composer install --no-dev', $dockerfile);
+        $this->assertStringContainsString('BREVO_API_KEY', $blueprint);
+        $this->assertStringNotContainsString('api-key-', $blueprint);
     }
 
     protected function tearDown(): void

@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\JobApplication;
+use App\Support\PrivateUploads;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -34,7 +35,7 @@ final class ApplicantResumeMail extends Mailable implements ShouldQueue
 
     public function attachments(): array
     {
-        return [Attachment::fromStorageDisk('local', 'files/uploads/resumes/'.basename($this->application->resume_file))
+        return [Attachment::fromStorageDisk(PrivateUploads::diskName(), PrivateUploads::path('resumes', $this->application->resume_file))
             ->as(basename($this->application->resume_file))];
     }
 }

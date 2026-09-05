@@ -49,7 +49,14 @@ final class CheckInstallation extends Command
         if ($this->option('mail')) {
             $mailer = (string) config('mail.default');
             if ($mailer === 'log' || $mailer === 'array') {
-                $failures[] = "MAIL_MAILER={$mailer} does not deliver email to recipients. Use resend or smtp.";
+                $failures[] = "MAIL_MAILER={$mailer} does not deliver email to recipients. Use brevo, resend, or smtp.";
+            } elseif ($mailer === 'brevo') {
+                if (blank(config('services.brevo.key'))) {
+                    $failures[] = 'BREVO_API_KEY is missing.';
+                }
+                if (! filter_var(config('mail.from.address'), FILTER_VALIDATE_EMAIL)) {
+                    $failures[] = 'MAIL_FROM_ADDRESS must be a valid email address.';
+                }
             } elseif ($mailer === 'resend') {
                 if (blank(config('services.resend.key'))) {
                     $failures[] = 'RESEND_API_KEY is missing.';

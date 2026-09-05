@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 
 final class AdminEventsDeleteController extends Controller
 {
@@ -20,7 +20,7 @@ final class AdminEventsDeleteController extends Controller
 
         $event->delete();
         if ($event->image) {
-            Storage::disk('local')->delete('files/uploads/events/'.basename($event->image));
+            PrivateUploads::delete('events', $event->image);
         }
 
         return redirect('/admin/events_list.php?deleted=1');

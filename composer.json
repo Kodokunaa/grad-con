@@ -22,7 +22,10 @@
         "ext-xml": "*",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
-        "resend/resend-php": "^1.13"
+        "league/flysystem-aws-s3-v3": "^3.35",
+        "resend/resend-php": "^1.13",
+        "symfony/brevo-mailer": "^7.4",
+        "symfony/http-client": "^7.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

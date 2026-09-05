@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\JobApplication;
 use App\Models\User;
+use App\Support\PrivateUploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Storage;
 
 final class FileController extends Controller
 {
@@ -49,21 +49,38 @@ final class FileController extends Controller
     private function serve(string $relative, bool $resume)
     {
         $relative = 'files/uploads/'.trim($relative, '/');
-        abort_unless(Storage::disk('local')->exists($relative), 404);
-        $path = Storage::disk('local')->path($relative);
-        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($path);
+        $disk = PrivateUploads::disk();
+        abort_unless($disk->exists($relative), 404);
+        $stream = $disk->readStream($relative);
+        abort_if($stream === false, 404);
+        $prefix = fread($stream, 8192);
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($prefix) ?: 'application/octet-stream';
         $resumeTypes = [
             'application/pdf',
             'application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/zip', // Some fileinfo databases identify DOCX containers as ZIP.
         ];
-        abort_unless($resume ? in_array($mime, $resumeTypes, true) : in_array($mime, ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'], true), 415);
-
-        if ($resume && $mime !== 'application/pdf') {
-            return response()->download($path, basename($path), ['Content-Type' => $mime, 'X-Content-Type-Options' => 'nosniff', 'Cache-Control' => 'private, no-store']);
+        if (! ($resume ? in_array($mime, $resumeTypes, true) : in_array($mime, ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'], true))) {
+            fclose($stream);
+            abort(415);
         }
 
-        return response()->file($path, ['Content-Type' => $mime, 'X-Content-Type-Options' => 'nosniff', 'Cache-Control' => 'private, no-store']);
+        if ($resume && $mime !== 'application/pdf') {
+            $disposition = 'attachment';
+        } else {
+            $disposition = 'inline';
+        }
+
+        return response()->stream(function () use ($prefix, $stream): void {
+            echo $prefix;
+            fpassthru($stream);
+            fclose($stream);
+        }, 200, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => $disposition.'; filename="'.basename($relative).'"',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, no-store',
+        ]);
     }
 }

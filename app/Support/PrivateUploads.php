@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,7 +12,7 @@ final class PrivateUploads
 
     public static function store(UploadedFile $file, string $category, string $filename): bool
     {
-        return $file->storeAs(self::directory($category), basename($filename), 'local') !== false;
+        return $file->storeAs(self::directory($category), basename($filename), self::diskName()) !== false;
     }
 
     public static function delete(string $category, ?string $filename): bool
@@ -20,20 +21,25 @@ final class PrivateUploads
             return true;
         }
 
-        return Storage::disk('local')->delete(self::path($category, $filename));
+        return self::disk()->delete(self::path($category, $filename));
     }
 
     public static function exists(string $category, ?string $filename): bool
     {
-        return $filename !== null && Storage::disk('local')->exists(self::path($category, $filename));
+        return $filename !== null && self::disk()->exists(self::path($category, $filename));
     }
 
-    public static function absolutePath(string $category, string $filename): string
+    public static function diskName(): string
     {
-        return Storage::disk('local')->path(self::path($category, $filename));
+        return (string) config('filesystems.uploads_disk', 'local');
     }
 
-    private static function path(string $category, string $filename): string
+    public static function disk(): FilesystemAdapter
+    {
+        return Storage::disk(self::diskName());
+    }
+
+    public static function path(string $category, string $filename): string
     {
         return self::directory($category).'/'.basename($filename);
     }

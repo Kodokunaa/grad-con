@@ -21,7 +21,7 @@ final class SendTestMail extends Command
         }
 
         if (in_array(config('mail.default'), ['log', 'array'], true)) {
-            $this->components->error('The configured mailer does not deliver externally. Set MAIL_MAILER=smtp.');
+            $this->components->error('The configured mailer does not deliver externally. Set MAIL_MAILER=brevo, resend, or smtp.');
 
             return self::FAILURE;
         }

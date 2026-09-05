@@ -18,6 +18,7 @@ Set the real `DB_*` values before migrating. Standard XAMPP MySQL uses port `330
 - [Installation](docs/installation.md)
 - [Existing-database upgrade](docs/upgrade.md)
 - [Deployment](docs/deployment.md)
+- [Render deployment](docs/render-deployment.md)
 - [Backup and restore](docs/backup-restore.md)
 - [Testing](docs/testing.md)
 - [Troubleshooting](docs/troubleshooting.md)
