@@ -92,7 +92,7 @@
         <p>Your current session will end and you will return to the login page.</p>
         <div class="logout-lightbox__actions">
             <button class="logout-lightbox__cancel" id="logoutLightboxCancel" type="button">Stay logged in</button>
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('logout', absolute: false) }}">
                 @csrf
                 <button class="logout-lightbox__confirm" type="submit">Log out</button>
             </form>
