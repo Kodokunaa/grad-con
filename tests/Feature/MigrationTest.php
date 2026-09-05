@@ -98,6 +98,7 @@ final class MigrationTest extends TestCase
 
         $this->assertStringContainsString('DocumentRoot /var/www/html/public', file_get_contents(base_path('docker/apache-vhost.conf')));
         $this->assertStringContainsString('php artisan migrate --force', $startup);
+        $this->assertStringContainsString('php artisan gradconn:check --database --mail', $startup);
         $this->assertStringContainsString('php artisan config:clear', $startup);
         $this->assertStringNotContainsString('php artisan optimize:clear', $startup);
         $this->assertStringNotContainsString('db:seed', $startup);

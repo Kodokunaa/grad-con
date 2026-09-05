@@ -15,6 +15,7 @@ fi
 
 php artisan config:clear
 php artisan migrate --force
+php artisan gradconn:check --database --mail
 php artisan optimize
 
 exec apache2-foreground

@@ -25,6 +25,12 @@ final class CheckInstallation extends Command
 
         if (! config('app.key')) {
             $failures[] = 'APP_KEY is missing. Run php artisan key:generate.';
+        } else {
+            try {
+                app('encrypter')->encryptString('gradconn-readiness-check');
+            } catch (\Throwable) {
+                $failures[] = 'APP_KEY is invalid. Set it to the complete output of php artisan key:generate --show.';
+            }
         }
 
         if (! in_array(config('app.timezone'), DateTimeZone::listIdentifiers(), true)) {
