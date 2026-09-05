@@ -57,7 +57,6 @@
         "ALTER TABLE post_notifications ADD COLUMN is_read TINYINT(1) NOT NULL DEFAULT 0 AFTER message",
         "ALTER TABLE post_notifications ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER is_read",
         "ALTER TABLE interviews\r\n            MODIFY application_id INT NULL,\r\n            MODIFY job_id INT NULL",
-        "ALTER TABLE interviews ADD COLUMN IF NOT EXISTS offer_id INT NULL",
         "ALTER TABLE job_offers MODIFY COLUMN status ENUM('sent', 'accepted', 'declined', 'expired', 'done') DEFAULT 'sent'",
         "ALTER TABLE users MODIFY password VARCHAR(255) NOT NULL",
         "ALTER TABLE users ADD COLUMN remember_token VARCHAR(100) NULL",

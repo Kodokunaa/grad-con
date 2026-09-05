@@ -107,6 +107,7 @@ final class MigrationTest extends TestCase
         $this->assertStringContainsString('BREVO_API_KEY', $blueprint);
         $this->assertMatchesRegularExpression('/key: DB_PORT\s+sync: false/', $blueprint);
         $this->assertStringNotContainsString('api-key-', $blueprint);
+        $this->assertStringNotContainsString('ADD COLUMN IF NOT EXISTS', file_get_contents(database_path('schema/gradconn.json')));
     }
 
     protected function tearDown(): void
