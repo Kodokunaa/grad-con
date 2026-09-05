@@ -11,6 +11,7 @@ $currentUserRoleLabel = $roleLabels[$currentUserRole] ?? ucfirst($currentUserRol
 <!doctype html>
 <html>
 <head>
+  @include('partials.favicon')
   <meta charset="utf-8">
   <title>GradConn</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">

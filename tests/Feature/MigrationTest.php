@@ -238,11 +238,12 @@ final class MigrationTest extends TestCase
         $this->get('/auth/admin_login.php')
             ->assertOk()
             ->assertSee('src="/ccc3d.png"', false)
+            ->assertSee('rel="icon" type="image/png" href="/ccc3d.png?v=2"', false)
             ->assertSee(route('password.request'), false)
             ->assertSee(route('register'), false);
 
-        $this->get('/register.php')->assertOk()->assertSee(route('login'), false);
-        $this->get('/reset_password.php')->assertOk()->assertSee(route('login'), false);
+        $this->get('/register.php')->assertOk()->assertSee(route('login'), false)->assertSee('/ccc3d.png?v=2', false);
+        $this->get('/reset_password.php')->assertOk()->assertSee(route('login'), false)->assertSee('/ccc3d.png?v=2', false);
 
         $admin = $this->user('admin');
         $this->actingAs($admin)
@@ -471,6 +472,9 @@ final class MigrationTest extends TestCase
                     }
                     if (! str_contains($content, 'class="app-header gradconn-navbar"')) {
                         $failures[] = $path.' is missing the shared authenticated navbar.';
+                    }
+                    if (! str_contains($content, 'rel="icon" type="image/png" href="/ccc3d.png?v=2"')) {
+                        $failures[] = $path.' is missing the GradConn favicon.';
                     }
                 }
             } catch (\Throwable $e) {

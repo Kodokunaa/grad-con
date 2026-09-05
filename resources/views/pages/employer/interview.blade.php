@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    @include('partials.favicon')
 <meta charset="UTF-8">
 <title>Set Interview</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
