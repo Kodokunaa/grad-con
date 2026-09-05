@@ -18,9 +18,25 @@ final class SocialFeedActionController extends Controller
         return $request->expectsJson() ? response()->json(['success' => true] + $result) : back();
     }
 
-    public function comment(StorePostCommentRequest $request, string $type, int $post, SocialFeedService $feed): RedirectResponse
+    public function comment(StorePostCommentRequest $request, string $type, int $post, SocialFeedService $feed): JsonResponse|RedirectResponse
     {
-        $feed->comment($request->user(), $type, $post, $request->string('comment')->trim()->toString(), $request->integer('parent_comment_id') ?: null);
+        $comment = $feed->comment($request->user(), $type, $post, $request->string('comment')->trim()->toString(), $request->integer('parent_comment_id') ?: null);
+
+        if ($request->expectsJson()) {
+            $comment->load('author');
+
+            return response()->json([
+                'success' => true,
+                'comment' => [
+                    'id' => $comment->id,
+                    'comment' => $comment->comment,
+                    'fullname' => $comment->author?->fullname ?? 'User',
+                    'profile_photo' => $comment->author?->profile_picture,
+                    'created_at' => $comment->created_at?->toIso8601String(),
+                ],
+                'comment_count' => PostComment::where(['post_type' => $type, 'post_id' => $post])->count(),
+            ]);
+        }
 
         return back()->with('status', 'Comment posted successfully.');
     }
