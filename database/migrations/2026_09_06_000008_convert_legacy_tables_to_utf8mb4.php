@@ -12,12 +12,13 @@ return new class extends Migration
         }
 
         $tables = DB::table('information_schema.columns')
+            ->selectRaw('TABLE_NAME AS legacy_table_name')
             ->whereRaw('table_schema = database()')
             ->whereNotNull('character_set_name')
             ->where('character_set_name', '<>', 'utf8mb4')
             ->distinct()
-            ->orderBy('table_name')
-            ->pluck('table_name');
+            ->orderBy('legacy_table_name')
+            ->pluck('legacy_table_name');
 
         foreach ($tables as $table) {
             $quotedTable = '`'.str_replace('`', '``', $table).'`';
