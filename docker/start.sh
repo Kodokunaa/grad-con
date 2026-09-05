@@ -10,7 +10,8 @@ chown -R www-data:www-data storage bootstrap/cache
 
 if [ -n "${AIVEN_CA_BASE64:-}" ]; then
     printf '%s' "$AIVEN_CA_BASE64" | base64 -d > storage/certs/aiven-ca.pem
-    chmod 600 storage/certs/aiven-ca.pem
+    chown www-data:www-data storage/certs/aiven-ca.pem
+    chmod 640 storage/certs/aiven-ca.pem
 fi
 
 php artisan config:clear
