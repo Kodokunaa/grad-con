@@ -35,7 +35,7 @@ services:
       - key: SESSION_DRIVER
         value: database
       - key: CACHE_STORE
-        value: database
+        value: file
       - key: QUEUE_CONNECTION
         value: sync
       - key: PRIVATE_UPLOADS_DISK

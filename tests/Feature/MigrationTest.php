@@ -105,8 +105,14 @@ final class MigrationTest extends TestCase
         $dockerfile = file_get_contents(base_path('Dockerfile'));
         $startup = file_get_contents(base_path('docker/start.sh'));
         $blueprint = file_get_contents(base_path('render.yaml'));
+        $apache = file_get_contents(base_path('docker/apache-vhost.conf'));
+        $php = file_get_contents(base_path('docker/php-production.ini'));
 
-        $this->assertStringContainsString('DocumentRoot /var/www/html/public', file_get_contents(base_path('docker/apache-vhost.conf')));
+        $this->assertStringContainsString('DocumentRoot /var/www/html/public', $apache);
+        $this->assertStringContainsString('AddOutputFilterByType DEFLATE', $apache);
+        $this->assertStringContainsString('max-age=31536000, immutable', $apache);
+        $this->assertStringContainsString('opcache.enable=1', $php);
+        $this->assertStringContainsString('opcache.validate_timestamps=0', $php);
         $this->assertStringContainsString('php artisan migrate --force', $startup);
         $this->assertStringContainsString('php artisan gradconn:check --database --mail', $startup);
         $this->assertStringContainsString('php artisan db:seed --class=AdminSeeder --force', $startup);
@@ -119,6 +125,7 @@ final class MigrationTest extends TestCase
         $this->assertStringContainsString('FROM php:8.3-cli AS vendor', $dockerfile);
         $this->assertStringContainsString('docker-php-ext-install bcmath curl dom intl mbstring pdo_mysql xml zip', $dockerfile);
         $this->assertStringContainsString('BREVO_API_KEY', $blueprint);
+        $this->assertMatchesRegularExpression('/key: CACHE_STORE\s+value: file/', $blueprint);
         $this->assertMatchesRegularExpression('/key: DB_PORT\s+sync: false/', $blueprint);
         $this->assertStringNotContainsString('api-key-', $blueprint);
         $this->assertStringNotContainsString('ADD COLUMN IF NOT EXISTS', file_get_contents(database_path('schema/gradconn.json')));

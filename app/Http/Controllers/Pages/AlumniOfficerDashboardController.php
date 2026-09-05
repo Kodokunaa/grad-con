@@ -18,9 +18,10 @@ final class AlumniOfficerDashboardController extends PageController
             $scheduledEvents = 0;
             $recentEvents = [];
             $error = '';
-            $totalEvents = Event::query()->count();
-            $activeEvents = Event::query()->where(fn ($q) => $q->whereNull('post_start_date')->orWhere('post_start_date', '<=', now()))->where(fn ($q) => $q->whereNull('post_end_date')->orWhere('post_end_date', '>=', now()))->count();
-            $scheduledEvents = Event::query()->where('post_start_date', '>', now())->count();
+            $eventStats = Event::query()->selectRaw('COUNT(*) total, SUM(CASE WHEN (post_start_date IS NULL OR post_start_date <= ?) AND (post_end_date IS NULL OR post_end_date >= ?) THEN 1 ELSE 0 END) active, SUM(CASE WHEN post_start_date > ? THEN 1 ELSE 0 END) scheduled', [now(), now(), now()])->first();
+            $totalEvents = (int) $eventStats->total;
+            $activeEvents = (int) $eventStats->active;
+            $scheduledEvents = (int) $eventStats->scheduled;
             $recentEvents = Event::query()->with('author')->latest('created_at')->latest('id')->limit(6)->get()->map(function ($event) {
                 $row = $event->toArray();
                 $row['poster_name'] = $event->author?->fullname;

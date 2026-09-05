@@ -19,4 +19,14 @@ final class Training extends Model
     {
         return $this->belongsTo(User::class, 'posted_by');
     }
+
+    public function comments()
+    {
+        return $this->hasMany(PostComment::class, 'post_id')->where('post_type', 'training');
+    }
+
+    public function reactions()
+    {
+        return $this->hasMany(PostReaction::class, 'post_id')->where('post_type', 'training');
+    }
 }

@@ -25,12 +25,7 @@ final class SocialFeedService
         $posts = $events;
         if (! $eventsOnly) {
             $trainings = Training::query()->where(fn ($q) => $q->where('target_course', $user->course)->orWhere('target_course', 'Open for All'))
-                ->with('author')->get()->map(function ($training) {
-                    $training->setRelation('reactions', PostReaction::where('post_type', 'training')->where('post_id', $training->id)->get());
-                    $training->setRelation('comments', PostComment::where('post_type', 'training')->where('post_id', $training->id)->with('author')->get());
-
-                    return $this->postArray($training, 'training');
-                });
+                ->with(['author', 'reactions', 'comments.author'])->get()->map(fn ($training) => $this->postArray($training, 'training'));
             $posts = $posts->concat($trainings);
         }
 
@@ -130,7 +125,15 @@ final class SocialFeedService
         $reactions = $post->reactions ?? collect();
         $comments = $post->comments ?? collect();
 
-        return array_merge($post->toArray(), ['post_type' => $type, 'poster' => $post->author?->fullname ?? 'GradConn', 'poster_photo' => $post->author?->profile_picture, 'reactions' => $reactions->toArray(), 'counts' => $this->reactionCounts($type, $post->id), 'comments' => $comments->map(fn ($c) => array_merge($c->toArray(), ['fullname' => $c->author?->fullname, 'profile_photo' => $c->author?->profile_picture]))->all()]);
+        $counts = array_fill_keys(array_keys(self::REACTIONS), 0);
+        foreach ($reactions->countBy('reaction_type') as $reaction => $total) {
+            if (array_key_exists($reaction, $counts)) {
+                $counts[$reaction] = $total;
+            }
+        }
+        $counts['total'] = array_sum($counts);
+
+        return array_merge($post->toArray(), ['post_type' => $type, 'poster' => $post->author?->fullname ?? 'GradConn', 'poster_photo' => $post->author?->profile_picture, 'reactions' => $reactions->toArray(), 'counts' => $counts, 'comments' => $comments->map(fn ($c) => array_merge($c->toArray(), ['fullname' => $c->author?->fullname, 'profile_photo' => $c->author?->profile_picture]))->all()]);
     }
 
     private function mentionedUserIds(string $text): Collection

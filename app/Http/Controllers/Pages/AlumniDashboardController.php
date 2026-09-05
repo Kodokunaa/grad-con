@@ -25,17 +25,17 @@ final class AlumniDashboardController extends PageController
             $acceptedJobOffers = 0;
             $declinedJobOffers = 0;
             $pendingJobOffers = 0;
-            $applications = JobApplication::query()->where('alumni_id', $alumni_id);
-            $offers = JobOffer::query()->where('alumni_id', $alumni_id);
-            $totalApplications = (clone $applications)->count();
-            $pendingApplications = (clone $applications)->where('status', 'pending')->count();
-            $rejectedApplications = (clone $applications)->where('status', 'rejected')->count();
-            $hiredApplications = (clone $applications)->where('status', 'hired')->count();
-            $upcomingInterviews = (clone $applications)->whereIn('status', ['interview', 'for interview'])->count();
-            $totalJobOffers = (clone $offers)->count();
-            $acceptedJobOffers = (clone $offers)->where('status', 'accepted')->count();
-            $declinedJobOffers = (clone $offers)->where('status', 'declined')->count();
-            $pendingJobOffers = (clone $offers)->where('status', 'sent')->count();
+            $applicationStats = JobApplication::query()->where('alumni_id', $alumni_id)->selectRaw("COUNT(*) total, SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) pending, SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) rejected, SUM(CASE WHEN status = 'hired' THEN 1 ELSE 0 END) hired, SUM(CASE WHEN status IN ('interview', 'for interview') THEN 1 ELSE 0 END) interviews")->first();
+            $offerStats = JobOffer::query()->where('alumni_id', $alumni_id)->selectRaw("COUNT(*) total, SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END) accepted, SUM(CASE WHEN status = 'declined' THEN 1 ELSE 0 END) declined, SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) pending")->first();
+            $totalApplications = (int) $applicationStats->total;
+            $pendingApplications = (int) $applicationStats->pending;
+            $rejectedApplications = (int) $applicationStats->rejected;
+            $hiredApplications = (int) $applicationStats->hired;
+            $upcomingInterviews = (int) $applicationStats->interviews;
+            $totalJobOffers = (int) $offerStats->total;
+            $acceptedJobOffers = (int) $offerStats->accepted;
+            $declinedJobOffers = (int) $offerStats->declined;
+            $pendingJobOffers = (int) $offerStats->pending;
 
             return $this->pageView('pages.alumni.dashboard', get_defined_vars());
         });
