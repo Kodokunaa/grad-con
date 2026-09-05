@@ -150,24 +150,6 @@
         "role": "admin"
     },
     {
-        "source": "admin/trainings_create.php",
-        "controller": "AdminTrainingsCreateController",
-        "view": "pages.admin.trainings_create",
-        "role": "admin"
-    },
-    {
-        "source": "admin/trainings_edit.php",
-        "controller": "AdminTrainingsEditController",
-        "view": "pages.admin.trainings_edit",
-        "role": "admin"
-    },
-    {
-        "source": "admin/trainings_list.php",
-        "controller": "AdminTrainingsListController",
-        "view": "pages.admin.trainings_list",
-        "role": "admin"
-    },
-    {
         "source": "alumni/add_degree.php",
         "controller": "AlumniAddDegreeController",
         "view": "pages.alumni.add_degree",

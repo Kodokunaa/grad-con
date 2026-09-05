@@ -21,10 +21,9 @@
                 ['admin.jobs_create', 'fa-briefcase', 'Post Job'],
                 ['admin.jobs_list', 'fa-file-signature', 'Jobs & Applications'],
             ]],
-            ['Events & Training', [
+            ['Events', [
                 ['admin.events_create', 'fa-calendar-plus', 'Post Event'],
                 ['admin.events_list', 'fa-calendar-days', 'Events Feed'],
-                ['admin.trainings_list', 'fa-person-chalkboard', 'Training Programs'],
                 ['admin.admin_archive', 'fa-box-archive', 'Archive'],
             ]],
             ['Account', [

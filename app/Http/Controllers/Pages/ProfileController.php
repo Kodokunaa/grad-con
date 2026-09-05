@@ -615,13 +615,6 @@ final class ProfileController extends PageController
             </div>
 
             <div class="section">
-                <h2 class="section-title">Trainings / Seminars</h2>
-                <div class="text-block"><?php
-                echo $formatMultiline($user['trainings'] ?? '');
-                ?></div>
-            </div>
-
-            <div class="section">
                 <h2 class="section-title">Certificates</h2>
                 <?php
                 if (empty($certificates_list)) {

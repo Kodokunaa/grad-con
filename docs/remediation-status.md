@@ -10,7 +10,7 @@ The Laravel migration and runtime cleanup are complete. The application runs fro
 | Database and migrations | Complete | A preserved-schema baseline supports both fresh installs and upgrades. Ownership-aware rollback protects legacy databases and drops fresh-install schema safely. Additive migrations own later changes. |
 | Routing | Complete | Read pages use GET. Mutations use POST, PUT, PATCH, or DELETE resource endpoints. Typo-era GET aliases are redirects only. No multi-action POST page controller remains. |
 | Authentication and account security | Complete | Passwords are hashed, login rehashing is enabled, password changes verify the current password, other sessions are invalidated, recovery is throttled, and security events are logged. |
-| Authorization | Complete | Role middleware and record policies protect jobs, applications, offers, interviews, events, training, alumni accounts, employment, certificates, and private files. |
+| Authorization | Complete | Role middleware and record policies protect jobs, applications, offers, interviews, events, alumni accounts, employment, certificates, and private files. |
 | Validation | Complete | Mutation controllers use Form Requests or route-bound records with explicit transition rules. The former global upload/password validation hook was removed. |
 | Uploads and files | Complete | Private files use Laravel `Storage`, randomized names, MIME/size validation, authorization, and failed-write cleanup. |
 | Mail and queues | Complete | Mail uses dedicated Mailables and Laravel queues; no PHPMailer or `PageMailer` runtime remains. Worker and SMTP procedures are documented. |

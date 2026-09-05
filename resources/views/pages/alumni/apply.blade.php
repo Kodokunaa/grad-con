@@ -531,12 +531,6 @@ echo htmlspecialchars($alumni["skills"] ?? "");
 ?></div>
                 </div>
 
-                <div class="resume-item full-width">
-                    <div class="resume-label">Trainings / Seminars</div>
-                    <div class="resume-value"><?php 
-echo htmlspecialchars($alumni["trainings"] ?? "");
-?></div>
-                </div>
             </div>
         </div>
 

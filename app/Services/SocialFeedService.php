@@ -7,7 +7,6 @@ use App\Models\Job;
 use App\Models\PostComment;
 use App\Models\PostNotification;
 use App\Models\PostReaction;
-use App\Models\Training;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -16,20 +15,14 @@ final class SocialFeedService
 {
     public const REACTIONS = ['like' => ['emoji' => '👍', 'label' => 'Like'], 'love' => ['emoji' => '❤️', 'label' => 'Love'], 'haha' => ['emoji' => '😂', 'label' => 'Haha'], 'angry' => ['emoji' => '😡', 'label' => 'Angry']];
 
-    public function postsFor(User $user, bool $eventsOnly = false): array
+    public function postsFor(User $user): array
     {
         $events = Event::query()->where('is_archived', false)
             ->where(fn ($q) => $q->whereNull('post_start_date')->orWhere('post_start_date', '<=', now()))
             ->where(fn ($q) => $q->whereNull('post_end_date')->orWhere('post_end_date', '>=', now()))
             ->with(['author', 'reactions', 'comments.author'])->get()->map(fn ($event) => $this->postArray($event, 'event'));
-        $posts = $events;
-        if (! $eventsOnly) {
-            $trainings = Training::query()->where(fn ($q) => $q->where('target_course', $user->course)->orWhere('target_course', 'Open for All'))
-                ->with(['author', 'reactions', 'comments.author'])->get()->map(fn ($training) => $this->postArray($training, 'training'));
-            $posts = $posts->concat($trainings);
-        }
 
-        return $posts->sortByDesc('created_at')->values()->map(function ($post) use ($user) {
+        return $events->sortByDesc('created_at')->values()->map(function ($post) use ($user) {
             $post['user_reaction'] = collect($post['reactions'])->firstWhere('user_id', $user->id)['reaction_type'] ?? '';
             unset($post['reactions']);
 
@@ -96,13 +89,11 @@ final class SocialFeedService
         });
     }
 
-    private function post(string $type, int $id): Event|Training
+    private function post(string $type, int $id): Event
     {
-        abort_unless(in_array($type, ['event', 'training'], true), 404);
-        $post = ($type === 'event' ? Event::query() : Training::query())->findOrFail($id);
-        if ($type === 'event') {
-            abort_unless(! $post->is_archived && (! $post->post_start_date || $post->post_start_date <= now()) && (! $post->post_end_date || $post->post_end_date >= now()), 404);
-        }
+        abort_unless($type === 'event', 404);
+        $post = Event::query()->findOrFail($id);
+        abort_unless(! $post->is_archived && (! $post->post_start_date || $post->post_start_date <= now()) && (! $post->post_end_date || $post->post_end_date >= now()), 404);
 
         return $post;
     }

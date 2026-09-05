@@ -19,7 +19,7 @@ final class StoreApplicationController extends Controller
         if (JobApplication::where('job_id', $job->id)->where('alumni_id', $alumni->id)->exists()) {
             throw ValidationException::withMessages(['resume' => 'You already applied to this job.']);
         }
-        foreach (['fullname', 'email', 'course', 'trainings'] as $field) {
+        foreach (['fullname', 'email', 'course'] as $field) {
             if (blank($alumni->{$field})) {
                 throw ValidationException::withMessages([$field => 'Your profile is incomplete. Please update it before applying.']);
             }
@@ -34,7 +34,7 @@ final class StoreApplicationController extends Controller
                 'applicant_birthdate' => $alumni->birthdate, 'applicant_age' => $alumni->age, 'applicant_gender' => $alumni->gender, 'applicant_civil_status' => $alumni->civil_status,
                 'applicant_contact_number' => $alumni->contact_number, 'applicant_address' => $alumni->address, 'applicant_indigenous_tribe' => $alumni->indigenous_tribe,
                 'applicant_special_needs' => $alumni->special_needs, 'applicant_employment_status' => $alumni->employment_status, 'applicant_job_aligned' => $alumni->job_aligned,
-                'applicant_profile_picture' => $alumni->profile_picture, 'applicant_career_objective' => $alumni->career_objective, 'applicant_skills' => $alumni->skills, 'applicant_trainings' => $alumni->trainings,
+                'applicant_profile_picture' => $alumni->profile_picture, 'applicant_career_objective' => $alumni->career_objective, 'applicant_skills' => $alumni->skills,
             ])->save();
         } catch (\Throwable $exception) {
             PrivateUploads::delete('resumes', $filename);

@@ -5,7 +5,7 @@
     <article class="post" id="post-{{ $key }}">
         <header><div class="avatar">{{ strtoupper(substr($post['poster'] ?? 'G', 0, 1)) }}</div><div><strong>{{ $post['poster'] }}</strong><small>{{ optional(\Carbon\Carbon::parse($post['created_at']))->diffForHumans() }}</small></div></header>
         <h2>{{ $post['title'] }}</h2><p>{!! nl2br(e($post['content'] ?? $post['description'] ?? '')) !!}</p>
-        @if(!empty($post['image']))<img class="post-image" src="{{ url('/uploads/'.($post['post_type']==='event'?'events':'trainings').'/'.basename($post['image'])) }}" alt="">@endif
+        @if(!empty($post['image']))<img class="post-image" src="{{ url('/uploads/events/'.basename($post['image'])) }}" alt="">@endif
         <div class="engagement"><span data-counts>{{ $post['counts']['total'] }} reactions</span><span>{{ count($post['comments']) }} comments</span></div>
         <form method="POST" action="{{ url('/feed/'.$post['post_type'].'/'.$post['id'].'/reaction') }}" class="reaction-form">@csrf
             <select name="reaction_type" aria-label="Reaction">@foreach(\App\Services\SocialFeedService::REACTIONS as $type=>$reaction)<option value="{{ $type }}" @selected($post['user_reaction']===$type)>{{ $reaction['emoji'] }} {{ $reaction['label'] }}</option>@endforeach</select><button>React</button>
@@ -25,7 +25,7 @@
     <div class="empty-state">
         <div class="empty-state__icon" aria-hidden="true">◇</div>
         <h2>No posts yet</h2>
-        <p>Events and training announcements will appear here when they are published.</p>
+        <p>Event announcements will appear here when they are published.</p>
     </div>
 @endforelse
 </div>

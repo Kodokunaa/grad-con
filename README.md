@@ -1,6 +1,6 @@
 # GradConn
 
-GradConn is a Laravel 13 alumni, employer, and campus-officer portal. Authentication, authorization, validation, private uploads, queued mail, jobs, applications, offers, interviews, events, training, social reactions, comments, and reports use Laravel controllers, models, policies, Form Requests, services, and Blade views.
+GradConn is a Laravel 13 alumni, employer, and campus-officer portal. Authentication, authorization, validation, private uploads, queued mail, jobs, applications, offers, interviews, events, social reactions, comments, and reports use Laravel controllers, models, policies, Form Requests, services, and Blade views.
 
 ## Start locally
 

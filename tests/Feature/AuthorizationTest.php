@@ -8,7 +8,6 @@ use App\Models\Interview;
 use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\JobOffer;
-use App\Models\Training;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -62,15 +61,13 @@ final class AuthorizationTest extends TestCase
         $this->assertFalse(Gate::forUser($otherAlumni)->allows('viewPrivateFile', $alumni));
     }
 
-    public function test_interview_and_training_policies_enforce_record_ownership(): void
+    public function test_interview_policy_enforces_record_ownership(): void
     {
         $admin = $this->user('admin');
         $employer = $this->user('employer');
         $otherEmployer = $this->user('employer');
         $alumni = $this->user('alumni');
         $otherAlumni = $this->user('alumni');
-        $officer = $this->user('alumni_officer');
-        $otherOfficer = $this->user('alumni_officer');
         $interview = Interview::forceCreate([
             'employer_id' => $employer->id,
             'alumni_id' => $alumni->id,
@@ -79,23 +76,11 @@ final class AuthorizationTest extends TestCase
             'location' => 'Campus',
             'status' => 'scheduled',
         ]);
-        $training = Training::forceCreate([
-            'title' => 'Policy training',
-            'content' => 'Test',
-            'training_date' => now()->addDay()->toDateString(),
-            'target_course' => 'BSIS',
-            'posted_by' => $officer->id,
-        ]);
-
         $this->assertTrue(Gate::forUser($admin)->allows('update', $interview));
         $this->assertTrue(Gate::forUser($employer)->allows('update', $interview));
         $this->assertFalse(Gate::forUser($otherEmployer)->allows('update', $interview));
         $this->assertTrue(Gate::forUser($alumni)->allows('view', $interview));
         $this->assertFalse(Gate::forUser($otherAlumni)->allows('view', $interview));
-        $this->assertTrue(Gate::forUser($admin)->allows('delete', $training));
-        $this->assertTrue(Gate::forUser($officer)->allows('update', $training));
-        $this->assertFalse(Gate::forUser($otherOfficer)->allows('update', $training));
-        $this->assertFalse(Gate::forUser($employer)->allows('viewAny', Training::class));
     }
 
     public function test_certificate_policy_enforces_alumni_ownership(): void

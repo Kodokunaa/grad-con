@@ -6,8 +6,6 @@ use App\Mail\AlumniAccountApprovedMail;
 use App\Mail\ApplicantResumeMail;
 use App\Mail\JobOfferMail;
 use App\Mail\JobOpportunityMail;
-use App\Mail\TrainingOpportunityMail;
-use App\Models\Training;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
@@ -36,7 +34,7 @@ final class WorkflowTest extends TestCase
     private function user(string $role): User
     {
         $u = new User;
-        $u->forceFill(['fullname' => 'Workflow Test', 'username' => 'flow_'.bin2hex(random_bytes(5)), 'email' => bin2hex(random_bytes(5)).'@example.test', 'password' => 'workflow-password', 'role' => $role, 'is_active' => 1, 'status' => 'approved', 'course' => 'BSIS', 'batch_year' => '2025', 'trainings' => 'Software development', 'address' => 'Calapan', 'employer_company' => 'Test Company']);
+        $u->forceFill(['fullname' => 'Workflow Test', 'username' => 'flow_'.bin2hex(random_bytes(5)), 'email' => bin2hex(random_bytes(5)).'@example.test', 'password' => 'workflow-password', 'role' => $role, 'is_active' => 1, 'status' => 'approved', 'course' => 'BSIS', 'batch_year' => '2025', 'address' => 'Calapan', 'employer_company' => 'Test Company']);
         $u->save();
 
         return $u;
@@ -263,16 +261,12 @@ final class WorkflowTest extends TestCase
             ->assertDownload($filename);
     }
 
-    public function test_events_trainings_and_education_can_be_created(): void
+    public function test_events_and_education_can_be_created(): void
     {
         Mail::fake();
         $admin = $this->user('admin');
         $this->actingAs($admin)->post('/events', ['title' => 'Workflow event', 'content' => 'Event description'])->assertRedirect(route('admin.events_create'));
         $this->assertDatabaseHas('events', ['title' => 'Workflow event', 'posted_by' => $admin->id]);
-        $this->post('/trainings', ['title' => 'Workflow training', 'content' => 'Training description', 'training_date' => date('Y-m-d'), 'target_course' => 'BSIS', 'location' => 'Campus'])->assertRedirect(route('admin.trainings_create'));
-        $training = DB::table('trainings')->where('title', 'Workflow training')->first();
-        $this->assertNotNull($training);
-        $this->get('/admin/trainings_edit.php?id='.$training->id)->assertOk();
         $alumni = $this->user('alumni');
         $this->actingAs($alumni)->post('/profile/education', ['add_education' => 1, 'school_name' => 'Test College', 'degree' => 'Tertiary', 'start_year' => '2021', 'end_year' => '2025'])->assertRedirect();
         $this->assertDatabaseHas('alumni_education', ['user_id' => $alumni->id, 'school_name' => 'Test College']);
@@ -302,43 +296,6 @@ final class WorkflowTest extends TestCase
             'title' => 'Updated event', 'content' => 'Changed',
         ])->assertRedirect(route('admin.events_edit', ['id' => $eventId]));
         $this->assertDatabaseHas('events', ['id' => $eventId, 'title' => 'Updated event']);
-    }
-
-    public function test_training_requests_validate_and_queue_dedicated_mail(): void
-    {
-        Mail::fake();
-        $admin = $this->user('admin');
-        $recipient = $this->user('alumni');
-        $recipient->forceFill(['employment_status' => 'Unemployed', 'course' => 'BSIS'])->save();
-
-        $this->actingAs($admin)->post(route('trainings.store'), [
-            'title' => 'Laravel training', 'content' => 'Training details',
-            'training_date' => '2026-10-15', 'target_course' => 'BSIS', 'location' => 'Campus',
-        ])->assertRedirect(route('admin.trainings_create'));
-        $training = Training::where('title', 'Laravel training')->firstOrFail();
-        Mail::assertQueued(TrainingOpportunityMail::class, fn ($mail) => $mail->hasTo($recipient->email));
-
-        $this->put(route('trainings.update', $training), [
-            'title' => '', 'content' => 'Changed', 'training_date' => 'bad-date',
-            'target_course' => 'Unknown course',
-        ])->assertSessionHasErrors(['title', 'training_date', 'target_course']);
-        $this->assertSame('Laravel training', $training->fresh()->title);
-    }
-
-    public function test_admin_training_deletion_uses_the_named_delete_route(): void
-    {
-        $admin = $this->user('admin');
-        $trainingId = DB::table('trainings')->insertGetId([
-            'title' => 'Delete route test', 'content' => 'Test',
-            'training_date' => date('Y-m-d'), 'target_course' => 'BSIS',
-            'posted_by' => $admin->id,
-        ]);
-
-        $this->actingAs($admin)
-            ->delete(route('admin.trainings.destroy', $trainingId))
-            ->assertRedirect(route('admin.trainings_list'));
-
-        $this->assertDatabaseMissing('trainings', ['id' => $trainingId]);
     }
 
     public function test_admin_job_deletion_uses_the_named_delete_route(): void

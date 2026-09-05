@@ -1173,13 +1173,6 @@ if ($role === 'alumni') {
     ?></textarea>
                                     </div>
 
-                                    <div class="col-12">
-                                        <label class="form-label">Trainings / Seminars</label>
-                                        <textarea class="form-textarea-custom" name="trainings" placeholder="Enter your trainings and seminars"><?php
-    echo htmlspecialchars($user['trainings'] ?? '');
-    ?></textarea>
-                                    </div>
-
                                     <div class="col-12 mt-2">
                                         <div class="subsection-title">Certificates</div>
                                         <div class="subsection-text">Add the certificates and achievements you earned.</div>

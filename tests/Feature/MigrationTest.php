@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoApiTransport;
 use Tests\TestCase;
@@ -425,7 +426,6 @@ final class MigrationTest extends TestCase
         $eventId = DB::table('events')->insertGetId(['title' => 'Inventory event', 'content' => 'Test', 'posted_by' => $users['admin']->id]);
         $event = DB::table('events')->find($eventId);
         $officerEventId = DB::table('events')->insertGetId(['title' => 'Officer inventory event', 'content' => 'Test', 'posted_by' => $users['alumni_officer']->id]);
-        $trainingId = DB::table('trainings')->insertGetId(['title' => 'Inventory training', 'content' => 'Test', 'training_date' => date('Y-m-d'), 'target_course' => 'BSIS', 'posted_by' => $users['admin']->id]);
         $failures = [];
         $this->withoutExceptionHandling();
         foreach ($inventory as $page) {
@@ -441,9 +441,6 @@ final class MigrationTest extends TestCase
             }
             if (str_contains($path, 'jobs_edit') || str_contains($path, 'job_details')) {
                 $query['id'] = $job->id;
-            }
-            if (str_contains($path, 'trainings_edit')) {
-                $query['id'] = $trainingId;
             }
             if ($path === '/admin/applications.php' || str_contains($path, 'jobs_notify') || $path === '/alumni/apply.php') {
                 $query['job_id'] = $job->id;
@@ -504,5 +501,17 @@ final class MigrationTest extends TestCase
                 ->assertSee($link);
             $this->assertSame(1, substr_count($response->getContent(), 'class="sidebar gradconn-sidebar"'));
         }
+    }
+
+    public function test_training_program_is_removed_from_the_application(): void
+    {
+        $admin = $this->user('admin');
+
+        $this->assertFalse(Schema::hasTable('trainings'));
+        $this->assertFalse(Schema::hasColumn('users', 'trainings'));
+        $this->assertFalse(Schema::hasColumn('applications', 'applicant_trainings'));
+        $this->actingAs($admin)->get('/admin/trainings_list.php')->assertNotFound();
+        $this->post('/trainings')->assertNotFound();
+        $this->get('/admin/dashboard.php')->assertOk()->assertDontSee('Training Programs');
     }
 }

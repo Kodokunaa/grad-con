@@ -1051,9 +1051,6 @@ foreach ($alumni as $a) {
                 <div class="snapshot-item full-width"><div class="snapshot-label">Work Experience</div><div class="snapshot-value"><?php 
     echo e($a['work_experience'] ?? '');
     ?></div></div>
-                <div class="snapshot-item full-width"><div class="snapshot-label">Trainings</div><div class="snapshot-value"><?php 
-    echo e($a['trainings'] ?? '');
-    ?></div></div>
             </div>
 
             <div class="details-section">

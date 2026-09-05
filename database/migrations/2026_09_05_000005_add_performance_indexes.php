@@ -24,9 +24,6 @@ return new class extends Migration
             'idx_events_archive_dates' => ['is_archived', 'post_start_date', 'post_end_date'],
             'idx_events_created' => ['created_at'],
         ],
-        'trainings' => [
-            'idx_trainings_target_created' => ['target_course', 'created_at'],
-        ],
         'interviews' => [
             'idx_interviews_employer_status_date' => ['employer_id', 'status', 'interview_date'],
             'idx_interviews_alumni_status_date' => ['alumni_id', 'status', 'interview_date'],

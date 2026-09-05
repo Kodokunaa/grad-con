@@ -1018,13 +1018,6 @@ foreach ($applications as $row) {
                 </div>
 
                 <div class="snapshot-item full-width">
-                    <div class="snapshot-label">Trainings</div>
-                    <div class="snapshot-value"><?php 
-    echo e($row['trainings'] ?? 'N/A');
-    ?></div>
-                </div>
-
-                <div class="snapshot-item full-width">
                     <div class="snapshot-label">Work Experience</div>
                     <div class="snapshot-value"><?php 
     echo e($row['work_experience'] ?? 'N/A');

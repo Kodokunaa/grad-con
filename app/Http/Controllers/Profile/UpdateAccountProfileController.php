@@ -23,7 +23,7 @@ final class UpdateAccountProfileController extends Controller
             $data['has_multiple_branches'] = 0;
             $data['branch_location'] = null;
         } elseif ($user->role === 'employer') {
-            foreach (['birthdate', 'gender', 'civil_status', 'contact_number', 'indigenous_tribe', 'special_needs', 'employment_status', 'career_objective', 'skills', 'trainings'] as $field) {
+            foreach (['birthdate', 'gender', 'civil_status', 'contact_number', 'indigenous_tribe', 'special_needs', 'employment_status', 'career_objective', 'skills'] as $field) {
                 $data[$field] = null;
             }$data['branch_location'] = $data['has_multiple_branches'] ? ($data['branch_location'] ?? null) : null;
         } else {

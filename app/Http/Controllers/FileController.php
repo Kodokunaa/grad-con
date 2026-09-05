@@ -29,7 +29,7 @@ final class FileController extends Controller
     public function upload(Request $request, string $path)
     {
         $parts = explode('/', trim($path, '/'));
-        abort_unless(count($parts) === 2 && in_array($parts[0], ['resumes', 'certificates', 'profiles', 'events', 'trainings'], true), 404);
+        abort_unless(count($parts) === 2 && in_array($parts[0], ['resumes', 'certificates', 'profiles', 'events'], true), 404);
         [$category] = $parts;
         if (str_starts_with($path, 'resumes/')) {
             return $this->resume($request, basename($path));
@@ -39,7 +39,7 @@ final class FileController extends Controller
             $owner = User::findOrFail($ownerId);
             Gate::authorize('viewPrivateFile', $owner);
         }
-        if (in_array($category, ['events', 'trainings'], true)) {
+        if ($category === 'events') {
             abort_unless(in_array($request->user()->role, ['admin', 'alumni', 'alumni_officer'], true), 403);
         }
 
