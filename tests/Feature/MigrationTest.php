@@ -103,6 +103,7 @@ final class MigrationTest extends TestCase
         $this->assertStringContainsString('FROM php:8.3-cli AS vendor', $dockerfile);
         $this->assertStringContainsString('docker-php-ext-install bcmath curl dom intl mbstring pdo_mysql xml zip', $dockerfile);
         $this->assertStringContainsString('BREVO_API_KEY', $blueprint);
+        $this->assertMatchesRegularExpression('/key: DB_PORT\s+sync: false/', $blueprint);
         $this->assertStringNotContainsString('api-key-', $blueprint);
     }
 
