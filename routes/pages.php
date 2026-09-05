@@ -164,6 +164,14 @@ Route::put('/profile/password', UpdatePasswordController::class)->middleware('ac
 Route::patch('/applications/{application}/status', UpdateApplicationStatusController::class)->middleware('account:admin,employer')->name('applications.status.update');
 Route::post('/interviews', ScheduleInterviewController::class)->middleware('account:admin,employer')->name('interviews.store');
 Route::delete('/profile/certificates/{certificate}', DestroyCertificateController::class)->middleware('account')->name('profile.certificates.destroy');
+Route::get('/events', function () {
+    return match (request()->user()->role) {
+        'admin' => to_route('admin.events_list'),
+        'alumni_officer' => to_route('alumni_officer.events_list'),
+        'alumni' => to_route('alumni.feed'),
+        default => to_route('employer.dashboard'),
+    };
+})->middleware('account')->name('events.index');
 Route::patch('/events/{event}/restore', RestoreEventController::class)->middleware('account')->name('events.restore');
 Route::patch('/events/{event}/archive', ArchiveEventController::class)->middleware('account')->name('events.archive');
 Route::post('/events', StoreEventController::class)->middleware('account')->name('events.store');

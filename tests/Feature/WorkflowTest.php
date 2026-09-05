@@ -277,6 +277,22 @@ final class WorkflowTest extends TestCase
         $this->assertDatabaseHas('alumni_education', ['user_id' => $alumni->id, 'school_name' => 'Test College']);
     }
 
+    public function test_events_index_redirects_each_role_to_its_event_destination(): void
+    {
+        $destinations = [
+            'admin' => 'admin.events_list',
+            'alumni_officer' => 'alumni_officer.events_list',
+            'alumni' => 'alumni.feed',
+            'employer' => 'employer.dashboard',
+        ];
+
+        foreach ($destinations as $role => $route) {
+            $this->actingAs($this->user($role))
+                ->get(route('events.index'))
+                ->assertRedirect(route($route));
+        }
+    }
+
     public function test_event_upload_storage_failure_returns_a_form_error(): void
     {
         $admin = $this->user('admin');
