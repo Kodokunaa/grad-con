@@ -8,6 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasTable('cache')) {
+            Schema::create('cache', function (Blueprint $t) {
+                $t->string('key')->primary();
+                $t->mediumText('value');
+                $t->integer('expiration');
+            });
+        }
+        if (! Schema::hasTable('cache_locks')) {
+            Schema::create('cache_locks', function (Blueprint $t) {
+                $t->string('key')->primary();
+                $t->string('owner');
+                $t->integer('expiration');
+            });
+        }
         if (! Schema::hasTable('password_reset_tokens')) {
             Schema::create('password_reset_tokens', function (Blueprint $t) {
                 $t->string('email')->primary();

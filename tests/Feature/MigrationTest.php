@@ -108,6 +108,11 @@ final class MigrationTest extends TestCase
         $this->assertMatchesRegularExpression('/key: DB_PORT\s+sync: false/', $blueprint);
         $this->assertStringNotContainsString('api-key-', $blueprint);
         $this->assertStringNotContainsString('ADD COLUMN IF NOT EXISTS', file_get_contents(database_path('schema/gradconn.json')));
+        $baselineMigration = file_get_contents(database_path('migrations/2026_09_04_000001_preserve_gradconn_schema.php'));
+        $infrastructureMigration = file_get_contents(database_path('migrations/2026_09_04_000002_add_laravel_infrastructure.php'));
+        $this->assertStringContainsString("unsignedTinyInteger('id')->primary()", $baselineMigration);
+        $this->assertStringContainsString("Schema::create('cache'", $infrastructureMigration);
+        $this->assertStringContainsString("string('key')->primary()", $infrastructureMigration);
     }
 
     protected function tearDown(): void

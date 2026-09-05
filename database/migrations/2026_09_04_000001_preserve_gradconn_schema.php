@@ -33,9 +33,10 @@ return new class extends Migration
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
         }
         Schema::create('gradconn_migration_state', function ($table) use ($ownsBaseline) {
+            $table->unsignedTinyInteger('id')->primary();
             $table->boolean('baseline_owned')->default($ownsBaseline);
         });
-        DB::table('gradconn_migration_state')->insert(['baseline_owned' => $ownsBaseline]);
+        DB::table('gradconn_migration_state')->insert(['id' => 1, 'baseline_owned' => $ownsBaseline]);
     }
 
     public function down(): void
