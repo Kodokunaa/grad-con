@@ -266,12 +266,12 @@ final class WorkflowTest extends TestCase
         Mail::fake();
         $admin = $this->user('admin');
         $this->actingAs($admin)->post('/events', [
-            'title' => 'Workflow event',
-            'content' => 'Event description',
+            'title' => '𝗔𝗡𝗡𝗢𝗨𝗡𝗖𝗘𝗠𝗘𝗡𝗧: Institution-Wide Orientation',
+            'content' => 'Orientation begins at 𝟴:𝟯𝟬 AM for all students.',
             'post_start_date' => '',
             'post_end_date' => '',
         ])->assertRedirect(route('admin.events_create'));
-        $this->assertDatabaseHas('events', ['title' => 'Workflow event', 'posted_by' => $admin->id]);
+        $this->assertDatabaseHas('events', ['title' => '𝗔𝗡𝗡𝗢𝗨𝗡𝗖𝗘𝗠𝗘𝗡𝗧: Institution-Wide Orientation', 'posted_by' => $admin->id]);
         $alumni = $this->user('alumni');
         $this->actingAs($alumni)->post('/profile/education', ['add_education' => 1, 'school_name' => 'Test College', 'degree' => 'Tertiary', 'start_year' => '2021', 'end_year' => '2025'])->assertRedirect();
         $this->assertDatabaseHas('alumni_education', ['user_id' => $alumni->id, 'school_name' => 'Test College']);
