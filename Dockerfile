@@ -9,8 +9,8 @@ RUN npm run build
 
 FROM php:8.3-cli AS vendor
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        git unzip libicu-dev libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install bcmath intl mbstring pdo_mysql zip \
+        git unzip libcurl4-openssl-dev libicu-dev libonig-dev libxml2-dev libzip-dev \
+    && docker-php-ext-install bcmath curl dom intl mbstring pdo_mysql xml zip \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /app
@@ -21,8 +21,8 @@ RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-int
 
 FROM php:8.3-apache
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libicu-dev libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install bcmath intl mbstring pdo_mysql zip opcache \
+        libcurl4-openssl-dev libicu-dev libonig-dev libxml2-dev libzip-dev \
+    && docker-php-ext-install bcmath curl dom intl mbstring pdo_mysql xml zip opcache \
     && a2enmod rewrite headers expires \
     && rm -rf /var/lib/apt/lists/*
 
