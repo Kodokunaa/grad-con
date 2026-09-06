@@ -179,6 +179,30 @@ final class WorkflowTest extends TestCase
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'interview']);
     }
 
+    public function test_application_picker_survives_multiline_profile_content(): void
+    {
+        $employer = $this->user('employer');
+        $alumni = $this->user('alumni');
+        $alumni->forceFill([
+            'contact_number' => '09123456789',
+            'career_objective' => "Build reliable systems.\nWork with O'Brien's team.",
+            'skills' => "PHP\nJavaScript",
+        ])->save();
+        $jobId = DB::table('jobs')->insertGetId([
+            'title' => 'Safe picker rendering', 'company' => 'Test Company',
+            'employer_company' => 'Test Company', 'description' => 'Test',
+            'posted_by' => $employer->id, 'employer_id' => $employer->id, 'is_open' => 1,
+        ]);
+
+        $this->actingAs($alumni)
+            ->get(route('alumni.apply', ['job_id' => $jobId]))
+            ->assertOk()
+            ->assertSee('for="resumeInput"', false)
+            ->assertSee('id="fileNameDisplay"', false)
+            ->assertSee('No PDF file selected')
+            ->assertSee('const profileData = JSON.parse(', false);
+    }
+
     public function test_alumni_job_pages_prevent_duplicate_applications_and_show_the_existing_state(): void
     {
         $employer = $this->user('employer');

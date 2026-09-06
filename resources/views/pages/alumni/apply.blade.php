@@ -88,6 +88,25 @@
         color: #f97316;
     }
 
+    .file-selection {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .file-name-display {
+        overflow-wrap: anywhere;
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .file-name-display.has-file {
+        color: #166534;
+        font-weight: 700;
+    }
+
     .form-textarea-custom {
         width: 100%;
         padding: 13px 14px;
@@ -554,7 +573,7 @@ echo htmlspecialchars($alumni["skills"] ?? "");
 
             <div class="form-group">
                 <label class="form-label">Upload Application Letter (PDF only) <span style="color: #f97316;">*</span></label>
-                <div style="position: relative; display: flex; align-items: center; gap: 10px;">
+                <div class="file-selection">
                     <input
                         type="file"
                         name="resume"
@@ -563,14 +582,13 @@ echo htmlspecialchars($alumni["skills"] ?? "");
                         required
                         style="display: none;"
                     >
-                    <button
-                        type="button"
+                    <label
+                        for="resumeInput"
                         class="btn-file-upload"
-                        onclick="document.getElementById('resumeInput').click()"
                     >
                         <span>📎 Choose PDF File</span>
-                    </button>
-                    <span id="fileNameDisplay" style="color: #6b7280; font-size: 14px;">No file selected</span>
+                    </label>
+                    <span id="fileNameDisplay" class="file-name-display" role="status" aria-live="polite">No PDF file selected</span>
                 </div>
                 <div style="color: #6b7280; font-size: 12px; margin-top: 6px;">
                     Accepted format: PDF only (Max 5MB)
@@ -647,29 +665,15 @@ echo view('partials.footer', \get_defined_vars());
 
 <script>
 // Profile data from PHP
-const profileData = {
-    fullname: '<?php 
-echo addslashes($alumni["fullname"] ?? "");
-?>',
-    email: '<?php 
-echo addslashes($alumni["email"] ?? "");
-?>',
-    course: '<?php 
-echo addslashes($alumni["course"] ?? "");
-?>',
-    contact_number: '<?php 
-echo addslashes($alumni["contact_number"] ?? "");
-?>',
-    address: '<?php 
-echo addslashes($alumni["address"] ?? "");
-?>',
-    career_objective: '<?php 
-echo addslashes($alumni["career_objective"] ?? "");
-?>',
-    skills: '<?php 
-echo addslashes($alumni["skills"] ?? "");
-?>'
-};
+const profileData = {{ Illuminate\Support\Js::from([
+    'fullname' => $alumni['fullname'] ?? '',
+    'email' => $alumni['email'] ?? '',
+    'course' => $alumni['course'] ?? '',
+    'contact_number' => $alumni['contact_number'] ?? '',
+    'address' => $alumni['address'] ?? '',
+    'career_objective' => $alumni['career_objective'] ?? '',
+    'skills' => $alumni['skills'] ?? '',
+]) }};
 
 // Define required fields with user-friendly labels
 const requiredFields = {
@@ -759,8 +763,8 @@ document.getElementById('applicationForm')?.addEventListener('submit', function(
         e.preventDefault();
         alert('Only PDF files are allowed.');
         resumeInput.value = '';
-        document.getElementById('fileNameDisplay').textContent = 'No file selected';
-        document.getElementById('fileNameDisplay').style.color = '#6b7280';
+        document.getElementById('fileNameDisplay').textContent = 'No PDF file selected';
+        document.getElementById('fileNameDisplay').classList.remove('has-file');
         return false;
     }
 
@@ -787,18 +791,28 @@ document.getElementById('resumeInput')?.addEventListener('change', function(e) {
         if (!fileName.endsWith('.pdf')) {
             alert('Only PDF files are allowed.');
             this.value = '';
-            fileNameDisplay.textContent = 'No file selected';
-            fileNameDisplay.style.color = '#6b7280';
+            fileNameDisplay.textContent = 'No PDF file selected';
+            fileNameDisplay.classList.remove('has-file');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('The PDF file must not be larger than 5MB.');
+            this.value = '';
+            fileNameDisplay.textContent = 'No PDF file selected';
+            fileNameDisplay.classList.remove('has-file');
             return;
         }
 
         const displayName = file.name;
-        const fileSize = (file.size / 1024).toFixed(2); // Size in KB
-        fileNameDisplay.textContent = displayName + ' (' + fileSize + ' KB)';
-        fileNameDisplay.style.color = '#166534';
+        const fileSize = file.size >= 1048576
+            ? (file.size / 1048576).toFixed(2) + ' MB'
+            : (file.size / 1024).toFixed(1) + ' KB';
+        fileNameDisplay.textContent = '✓ ' + displayName + ' (' + fileSize + ')';
+        fileNameDisplay.classList.add('has-file');
     } else {
-        fileNameDisplay.textContent = 'No file selected';
-        fileNameDisplay.style.color = '#6b7280';
+        fileNameDisplay.textContent = 'No PDF file selected';
+        fileNameDisplay.classList.remove('has-file');
     }
 });
 
