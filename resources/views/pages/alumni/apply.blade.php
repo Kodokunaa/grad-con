@@ -525,7 +525,7 @@ echo htmlspecialchars($alumni["career_objective"] ?? "");
                 </div>
 
                 <div class="resume-item full-width">
-                    <div class="resume-label">Skills</div>
+                    <div class="resume-label">Professional Competencies</div>
                     <div class="resume-value" id="preview-skills"><?php 
 echo htmlspecialchars($alumni["skills"] ?? "");
 ?></div>
@@ -679,7 +679,7 @@ const requiredFields = {
     contact_number: 'Contact Number',
     address: 'Address',
     career_objective: 'Career Objective',
-    skills: 'Skills'
+    skills: 'Professional Competencies'
 };
 
 /**

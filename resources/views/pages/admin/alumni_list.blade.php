@@ -861,14 +861,14 @@ foreach ($batchOptions as $batch) {
         <div class="skills-search-header">
             <div>
                 <h4 class="skills-search-title">Search Alumni by Competencies</h4>
-                <p class="skills-search-subtitle">Type a skill keyword to find alumni with matching skills. Example: PHP, MySQL, communication, leadership.</p>
+                <p class="skills-search-subtitle">Enter a competency to find matching alumni. Examples: PHP, MySQL, communication, leadership.</p>
             </div>
         </div>
         <div class="skills-search-row">
-            <input type="text" id="skillsSearch" class="skills-search-input" placeholder="Search skills of alumni...">
+            <input type="text" id="skillsSearch" class="skills-search-input" placeholder="Search alumni competencies...">
             <button type="button" id="clearSkillsSearch" class="skills-clear-btn">Clear</button>
         </div>
-        <div id="skillsSearchResult" class="skills-result-text">Showing all alumni skills.</div>
+        <div id="skillsSearchResult" class="skills-result-text">Showing all alumni competencies.</div>
     </div>
 
     <div class="table-card">
@@ -881,7 +881,7 @@ foreach ($batchOptions as $batch) {
                     <th>Email</th>
                     <th>Course</th>
                     <th>Batch</th>
-                    <th>Skills</th>
+                    <th>Competencies</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -1045,7 +1045,7 @@ foreach ($alumni as $a) {
                 <div class="snapshot-item full-width"><div class="snapshot-label">Career Objective</div><div class="snapshot-value"><?php 
     echo e($a['career_objective'] ?? '');
     ?></div></div>
-                <div class="snapshot-item full-width"><div class="snapshot-label">Skills</div><div class="snapshot-value"><?php 
+                <div class="snapshot-item full-width"><div class="snapshot-label">Professional Competencies</div><div class="snapshot-value"><?php
     echo e($a['skills'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Work Experience</div><div class="snapshot-value"><?php 
@@ -1401,9 +1401,9 @@ $(function () {
         const visibleCount = table.rows({ search: 'applied' }).count();
 
         if (skillValue === '') {
-            $('#skillsSearchResult').text('Showing all alumni skills.');
+            $('#skillsSearchResult').text('Showing all alumni competencies.');
         } else {
-            $('#skillsSearchResult').text('Found ' + visibleCount + ' alumni result(s) for skill: "' + skillValue + '".');
+            $('#skillsSearchResult').text('Found ' + visibleCount + ' alumni result(s) for competency: "' + skillValue + '".');
         }
     }
 

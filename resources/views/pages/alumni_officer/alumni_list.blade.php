@@ -801,7 +801,7 @@ foreach ($alumni as $a) {
                 <div class="snapshot-item full-width"><div class="snapshot-label">Career Objective</div><div class="snapshot-value"><?php 
     echo e($a['career_objective'] ?? '');
     ?></div></div>
-                <div class="snapshot-item full-width"><div class="snapshot-label">Skills</div><div class="snapshot-value"><?php 
+                <div class="snapshot-item full-width"><div class="snapshot-label">Professional Competencies</div><div class="snapshot-value"><?php
     echo e($a['skills'] ?? '');
     ?></div></div>
                 <div class="snapshot-item full-width"><div class="snapshot-label">Work Experience</div><div class="snapshot-value"><?php 

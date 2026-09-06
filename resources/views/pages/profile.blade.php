@@ -1167,8 +1167,8 @@ if ($role === 'alumni') {
                                     </div>
 
                                     <div class="col-12">
-                                        <label class="form-label">Skills</label>
-                                        <textarea class="form-textarea-custom" name="skills" placeholder="List your skills, separated by commas or lines"><?php
+                                        <label class="form-label">Professional Competencies</label>
+                                        <textarea class="form-textarea-custom" name="skills" placeholder="List your competencies, separated by commas or lines"><?php
     echo htmlspecialchars($user['skills'] ?? '');
     ?></textarea>
                                     </div>

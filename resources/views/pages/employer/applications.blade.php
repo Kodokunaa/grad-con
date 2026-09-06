@@ -1012,7 +1012,7 @@ foreach ($applications as $row) {
                 </div>
 
                 <div class="snapshot-item full-width">
-                    <div class="snapshot-label">Skills</div>
+                    <div class="snapshot-label">Professional Competencies</div>
                     <div class="snapshot-value"><?php
     echo e($row['skills'] ?? 'N/A');
     ?></div>

@@ -608,7 +608,7 @@ final class ProfileController extends PageController
             </div>
 
             <div class="section">
-                <h2 class="section-title">Skills</h2>
+                <h2 class="section-title">Professional Competencies</h2>
                 <div class="text-block"><?php
                 echo $formatMultiline($user['skills'] ?? '');
                 ?></div>

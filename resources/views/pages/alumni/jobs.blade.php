@@ -354,7 +354,7 @@ body{
     <div class="jobs-hero">
         <h4 class="page-title">Open Jobs</h4>
         <p class="page-subtitle">
-            Browse available job opportunities and find the position that matches your skills.
+            Browse available job opportunities and find the position that matches your competencies.
         </p>
     </div>
 
