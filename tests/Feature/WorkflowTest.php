@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\AlumniAccountApprovedMail;
 use App\Mail\ApplicantResumeMail;
+use App\Mail\JobOfferMail;
 use App\Mail\JobOpportunityMail;
 use App\Models\User;
 use Database\Seeders\AlumniOfficerSeeder;
@@ -564,7 +565,7 @@ final class WorkflowTest extends TestCase
         $this->get(route('register'))->assertOk()->assertSee('BLIS');
 
         $employer = $this->user('employer');
-        $this->actingAs($employer)->get('/employer/alumni_list')->assertOk()->assertSee('Professional Directory');
+        $this->actingAs($employer)->get('/employer/alumni_list')->assertOk()->assertSee('Talent Directory');
         $this->actingAs($employer)->get('/employer/job_offers')->assertRedirect(route('employer.applications'), 301);
         $this->actingAs($employer)->post('/employer/offers', [])->assertNotFound();
     }
@@ -595,12 +596,19 @@ final class WorkflowTest extends TestCase
 
     public function test_employer_application_view_exposes_only_application_relevant_profile_data(): void
     {
+        Mail::fake();
         $employer = $this->user('employer');
         $alumni = $this->user('alumni');
         $alumni->forceFill(['address' => 'PRIVATE HOME ADDRESS', 'indigenous_tribe' => 'PRIVATE TRIBE', 'special_needs' => 'PRIVATE MEDICAL DATA', 'skills' => 'Laravel, communication'])->save();
         $this->actingAs($employer)->get(route('employer.alumni_list'))
-            ->assertOk()->assertSee($alumni->fullname)->assertSee('Laravel, communication')
+            ->assertOk()->assertSee($alumni->fullname)->assertSee('Laravel, communication')->assertSee('Send Job Offer Email')
             ->assertDontSee($alumni->email)->assertDontSee('PRIVATE HOME ADDRESS')->assertDontSee('PRIVATE TRIBE')->assertDontSee('PRIVATE MEDICAL DATA');
+        $this->post(route('employer.offers.store'), [
+            'alumni_id' => $alumni->id, 'subject' => 'Backend Developer Opportunity',
+            'message' => 'We would like to discuss a backend developer role with you.',
+        ])->assertRedirect(route('employer.alumni_list'));
+        $this->assertDatabaseHas('job_offers', ['employer_id' => $employer->id, 'alumni_id' => $alumni->id, 'subject' => 'Backend Developer Opportunity']);
+        Mail::assertQueued(JobOfferMail::class, fn (JobOfferMail $mail) => $mail->offer->alumni_id === $alumni->id);
         $jobId = DB::table('jobs')->insertGetId([
             'title' => 'Privacy Test Job', 'company' => 'Test Company', 'employer_company' => 'Test Company',
             'description' => 'Test', 'posted_by' => $employer->id, 'employer_id' => $employer->id, 'is_open' => 1,

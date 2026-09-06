@@ -12,6 +12,7 @@ use App\Http\Controllers\Alumni\StoreEmploymentController;
 use App\Http\Controllers\Application\AlumniApplicationActionController;
 use App\Http\Controllers\Application\StoreApplicationController;
 use App\Http\Controllers\Application\UpdateApplicationStatusController;
+use App\Http\Controllers\Employer\SendJobOfferController;
 use App\Http\Controllers\Event\ArchiveEventController;
 use App\Http\Controllers\Event\DestroyEventController;
 use App\Http\Controllers\Event\EventIndexController;
@@ -140,6 +141,7 @@ Route::get('/alumni_officer/events_create', AlumniOfficerEventsCreateController:
 Route::get('/alumni_officer/events_edit', AlumniOfficerEventsEditController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_edit');
 Route::get('/alumni_officer/events_list', AlumniOfficerEventsListController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_list');
 Route::get('/employer/alumni_list', EmployerAlumniListController::class)->middleware('account:employer')->name('employer.alumni_list');
+Route::post('/employer/job-offers', SendJobOfferController::class)->middleware(['account:employer', 'throttle:10,1'])->name('employer.offers.store');
 Route::get('/employer/applications', EmployerApplicationsController::class)->middleware('account:employer')->name('employer.applications');
 Route::get('/employer/dashboard', EmployerDashboardController::class)->middleware('account:employer')->name('employer.dashboard');
 Route::get('/employer/interview', EmployerInterviewController::class)->middleware('account:employer')->name('employer.interview');

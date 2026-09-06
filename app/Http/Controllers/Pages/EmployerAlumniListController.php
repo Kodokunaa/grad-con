@@ -16,7 +16,13 @@ final class EmployerAlumniListController extends Controller
         $batch = trim((string) $request->query('batch_year', ''));
 
         $query = User::query()->where('role', 'alumni')->where('is_active', true)->where('status', 'approved')
-            ->select(['id', 'fullname', 'course', 'batch_year', 'career_objective', 'skills', 'employment_status']);
+            ->select(['id', 'fullname', 'email', 'course', 'batch_year', 'career_objective', 'skills', 'work_experience', 'employment_status'])
+            ->with([
+                'education' => fn ($builder) => $builder->orderByDesc('end_year')->limit(5),
+                'certificates' => fn ($builder) => $builder->orderByDesc('issue_date')->limit(5),
+                'employmentHistory' => fn ($builder) => $builder->orderByDesc('start_date')->limit(5),
+                'degrees' => fn ($builder) => $builder->orderByDesc('id')->limit(5),
+            ]);
         if ($search !== '') {
             $query->where(fn ($builder) => $builder->where('fullname', 'like', "%{$search}%")
                 ->orWhere('skills', 'like', "%{$search}%"));

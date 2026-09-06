@@ -6,11 +6,11 @@ This file records how the reviewed requirements map to the Laravel application.
 | --- | --- |
 | Improve spacing and interfaces | Authenticated pages use the shared responsive navbar/sidebar shell. The alumni community feed uses card spacing and mobile breakpoints. |
 | Use “competencies” where appropriate | User-facing job and applicant labels use “competencies”; the legacy `skills` database column remains for upgrade compatibility. |
-| Remove invitations and offers | Direct alumni offers, invitation responses, employer alumni search, and offer navigation were removed. Old bookmarked GET pages redirect to the closest supported workflow. |
+| Remove invitations to apply | The invitation-to-apply and accept/decline workflow remains removed. Employers may send a direct informational job-offer email from a professional alumni snapshot, as requested in the revised workflow. |
 | Remove generated reviews | Applications show submitted information and employer decisions only. The system does not generate applicant reviews. |
 | About Company | Employer profile and dashboard link to a single About Company area. |
 | Application letter | Applicant uploads, admin/employer viewing, and forwarded email copy identify the private file as an application letter. |
-| Applicant privacy | The employer Alumni List exposes professional directory fields only. Contact details and an allowlisted application snapshot become available after the alumni applies. Home address, demographic data, special needs, and other private fields are excluded. |
+| Applicant privacy | The employer Alumni List exposes professional directory fields only. Employers can send email to the account's stored address without seeing it. Contact details and an allowlisted application snapshot become available after the alumni applies. Home address, demographic data, special needs, and other private fields are excluded. |
 | Complete course selection | Registration uses the configured eight City College of Calapan programs, including BLIS. |
 | Remove redundant search/status text | The requested search helper sentence and “Registered Alumni” label were removed. |
 | Email unsubscribe | Alumni can disable update emails in Profile. Automatic and manual job notifications query only subscribed alumni. Account/security mail remains available. |
