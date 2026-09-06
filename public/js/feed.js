@@ -10,6 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
         node.textContent = String(value ?? '');
         return node.innerHTML;
     };
+    const mentionNames = users.map(user => String(user.name || '')).filter(Boolean).sort((a, b) => b.length - a.length);
+    const highlightMentions = value => {
+        let output = escapeHtml(value);
+        mentionNames.forEach(name => {
+            const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            output = output.replace(new RegExp(`@${escapedName}(?=$|[\\s,.!?;:])`, 'giu'), match => `<span class="feed-mention">${match}</span>`);
+        });
+        return output;
+    };
     const initials = name => String(name || 'U').trim().split(/\s+/).slice(0, 2).map(part => part.charAt(0).toUpperCase()).join('') || 'U';
     const notify = message => {
         if (!toast) return;
@@ -21,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const avatarHtml = comment => comment.profile_photo
         ? `<img src="/uploads/profiles/${encodeURIComponent(comment.profile_photo.split('/').pop())}" alt="">`
         : escapeHtml(initials(comment.fullname));
-    const commentHtml = (comment, reply = false) => `<div class="feed-comment${reply ? ' feed-comment--reply' : ''}" data-comment-id="${comment.id}"><div class="feed-avatar feed-avatar--small">${avatarHtml(comment)}</div><div class="feed-comment__content"><div class="feed-comment__bubble"><strong>${escapeHtml(comment.fullname)}</strong><p>${escapeHtml(comment.comment)}</p></div><small>Just now</small></div></div>`;
-    const threadHtml = (comment, action, token, listId) => `<div class="feed-comment-thread" data-thread-id="${comment.id}"><div class="feed-comment" data-comment-id="${comment.id}"><div class="feed-avatar feed-avatar--small">${avatarHtml(comment)}</div><div class="feed-comment__content"><div class="feed-comment__bubble"><strong>${escapeHtml(comment.fullname)}</strong><p>${escapeHtml(comment.comment)}</p></div><div class="feed-comment__meta"><small>Just now</small><button type="button" data-reply-toggle="reply-form-${comment.id}" data-reply-name="${escapeHtml(comment.fullname)}">Reply</button></div></div></div><div class="feed-replies" data-replies-for="${comment.id}"></div><form method="POST" action="${escapeHtml(action)}" id="reply-form-${comment.id}" class="feed-comment-form feed-reply-form" data-comments-list="${escapeHtml(listId)}" data-replies-list="${comment.id}" hidden><input type="hidden" name="_token" value="${escapeHtml(token)}"><input type="hidden" name="parent_comment_id" value="${comment.id}"><div class="comment-composer"><input name="comment" maxlength="3000" required autocomplete="off" placeholder="Write a reply…" data-mention-input><button type="submit" aria-label="Post reply"><i class="fas fa-paper-plane"></i></button></div></form></div>`;
+    const commentHtml = (comment, reply = false) => `<div class="feed-comment${reply ? ' feed-comment--reply' : ''}" data-comment-id="${comment.id}"><div class="feed-avatar feed-avatar--small">${avatarHtml(comment)}</div><div class="feed-comment__content"><div class="feed-comment__bubble"><strong>${escapeHtml(comment.fullname)}</strong><p>${highlightMentions(comment.comment)}</p></div><small>Just now</small></div></div>`;
+    const threadHtml = (comment, action, token, listId) => `<div class="feed-comment-thread" data-thread-id="${comment.id}"><div class="feed-comment" data-comment-id="${comment.id}"><div class="feed-avatar feed-avatar--small">${avatarHtml(comment)}</div><div class="feed-comment__content"><div class="feed-comment__bubble"><strong>${escapeHtml(comment.fullname)}</strong><p>${highlightMentions(comment.comment)}</p></div><div class="feed-comment__meta"><small>Just now</small><button type="button" data-reply-toggle="reply-form-${comment.id}" data-reply-name="${escapeHtml(comment.fullname)}">Reply</button></div></div></div><div class="feed-replies" data-replies-for="${comment.id}"></div><form method="POST" action="${escapeHtml(action)}" id="reply-form-${comment.id}" class="feed-comment-form feed-reply-form" data-comments-list="${escapeHtml(listId)}" data-replies-list="${comment.id}" hidden><input type="hidden" name="_token" value="${escapeHtml(token)}"><input type="hidden" name="parent_comment_id" value="${comment.id}"><div class="comment-composer"><input name="comment" maxlength="3000" required autocomplete="off" placeholder="Write a reply…" data-mention-input><button type="submit" aria-label="Post reply"><i class="fas fa-paper-plane"></i></button></div></form></div>`;
 
     function closeLightbox() {
         const box = document.querySelector('[data-feed-lightbox]');
@@ -142,6 +151,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function hideMentions() { if (menu) menu.hidden = true; }
+    let activeMentionIndex = 0;
+    function selectMention(item) {
+        if (!item || !mentionInput) return;
+        const pos = mentionInput.selectionStart || 0;
+        const insertion = `@${item.dataset.mentionName} `;
+        mentionInput.value = mentionInput.value.slice(0, mentionStart) + insertion + mentionInput.value.slice(pos);
+        mentionInput.focus();
+        mentionInput.setSelectionRange(mentionStart + insertion.length, mentionStart + insertion.length);
+        hideMentions();
+    }
     function updateMentions(input) {
         if (!menu) return;
         const pos = input.selectionStart || 0;
@@ -154,7 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!matches.length) return hideMentions();
         mentionInput = input;
         mentionStart = at;
-        menu.innerHTML = matches.map(user => `<button type="button" data-mention-name="${escapeHtml(user.name)}"><span>${escapeHtml(initials(user.name))}</span>${escapeHtml(user.name)}</button>`).join('');
+        activeMentionIndex = 0;
+        menu.innerHTML = matches.map((user, index) => `<button type="button" data-mention-name="${escapeHtml(user.name)}" class="${index === 0 ? 'is-active' : ''}"><span>${escapeHtml(initials(user.name))}</span>${escapeHtml(user.name)}</button>`).join('');
         const rect = input.getBoundingClientRect();
         menu.style.left = `${rect.left + scrollX}px`;
         menu.style.top = `${rect.bottom + scrollY + 6}px`;
@@ -162,15 +182,27 @@ document.addEventListener('DOMContentLoaded', () => {
         menu.hidden = false;
     }
     document.addEventListener('input', event => { if (event.target.matches('[data-mention-input]')) updateMentions(event.target); });
+    document.addEventListener('keydown', event => {
+        if (!event.target.matches('[data-mention-input]') || !menu || menu.hidden) return;
+        const items = [...menu.querySelectorAll('[data-mention-name]')];
+        if (!items.length) return;
+        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            activeMentionIndex = (activeMentionIndex + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+            items.forEach((item, index) => item.classList.toggle('is-active', index === activeMentionIndex));
+            items[activeMentionIndex].scrollIntoView({ block: 'nearest' });
+        } else if (event.key === 'Enter' || event.key === 'Tab') {
+            event.preventDefault();
+            selectMention(items[activeMentionIndex]);
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            hideMentions();
+        }
+    });
     document.addEventListener('click', event => {
         const item = event.target.closest('[data-mention-name]');
         if (item && mentionInput) {
-            const pos = mentionInput.selectionStart || 0;
-            const insertion = `@${item.dataset.mentionName} `;
-            mentionInput.value = mentionInput.value.slice(0, mentionStart) + insertion + mentionInput.value.slice(pos);
-            mentionInput.focus();
-            mentionInput.setSelectionRange(mentionStart + insertion.length, mentionStart + insertion.length);
-            hideMentions();
+            selectMention(item);
         } else if (!event.target.closest('[data-mention-menu]') && !event.target.matches('[data-mention-input]')) {
             hideMentions();
         }

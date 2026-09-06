@@ -123,6 +123,7 @@ final class SocialFeedTest extends TestCase
         $this->assertDatabaseHas('post_comments', ['parent_comment_id' => $parent->id, 'user_id' => $officer->id]);
         $this->assertDatabaseHas('post_notifications', ['recipient_user_id' => $mentioned->id, 'notification_type' => 'mention']);
         $this->assertDatabaseMissing('post_notifications', ['recipient_user_id' => $otherMaria->id, 'notification_type' => 'mention']);
-        $this->actingAs($author)->get(route('alumni.feed'))->assertOk()->assertSee('Original comment')->assertSee('@Maria Santos thank you for joining.');
+        $this->actingAs($author)->get(route('alumni.feed'))->assertOk()->assertSee('Original comment')
+            ->assertSee('<span class="feed-mention">@Maria Santos</span>', false)->assertSee('thank you for joining.');
     }
 }

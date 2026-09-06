@@ -8,6 +8,12 @@
     $initials = fn ($name) => collect(preg_split('/\\s+/', trim((string) $name)))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->join('') ?: 'U';
     $avatar = fn ($photo) => $photo ? url('/uploads/profiles/'.basename($photo)) : null;
     $shorten = fn ($text, $limit = 115) => mb_strlen(trim(strip_tags((string) $text))) > $limit ? mb_substr(trim(strip_tags((string) $text)), 0, $limit).'…' : (trim(strip_tags((string) $text)) ?: 'No description provided.');
+    $mentionNames = collect($mentionUsers)->pluck('name')->filter()->sortByDesc(fn ($name) => mb_strlen($name))->values();
+    $mentionPattern = $mentionNames->isEmpty() ? null : '/(@(?:'.implode('|', $mentionNames->map(fn ($name) => preg_quote($name, '/'))->all()).'))(?=$|[\s,.!?;:])/iu';
+    $highlightMentions = function ($text) use ($mentionPattern) {
+        if (!$mentionPattern) return e($text);
+        return collect(preg_split($mentionPattern, (string) $text, -1, PREG_SPLIT_DELIM_CAPTURE))->map(fn ($part) => preg_match($mentionPattern, $part) ? '<span class="feed-mention">'.e($part).'</span>' : e($part))->join('');
+    };
 @endphp
 
 <div class="alumni-feed-page">
@@ -90,13 +96,13 @@
                                 <div class="feed-comment-thread" data-thread-id="{{ $comment['id'] }}">
                                 <div class="feed-comment" data-comment-id="{{ $comment['id'] }}">
                                     <div class="feed-avatar feed-avatar--small">@if($avatar($comment['profile_photo'] ?? null))<img src="{{ $avatar($comment['profile_photo']) }}" alt="">@else{{ $initials($comment['fullname'] ?? 'User') }}@endif</div>
-                                    <div class="feed-comment__content"><div class="feed-comment__bubble"><strong>{{ $comment['fullname'] ?? 'User' }}</strong><p>{{ $comment['comment'] }}</p></div><div class="feed-comment__meta"><small>{{ \Carbon\Carbon::parse($comment['created_at'])->diffForHumans() }}</small><button type="button" data-reply-toggle="reply-form-{{ $comment['id'] }}" data-reply-name="{{ $comment['fullname'] ?? 'User' }}">Reply</button></div></div>
+                                    <div class="feed-comment__content"><div class="feed-comment__bubble"><strong>{{ $comment['fullname'] ?? 'User' }}</strong><p>{!! $highlightMentions($comment['comment']) !!}</p></div><div class="feed-comment__meta"><small>{{ \Carbon\Carbon::parse($comment['created_at'])->diffForHumans() }}</small><button type="button" data-reply-toggle="reply-form-{{ $comment['id'] }}" data-reply-name="{{ $comment['fullname'] ?? 'User' }}">Reply</button></div></div>
                                 </div>
                                 <div class="feed-replies" data-replies-for="{{ $comment['id'] }}">
                                     @foreach($comment['replies'] as $reply)
                                         <div class="feed-comment feed-comment--reply" data-comment-id="{{ $reply['id'] }}">
                                             <div class="feed-avatar feed-avatar--small">@if($avatar($reply['profile_photo'] ?? null))<img src="{{ $avatar($reply['profile_photo']) }}" alt="">@else{{ $initials($reply['fullname'] ?? 'User') }}@endif</div>
-                                            <div class="feed-comment__content"><div class="feed-comment__bubble"><strong>{{ $reply['fullname'] ?? 'User' }}</strong><p>{{ $reply['comment'] }}</p></div><small>{{ \Carbon\Carbon::parse($reply['created_at'])->diffForHumans() }}</small></div>
+                                            <div class="feed-comment__content"><div class="feed-comment__bubble"><strong>{{ $reply['fullname'] ?? 'User' }}</strong><p>{!! $highlightMentions($reply['comment']) !!}</p></div><small>{{ \Carbon\Carbon::parse($reply['created_at'])->diffForHumans() }}</small></div>
                                         </div>
                                     @endforeach
                                 </div>
