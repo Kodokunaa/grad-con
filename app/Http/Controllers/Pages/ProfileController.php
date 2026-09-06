@@ -21,7 +21,7 @@ final class ProfileController extends PageController
             $profile_error = '';
             $password_msg = '';
             $password_error = '';
-            $active_tab = 'profile';
+            $active_tab = $request->query('tab') === 'security' ? 'security' : 'profile';
             $cert_msg = (string) session('status', '');
             $profile_msg = $cert_msg;
             $cert_error = '';

@@ -15,5 +15,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(AdminSeeder::class);
+        if (filled(config('gradconn.alumni_officer_seed.password'))) {
+            $this->call(AlumniOfficerSeeder::class);
+        }
     }
 }

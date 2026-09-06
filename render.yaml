@@ -80,3 +80,11 @@ services:
         sync: false
       - key: ADMIN_SEED_PASSWORD
         sync: false
+      - key: ALUMNI_OFFICER_SEED_NAME
+        value: GradConn Alumni Officer
+      - key: ALUMNI_OFFICER_SEED_USERNAME
+        sync: false
+      - key: ALUMNI_OFFICER_SEED_EMAIL
+        sync: false
+      - key: ALUMNI_OFFICER_SEED_PASSWORD
+        sync: false

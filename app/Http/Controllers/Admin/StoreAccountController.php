@@ -22,6 +22,9 @@ final class StoreAccountController extends Controller
 
     public function officer(CreateAlumniOfficerRequest $request)
     {
+        if (User::query()->where('role', 'alumni_officer')->exists()) {
+            return back()->withErrors(['username' => 'Only one Alumni Officer account is allowed. Update the existing account instead.'])->withInput();
+        }
         $data = $request->validated();
         User::forceCreate(['fullname' => $data['fullname'], 'username' => $data['username'], 'email' => $data['email'], 'password' => $data['password'], 'role' => 'alumni_officer', 'is_active' => $request->boolean('is_active'), 'status' => 'approved']);
         Cache::forget('feed.mention-users.v1');

@@ -6,6 +6,7 @@ use App\Mail\AlumniAccountApprovedMail;
 use App\Mail\ApplicantResumeMail;
 use App\Mail\JobOpportunityMail;
 use App\Models\User;
+use Database\Seeders\AlumniOfficerSeeder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -611,5 +612,32 @@ final class WorkflowTest extends TestCase
         $this->actingAs($employer)->get(route('employer.applications'))
             ->assertOk()->assertSee('Laravel, communication')
             ->assertDontSee('PRIVATE HOME ADDRESS')->assertDontSee('PRIVATE TRIBE')->assertDontSee('PRIVATE MEDICAL DATA');
+    }
+
+    public function test_single_alumni_officer_can_be_seeded_and_manage_events_and_password(): void
+    {
+        User::query()->where('role', 'alumni_officer')->delete();
+        config()->set('gradconn.alumni_officer_seed', [
+            'name' => 'Campus Alumni Officer', 'username' => 'campus_officer',
+            'email' => 'officer@example.test', 'password' => 'SecureOfficer123',
+        ]);
+        $this->seed(AlumniOfficerSeeder::class);
+        $this->seed(AlumniOfficerSeeder::class);
+
+        $officer = User::query()->where('role', 'alumni_officer')->firstOrFail();
+        $this->assertSame(1, User::query()->where('role', 'alumni_officer')->count());
+        $this->assertTrue(Hash::check('SecureOfficer123', $officer->password));
+        $admin = $this->user('admin');
+        $this->actingAs($admin)->post(route('admin.alumni-officers.store'), [
+            'fullname' => 'Second Officer', 'username' => 'second_officer', 'email' => 'second@example.test',
+            'password' => 'SecondOfficer123', 'confirm_password' => 'SecondOfficer123', 'is_active' => 1,
+        ])->assertSessionHasErrors('username');
+        $this->assertSame(1, User::query()->where('role', 'alumni_officer')->count());
+        $this->actingAs($officer)->get(route('alumni_officer.dashboard'))->assertOk()->assertSee('Alumni Officer Workspace')->assertSee('Change Password');
+        $this->post(route('events.store'), ['category' => 'announcement', 'title' => 'Officer announcement', 'content' => 'Posted by the officer.'])->assertRedirect(route('alumni_officer.events_create'));
+        $this->assertDatabaseHas('events', ['title' => 'Officer announcement', 'posted_by' => $officer->id]);
+        $this->put(route('profile.password.update'), ['old_password' => 'SecureOfficer123', 'new_password' => 'ChangedOfficer123', 'confirm_password' => 'ChangedOfficer123'])
+            ->assertRedirect('/profile?tab=security');
+        $this->assertTrue(Hash::check('ChangedOfficer123', $officer->fresh()->password));
     }
 }

@@ -60,6 +60,13 @@ To create the administrator without a Render Shell, temporarily supply the
 `ADMIN_SEED_PASSWORD` is present. Remove the password from the environment after
 the account has been created so later deployments cannot reset it.
 
+To create the single Alumni Officer, temporarily set the four
+`ALUMNI_OFFICER_SEED_*` variables and deploy. Startup runs
+`AlumniOfficerSeeder` when `ALUMNI_OFFICER_SEED_PASSWORD` is present. After the
+successful deployment, remove that password variable. The same seeder updates
+the existing officer if credentials must be reset; it never adds a second
+Alumni Officer.
+
 ## Troubleshooting
 
 - Database TLS errors usually mean the base64 CA value is incomplete.

@@ -350,7 +350,7 @@ final class MigrationTest extends TestCase
             'old_password' => 'test-password-123',
             'new_password' => 'replacement-admin-password',
             'confirm_password' => 'replacement-admin-password',
-        ])->assertRedirect('/profile');
+        ])->assertRedirect('/profile?tab=security');
 
         $this->assertTrue(Hash::check('replacement-admin-password', $admin->fresh()->password));
         Auth::logout();

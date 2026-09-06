@@ -29,4 +29,12 @@ bash scripts/verify.sh
 
 Point Apache or Nginx to `public`, never the repository root. Configure `APP_URL`, timezone, database, mail, queue, and session values in `.env`. Set `ADMIN_SEED_NAME`, `ADMIN_SEED_USERNAME`, `ADMIN_SEED_EMAIL`, and a 12+ character `ADMIN_SEED_PASSWORD`, then run `php artisan db:seed --class=AdminSeeder` for the first administrator.
 
+The application permits one Alumni Officer account. Set `ALUMNI_OFFICER_SEED_NAME`, `ALUMNI_OFFICER_SEED_USERNAME`, `ALUMNI_OFFICER_SEED_EMAIL`, and a strong 12+ character `ALUMNI_OFFICER_SEED_PASSWORD`, then run:
+
+```bash
+php artisan db:seed --class=AlumniOfficerSeeder --force
+```
+
+The seeder is idempotent: running it again updates the existing Alumni Officer instead of creating a second officer. Remove the seed password from production environment variables after the account has been created. The officer can change the password from **Alumni Officer Dashboard → Change Password**.
+
 For outbound email without a domain, create and verify an individual sender in Brevo. Set `MAIL_MAILER=smtp`, `MAIL_HOST=smtp-relay.brevo.com`, `MAIL_PORT=587`, `MAIL_SCHEME=null`, `MAIL_USERNAME` to the Brevo SMTP login, `MAIL_PASSWORD` to a Brevo SMTP key, and `MAIL_FROM_ADDRESS` to the verified sender. Run `php artisan gradconn:check --mail` before testing account workflows.
