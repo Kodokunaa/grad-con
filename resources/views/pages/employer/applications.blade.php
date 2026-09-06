@@ -803,9 +803,7 @@ if (! empty($applications)) {
                                     <?php
         if (! empty($row['resume_file'])) {
             ?>
-                                        <a href="?view_resume=<?php
-            echo rawurlencode($row['resume_file']);
-            ?>"
+                                        <a href="{{ route('applications.letter', ['application' => (int) $row['application_id']]) }}"
                                            class="btn"
                                            style="background:#3b82f6; color:#fff; text-align:center;"
                                            target="_blank"

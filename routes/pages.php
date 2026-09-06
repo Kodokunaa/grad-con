@@ -16,6 +16,7 @@ use App\Http\Controllers\Application\UpdateApplicationStatusController;
 use App\Http\Controllers\Employer\AlumniDirectoryActionController;
 use App\Http\Controllers\Employer\EmployerJobOfferActionController;
 use App\Http\Controllers\Event\ArchiveEventController;
+use App\Http\Controllers\Event\DestroyEventController;
 use App\Http\Controllers\Event\EventIndexController;
 use App\Http\Controllers\Event\RestoreEventController;
 use App\Http\Controllers\Event\StoreEventController;
@@ -168,6 +169,7 @@ Route::delete('/profile/certificates/{certificate}', DestroyCertificateControlle
 Route::get('/events', EventIndexController::class)->middleware('account')->name('events.index');
 Route::patch('/events/{event}/restore', RestoreEventController::class)->middleware('account')->name('events.restore');
 Route::patch('/events/{event}/archive', ArchiveEventController::class)->middleware('account')->name('events.archive');
+Route::delete('/events/{event}', DestroyEventController::class)->middleware('account:admin,alumni_officer')->name('events.destroy');
 Route::post('/events', StoreEventController::class)->middleware('account')->name('events.store');
 Route::post('/feed/{type}/{post}/reaction', [SocialFeedActionController::class, 'reaction'])->where('type', 'event')->middleware('account:admin,alumni,alumni_officer')->name('feed.reactions.store');
 Route::post('/feed/{type}/{post}/comments', [SocialFeedActionController::class, 'comment'])->where('type', 'event')->middleware('account:admin,alumni,alumni_officer')->name('feed.comments.store');

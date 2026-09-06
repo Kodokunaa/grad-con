@@ -170,7 +170,8 @@ final class WorkflowTest extends TestCase
         $path = storage_path('app/private/files/uploads/resumes/'.$application->resume_file);
         $this->createdFiles[] = $path;
         $this->assertFileExists($path);
-        $this->actingAs($this->user('admin'))->get(route('admin.applications.letter', $application->id))->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->actingAs($this->user('admin'))->get(route('applications.letter', $application->id))->assertOk()->assertHeader('content-type', 'application/pdf');
+        $this->actingAs($employer)->get(route('applications.letter', $application->id))->assertOk()->assertHeader('content-type', 'application/pdf');
         $this->actingAs($employer)->get('/employer/applications?view_resume='.urlencode($application->resume_file))->assertOk()->assertHeader('content-type', 'application/pdf');
         $this->patch('/applications/'.$application->id.'/status', ['action' => 'interview', 'action_message' => 'Please attend the interview.'])->assertRedirect();
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'interview']);
@@ -408,6 +409,30 @@ final class WorkflowTest extends TestCase
             'post_start_date' => '', 'post_end_date' => '',
         ])->assertRedirect(route('admin.events_edit', ['id' => $eventId]));
         $this->assertDatabaseHas('events', ['id' => $eventId, 'title' => 'Updated event']);
+    }
+
+    public function test_event_deletion_uses_an_authorized_resource_route(): void
+    {
+        $officer = $this->user('alumni_officer');
+        $otherOfficer = $this->user('alumni_officer');
+        $eventId = DB::table('events')->insertGetId([
+            'title' => 'Delete event route test', 'content' => 'Test', 'posted_by' => $officer->id,
+        ]);
+
+        $this->actingAs($officer)
+            ->get(route('alumni_officer.dashboard'))
+            ->assertOk()
+            ->assertSee(route('events.destroy', $eventId), false);
+
+        $this->actingAs($otherOfficer)
+            ->delete(route('events.destroy', $eventId))
+            ->assertForbidden();
+        $this->assertDatabaseHas('events', ['id' => $eventId]);
+
+        $this->actingAs($officer)
+            ->delete(route('events.destroy', $eventId))
+            ->assertRedirect(route('alumni_officer.events_list'));
+        $this->assertDatabaseMissing('events', ['id' => $eventId]);
     }
 
     public function test_admin_job_deletion_uses_the_named_delete_route(): void

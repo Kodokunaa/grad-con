@@ -763,7 +763,7 @@ if (!empty($applications)) {
                                     <?php 
         if (!empty($resumeFile)) {
             ?>
-                                        <a href="{{ route('admin.applications.letter', ['application' => (int) $row['application_id']]) }}"
+                                        <a href="{{ route('applications.letter', ['application' => (int) $row['application_id']]) }}"
                                            class="btn"
                                            style="background: #3b82f6; color: #fff; text-align: center; text-decoration: none;"
                                            target="_blank" rel="noopener noreferrer">

@@ -534,11 +534,11 @@ if (count($recentEvents) === 0) {
         ?>/alumni_officer/events_edit?id=<?php 
         echo (int) $event['id'];
         ?>" class="btn-action btn-edit">Edit</a>
-                                            <a href="<?php 
-        echo \url('');
-        ?>/alumni_officer/events_list?delete=<?php 
-        echo (int) $event['id'];
-        ?>" class="btn-action btn-delete" onclick="return confirm('Delete this event?');">Delete</a>
+                                            <form method="POST" action="{{ route('events.destroy', $event['id']) }}" style="display:inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn-action btn-delete" onclick="return confirm('Delete this event?');">Delete</button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
