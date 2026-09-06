@@ -234,6 +234,12 @@
     "role": "alumni_officer"
   },
   {
+    "source": "employer/alumni_list.php",
+    "controller": "EmployerAlumniListController",
+    "view": "pages.employer.alumni_list",
+    "role": "employer"
+  },
+  {
     "source": "employer/applications.php",
     "controller": "EmployerApplicationsController",
     "view": "pages.employer.applications",

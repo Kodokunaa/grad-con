@@ -564,7 +564,7 @@ final class WorkflowTest extends TestCase
         $this->get(route('register'))->assertOk()->assertSee('BLIS');
 
         $employer = $this->user('employer');
-        $this->actingAs($employer)->get('/employer/alumni_list')->assertRedirect(route('employer.posted_job'), 301);
+        $this->actingAs($employer)->get('/employer/alumni_list')->assertOk()->assertSee('Professional Directory');
         $this->actingAs($employer)->get('/employer/job_offers')->assertRedirect(route('employer.applications'), 301);
         $this->actingAs($employer)->post('/employer/offers', [])->assertNotFound();
     }
@@ -598,6 +598,9 @@ final class WorkflowTest extends TestCase
         $employer = $this->user('employer');
         $alumni = $this->user('alumni');
         $alumni->forceFill(['address' => 'PRIVATE HOME ADDRESS', 'indigenous_tribe' => 'PRIVATE TRIBE', 'special_needs' => 'PRIVATE MEDICAL DATA', 'skills' => 'Laravel, communication'])->save();
+        $this->actingAs($employer)->get(route('employer.alumni_list'))
+            ->assertOk()->assertSee($alumni->fullname)->assertSee('Laravel, communication')
+            ->assertDontSee($alumni->email)->assertDontSee('PRIVATE HOME ADDRESS')->assertDontSee('PRIVATE TRIBE')->assertDontSee('PRIVATE MEDICAL DATA');
         $jobId = DB::table('jobs')->insertGetId([
             'title' => 'Privacy Test Job', 'company' => 'Test Company', 'employer_company' => 'Test Company',
             'description' => 'Test', 'posted_by' => $employer->id, 'employer_id' => $employer->id, 'is_open' => 1,

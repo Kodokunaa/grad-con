@@ -61,6 +61,7 @@ use App\Http\Controllers\Pages\AlumniOfficerEventsCreateController;
 use App\Http\Controllers\Pages\AlumniOfficerEventsEditController;
 use App\Http\Controllers\Pages\AlumniOfficerEventsListController;
 use App\Http\Controllers\Pages\ArchiveController;
+use App\Http\Controllers\Pages\EmployerAlumniListController;
 use App\Http\Controllers\Pages\EmployerApplicationsController;
 use App\Http\Controllers\Pages\EmployerDashboardController;
 use App\Http\Controllers\Pages\EmployerInterviewController;
@@ -138,7 +139,7 @@ Route::get('/alumni_officer/dashboard', AlumniOfficerDashboardController::class)
 Route::get('/alumni_officer/events_create', AlumniOfficerEventsCreateController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_create');
 Route::get('/alumni_officer/events_edit', AlumniOfficerEventsEditController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_edit');
 Route::get('/alumni_officer/events_list', AlumniOfficerEventsListController::class)->middleware('account:alumni_officer')->name('alumni_officer.events_list');
-Route::get('/employer/alumni_list', fn () => to_route('employer.posted_job', status: 301))->middleware('account:employer')->name('employer.alumni_list');
+Route::get('/employer/alumni_list', EmployerAlumniListController::class)->middleware('account:employer')->name('employer.alumni_list');
 Route::get('/employer/applications', EmployerApplicationsController::class)->middleware('account:employer')->name('employer.applications');
 Route::get('/employer/dashboard', EmployerDashboardController::class)->middleware('account:employer')->name('employer.dashboard');
 Route::get('/employer/interview', EmployerInterviewController::class)->middleware('account:employer')->name('employer.interview');
