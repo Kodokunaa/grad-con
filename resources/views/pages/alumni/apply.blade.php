@@ -534,17 +534,33 @@ echo htmlspecialchars($alumni["skills"] ?? "");
             </div>
         </div>
 
+        @if($alreadyApplied)
+            <div class="alert-box alert-success-custom">
+                You already applied for this opportunity. You can review its status under My Applications.
+            </div>
+            <div class="actions">
+                <a class="btn-orange" href="{{ route('alumni.my_applications') }}">View My Applications</a>
+                <a class="btn-outline-custom" href="{{ route('alumni.jobs') }}">Back to Jobs</a>
+            </div>
+        @else
         <form method="POST" action="{{ route('applications.store', $job_id) }}" id="applicationForm" enctype="multipart/form-data">
 @csrf
 
+            @if($errors->any())
+                <div class="alert-box alert-danger-custom" role="alert">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
             <div class="form-group">
-                <label class="form-label">Upload Apllciation letter (PDF only) <span style="color: #f97316;">*</span></label>
+                <label class="form-label">Upload Application Letter (PDF only) <span style="color: #f97316;">*</span></label>
                 <div style="position: relative; display: flex; align-items: center; gap: 10px;">
                     <input
                         type="file"
                         name="resume"
                         id="resumeInput"
                         accept=".pdf,application/pdf"
+                        required
                         style="display: none;"
                     >
                     <button
@@ -600,6 +616,7 @@ echo \url('');
 ?>/alumni/jobs">Back</a>
             </div>
         </form>
+        @endif
     </div>
 </div>
 
@@ -724,7 +741,7 @@ echo \url('');
 /**
  * Handle form submission
  */
-document.getElementById('applicationForm').addEventListener('submit', function(e) {
+document.getElementById('applicationForm')?.addEventListener('submit', function(e) {
     const resumeInput = document.getElementById('resumeInput');
 
     // Check if resume file is selected
@@ -760,7 +777,7 @@ document.getElementById('applicationForm').addEventListener('submit', function(e
 });
 
 // Handle resume file selection
-document.getElementById('resumeInput').addEventListener('change', function(e) {
+document.getElementById('resumeInput')?.addEventListener('change', function(e) {
     const fileNameDisplay = document.getElementById('fileNameDisplay');
 
     if (this.files && this.files.length > 0) {

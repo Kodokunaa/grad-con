@@ -13,6 +13,6 @@ final class StoreApplicationRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['message' => ['nullable', 'string', 'max:5000'], 'agree_terms' => ['accepted'], 'resume' => ['required', 'file', 'mimes:pdf', 'mimetypes:application/pdf', 'max:5120']];
+        return ['message' => ['nullable', 'string', 'max:5000'], 'agree_terms' => ['accepted'], 'resume' => ['required', 'file', 'extensions:pdf', 'mimetypes:application/pdf,application/x-pdf,application/octet-stream', 'max:5120']];
     }
 }

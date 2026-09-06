@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
+use App\Models\JobApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -26,6 +27,7 @@ final class AlumniJobsController extends PageController
                 });
             }
             $jobs = $query->orderByDesc('id')->get()->map(fn ($row) => (array) $row)->all();
+            $appliedJobIds = JobApplication::query()->where('alumni_id', $alumni_id)->pluck('job_id')->map(fn ($id) => (int) $id)->all();
             echo view('partials.header', \get_defined_vars());
             echo view('partials.alumni_sidebar', \get_defined_vars());
 

@@ -177,6 +177,55 @@ final class WorkflowTest extends TestCase
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'interview']);
     }
 
+    public function test_alumni_job_pages_prevent_duplicate_applications_and_show_the_existing_state(): void
+    {
+        $employer = $this->user('employer');
+        $alumni = $this->user('alumni');
+        $jobId = DB::table('jobs')->insertGetId([
+            'title' => 'No duplicate applications', 'company' => 'Test Company', 'employer_company' => 'Test Company',
+            'description' => 'Test', 'posted_by' => $employer->id, 'employer_id' => $employer->id, 'is_open' => 1,
+        ]);
+        DB::table('applications')->insert(['job_id' => $jobId, 'alumni_id' => $alumni->id, 'status' => 'pending']);
+
+        $this->actingAs($alumni)->get(route('alumni.jobs'))
+            ->assertOk()->assertSee('Already Applied')->assertDontSee('/alumni/apply?job_id='.$jobId, false);
+        $this->get(route('alumni.job_details', ['id' => $jobId]))
+            ->assertOk()->assertSee('You already applied')->assertDontSee('Apply Now');
+        $this->get(route('alumni.apply', ['job_id' => $jobId]))
+            ->assertOk()->assertSee('You already applied for this opportunity')->assertDontSee('id="applicationForm"', false);
+
+        $upload = UploadedFile::fake()->createWithContent('application.pdf', "%PDF-1.4\n%%EOF");
+        $this->post(route('applications.store', $jobId), ['agree_terms' => 1, 'resume' => $upload])
+            ->assertSessionHasErrors('resume');
+        $this->assertSame(1, DB::table('applications')->where('job_id', $jobId)->where('alumni_id', $alumni->id)->count());
+    }
+
+    public function test_alumni_can_store_a_certificate_and_see_validation_errors(): void
+    {
+        $alumni = $this->user('alumni');
+        $originalDisk = config('filesystems.uploads_disk');
+        config(['filesystems.uploads_disk' => 'local']);
+        Storage::fake('local');
+
+        try {
+            $certificate = UploadedFile::fake()->createWithContent(
+                'certificate.png',
+                base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', true)
+            );
+            $this->actingAs($alumni)->post(route('profile.certificates.store'), [
+                'certificate_name' => 'Laravel Certificate', 'issue_date' => today()->toDateString(), 'certificate_image' => $certificate,
+            ])->assertSessionHasNoErrors()->assertRedirect(route('profile'));
+
+            $record = DB::table('alumni_certificates')->where('user_id', $alumni->id)->where('certificate_name', 'Laravel Certificate')->first();
+            $this->assertNotNull($record);
+            Storage::disk('local')->assertExists('files/uploads/certificates/'.$record->certificate_image);
+
+            $this->from(route('profile'))->post(route('profile.certificates.store'), [])->assertSessionHasErrors(['certificate_name', 'certificate_image']);
+        } finally {
+            config(['filesystems.uploads_disk' => $originalDisk]);
+        }
+    }
+
     public function test_job_details_cannot_bypass_the_complete_application_flow(): void
     {
         $employer = $this->user('employer');

@@ -1179,6 +1179,9 @@ if ($role === 'alumni') {
                                     </div>
 
                                     <div class="col-12">
+                                        @if($errors->hasAny(['certificate_name', 'certificate_image', 'issue_date']))
+                                            <div class="alert-box alert-danger-custom" role="alert">{{ $errors->first() }}</div>
+                                        @endif
                                         <?php
     if ($cert_msg) {
         ?>
@@ -1202,12 +1205,12 @@ if ($role === 'alumni') {
 
                                     <div class="col-md-5">
                                         <label class="form-label">Certificate Name</label>
-                                        <input class="form-control-custom" name="certificate_name" form="certificateForm" placeholder="Enter certificate name">
+                                        <input class="form-control-custom" name="certificate_name" form="certificateForm" placeholder="Enter certificate name" required>
                                     </div>
 
                                     <div class="col-md-4">
                                         <label class="form-label">Certificate Image</label>
-                                        <input type="file" class="form-file-custom" name="certificate_image" form="certificateForm" accept="image/*">
+                                        <input type="file" class="form-file-custom" name="certificate_image" form="certificateForm" accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf" required>
                                     </div>
 
                                     <div class="col-md-3">

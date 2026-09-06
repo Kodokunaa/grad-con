@@ -95,7 +95,7 @@
                 <div class="rail-heading"><h2>Job Opportunities</h2><a href="{{ route('alumni.jobs') }}">See all</a></div>
                 <div class="rail-jobs" data-job-list>
                     @forelse($sidebarJobs as $job)
-                        <article class="rail-job {{ $loop->index > 1 ? 'rail-job--extra' : '' }}"><span class="rail-job__icon"><i class="fas fa-building"></i></span><div><h3>{{ $job['title'] ?? 'Job opening' }}</h3><p>{{ $job['employer_company'] ?? 'Company' }}@if(!empty($job['location'])) · {{ $job['location'] }}@endif</p><small>{{ $shorten($job['description'] ?? '') }}</small><a href="{{ route('alumni.apply', ['id' => $job['id']]) }}">View opportunity <i class="fas fa-arrow-right"></i></a></div></article>
+                        <article class="rail-job {{ $loop->index > 1 ? 'rail-job--extra' : '' }}"><span class="rail-job__icon"><i class="fas fa-building"></i></span><div><h3>{{ $job['title'] ?? 'Job opening' }}</h3><p>{{ $job['employer_company'] ?? 'Company' }}@if(!empty($job['location'])) · {{ $job['location'] }}@endif</p><small>{{ $shorten($job['description'] ?? '') }}</small><a href="{{ route('alumni.job_details', ['id' => $job['id']]) }}">View opportunity <i class="fas fa-arrow-right"></i></a></div></article>
                     @empty
                         <p class="rail-empty">No open positions right now.</p>
                     @endforelse

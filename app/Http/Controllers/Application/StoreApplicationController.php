@@ -7,6 +7,7 @@ use App\Http\Requests\StoreApplicationRequest;
 use App\Models\Job;
 use App\Models\JobApplication;
 use App\Support\PrivateUploads;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 
@@ -38,6 +39,13 @@ final class StoreApplicationController extends Controller
                 'applicant_special_needs' => $alumni->special_needs, 'applicant_employment_status' => $alumni->employment_status, 'applicant_job_aligned' => $alumni->job_aligned,
                 'applicant_profile_picture' => $alumni->profile_picture, 'applicant_career_objective' => $alumni->career_objective, 'applicant_skills' => $alumni->skills,
             ])->save();
+        } catch (QueryException $exception) {
+            PrivateUploads::delete('resumes', $filename);
+            if ((string) $exception->getCode() === '23000') {
+                throw ValidationException::withMessages(['resume' => 'You already applied to this job.']);
+            }
+
+            throw $exception;
         } catch (\Throwable $exception) {
             PrivateUploads::delete('resumes', $filename);
             throw $exception;

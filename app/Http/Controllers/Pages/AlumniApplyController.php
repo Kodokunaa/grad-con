@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\PageController;
 use App\Models\Job;
+use App\Models\JobApplication;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -33,6 +34,7 @@ final class AlumniApplyController extends PageController
             $msg = '';
             $error = '';
             $alumni_id = (int) request()->user()?->id;
+            $alreadyApplied = JobApplication::query()->where('job_id', $job_id)->where('alumni_id', $alumni_id)->exists();
             // Load alumni profile data from users table
             $alumni = User::query()->whereKey($alumni_id)->where('role', 'alumni')->first()?->toArray();
             if (! $alumni) {

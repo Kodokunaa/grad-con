@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\Job;
 use App\Models\PostComment;
 use App\Models\PostReaction;
 use App\Models\User;
 use App\Services\SocialFeedService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -40,6 +42,18 @@ final class SocialFeedTest extends TestCase
         $this->actingAs($other)->delete('/feed/comments/'.$comment->id)->assertForbidden();
         $this->actingAs($officer)->delete('/feed/comments/'.$comment->id)->assertRedirect();
         $this->assertDatabaseMissing('post_comments', ['id' => $comment->id]);
+    }
+
+    public function test_feed_job_opportunities_open_the_job_details_page(): void
+    {
+        $employer = $this->user('employer');
+        $alumni = $this->user('alumni');
+        $job = new Job;
+        $job->forceFill(['title' => 'Feed opportunity', 'company' => 'Test Company', 'employer_company' => 'Test Company', 'description' => 'Test', 'posted_by' => $employer->id, 'employer_id' => $employer->id, 'is_open' => true])->save();
+        Cache::flush();
+
+        $this->actingAs($alumni)->get(route('alumni.feed'))
+            ->assertOk()->assertSee(route('alumni.job_details', ['id' => $job->id]), false);
     }
 
     public function test_reaction_endpoint_rejects_unknown_reactions_and_hidden_events(): void

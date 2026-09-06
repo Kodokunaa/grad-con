@@ -13,6 +13,6 @@ final class StoreCertificateRequest extends FormRequest
 
     public function rules(): array
     {
-        return ['certificate_name' => ['required', 'string', 'max:255'], 'issue_date' => ['nullable', 'date', 'before_or_equal:today'], 'certificate_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072']];
+        return ['certificate_name' => ['required', 'string', 'max:255'], 'issue_date' => ['nullable', 'date', 'before_or_equal:today'], 'certificate_image' => ['required', 'file', 'extensions:jpg,jpeg,png,webp,pdf', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf,application/x-pdf', 'max:5120']];
     }
 }

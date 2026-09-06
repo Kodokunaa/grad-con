@@ -1,5 +1,10 @@
 <?php
 
+$uploadsDisk = env('PRIVATE_UPLOADS_DISK', env('FILESYSTEM_DISK', 'local'));
+if ($uploadsDisk === 's3' && (! env('AWS_ACCESS_KEY_ID') || ! env('AWS_SECRET_ACCESS_KEY') || ! env('AWS_BUCKET'))) {
+    $uploadsDisk = 'local';
+}
+
 return [
 
     /*
@@ -15,7 +20,7 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
-    'uploads_disk' => env('PRIVATE_UPLOADS_DISK', env('FILESYSTEM_DISK', 'local')),
+    'uploads_disk' => $uploadsDisk,
 
     /*
     |--------------------------------------------------------------------------

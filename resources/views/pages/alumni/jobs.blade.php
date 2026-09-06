@@ -503,13 +503,12 @@ if (count($jobs) === 0) {
                     <div class="card-footer">
                         <span class="view-details">Review the details before applying</span>
 
-                        <a class="btn-orange" href="<?php 
-        echo \url('');
-        ?>/alumni/apply?job_id=<?php 
-        echo (int) $j['id'];
-        ?>">
-                            Apply Now
-                        </a>
+                        <?php $hasApplied = in_array((int) $j['id'], $appliedJobIds, true); ?>
+                        @if($hasApplied)
+                            <a class="btn-orange" href="{{ route('alumni.my_applications') }}" style="background:#16a34a;">Already Applied</a>
+                        @else
+                            <a class="btn-orange" href="{{ route('alumni.job_details', ['id' => (int) $j['id']]) }}">View Opportunity</a>
+                        @endif
                     </div>
 
                 </div>
