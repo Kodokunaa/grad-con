@@ -599,9 +599,9 @@ final class WorkflowTest extends TestCase
         Mail::fake();
         $employer = $this->user('employer');
         $alumni = $this->user('alumni');
-        $alumni->forceFill(['address' => 'PRIVATE HOME ADDRESS', 'indigenous_tribe' => 'PRIVATE TRIBE', 'special_needs' => 'PRIVATE MEDICAL DATA', 'skills' => 'Laravel, communication'])->save();
+        $alumni->forceFill(['address' => 'PRIVATE HOME ADDRESS', 'indigenous_tribe' => 'PRIVATE TRIBE', 'special_needs' => 'PRIVATE MEDICAL DATA', 'skills' => 'Laravel, communication', 'profile_picture' => 'alumni-photo.webp'])->save();
         $this->actingAs($employer)->get(route('employer.alumni_list'))
-            ->assertOk()->assertSee($alumni->fullname)->assertSee('Laravel, communication')->assertSee('Send Job Offer Email')
+            ->assertOk()->assertSee($alumni->fullname)->assertSee('Laravel, communication')->assertSee('Send Job Offer Email')->assertSee('/uploads/profiles/alumni-photo.webp', false)
             ->assertDontSee($alumni->email)->assertDontSee('PRIVATE HOME ADDRESS')->assertDontSee('PRIVATE TRIBE')->assertDontSee('PRIVATE MEDICAL DATA');
         $this->post(route('employer.offers.store'), [
             'alumni_id' => $alumni->id, 'subject' => 'Backend Developer Opportunity',
