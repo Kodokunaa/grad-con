@@ -170,6 +170,7 @@ final class WorkflowTest extends TestCase
         $path = storage_path('app/private/files/uploads/resumes/'.$application->resume_file);
         $this->createdFiles[] = $path;
         $this->assertFileExists($path);
+        $this->actingAs($this->user('admin'))->get(route('admin.applications.letter', $application->id))->assertOk()->assertHeader('content-type', 'application/pdf');
         $this->actingAs($employer)->get('/employer/applications?view_resume='.urlencode($application->resume_file))->assertOk()->assertHeader('content-type', 'application/pdf');
         $this->patch('/applications/'.$application->id.'/status', ['action' => 'interview', 'action_message' => 'Please attend the interview.'])->assertRedirect();
         $this->assertDatabaseHas('applications', ['id' => $application->id, 'status' => 'interview']);

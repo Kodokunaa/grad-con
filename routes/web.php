@@ -16,6 +16,7 @@ Route::post('/reset-password', [AuthController::class, 'reset'])->middleware('th
 Route::get('/auth/logout', fn () => redirect('/'))->middleware('account');
 Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('account')->name('logout');
 Route::get('/admin/view-resume', [FileController::class, 'resume'])->middleware('account:admin');
+Route::get('/admin/applications/{application}/application-letter', [FileController::class, 'applicationLetter'])->middleware('account:admin')->name('admin.applications.letter');
 Route::get('/uploads/{path}', [FileController::class, 'upload'])->where('path', '.*')->middleware('account');
 Route::get('/admin/employer-list', fn () => to_route('admin.create_employer'))->middleware('account:admin');
 Route::get('/employer/my-jobs', fn () => to_route('employer.posted_job'))->middleware('account:employer');

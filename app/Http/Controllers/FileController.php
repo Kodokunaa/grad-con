@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Gate;
 
 final class FileController extends Controller
 {
+    public function applicationLetter(Request $request, JobApplication $application)
+    {
+        Gate::authorize('view', $application);
+
+        return $this->serveApplicationFile($application);
+    }
+
     public function resume(Request $request, ?string $filename = null)
     {
         $query = JobApplication::query();
@@ -21,9 +28,8 @@ final class FileController extends Controller
         }
         $application = $query->firstOrFail();
         Gate::authorize('view', $application);
-        $file = basename((string) $application->resume_file);
 
-        return $this->serve('resumes/'.$file, true);
+        return $this->serveApplicationFile($application);
     }
 
     public function upload(Request $request, string $path)
@@ -44,6 +50,14 @@ final class FileController extends Controller
         }
 
         return $this->serve($path, false);
+    }
+
+    private function serveApplicationFile(JobApplication $application)
+    {
+        $file = basename((string) $application->resume_file);
+        abort_if($file === '', 404);
+
+        return $this->serve('resumes/'.$file, true);
     }
 
     private function serve(string $relative, bool $resume)
