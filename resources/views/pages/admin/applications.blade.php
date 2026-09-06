@@ -771,7 +771,7 @@ if (!empty($applications)) {
                                            class="btn"
                                            style="background: #3b82f6; color: #fff; text-align: center; text-decoration: none;"
                                            target="_blank" rel="noopener noreferrer">
-                                            📄 View Resume
+                                            📄 View Application Letter
                                         </a>
                                     <?php 
         }
