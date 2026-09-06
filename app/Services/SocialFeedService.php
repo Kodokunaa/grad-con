@@ -29,7 +29,7 @@ final class SocialFeedService
                     ->where(fn ($q) => $q->whereNull('post_end_date')->orWhere('post_end_date', '>=', now()));
             }
 
-            return $query->with(['author', 'reactions', 'comments.author'])
+            return $query->with(['author', 'reactions', 'comments.author', 'comments.replies.author'])
                 ->latest('created_at')
                 ->limit(config('performance.feed_limit'))
                 ->get()
@@ -91,10 +91,11 @@ final class SocialFeedService
             }
             $comment = new PostComment;
             $comment->forceFill(['post_type' => $type, 'post_id' => $id, 'parent_comment_id' => $parent?->id, 'user_id' => $user->id, 'comment' => $text, 'created_at' => now()])->save();
-            $recipients = collect([$post->posted_by, $parent?->user_id])->merge($this->mentionedUserIds($text))->filter(fn ($id) => $id && (int) $id !== $user->id)->unique();
+            $mentionedIds = $this->mentionedUserIds($text);
+            $recipients = collect([$post->posted_by, $parent?->user_id])->merge($mentionedIds)->filter(fn ($id) => $id && (int) $id !== $user->id)->unique();
             foreach ($recipients as $recipient) {
                 $notification = new PostNotification;
-                $notification->forceFill(['recipient_user_id' => $recipient, 'sender_user_id' => $user->id, 'post_type' => $type, 'post_id' => $id, 'notification_type' => 'comment', 'message' => $user->fullname.' commented on '.$type.': '.$post->title, 'created_at' => now()])->save();
+                $notification->forceFill(['recipient_user_id' => $recipient, 'sender_user_id' => $user->id, 'post_type' => $type, 'post_id' => $id, 'notification_type' => $mentionedIds->contains((int) $recipient) ? 'mention' : ($parent ? 'reply' : 'comment'), 'message' => $user->fullname.($parent ? ' replied to a comment on ' : ' commented on ').$type.': '.$post->title, 'created_at' => now()])->save();
             }
 
             return $comment;
@@ -156,21 +157,24 @@ final class SocialFeedService
         }
         $counts['total'] = array_sum($counts);
 
-        return array_merge($post->toArray(), ['post_type' => $type, 'poster' => $post->author?->fullname ?? 'GradConn', 'poster_photo' => $post->author?->profile_picture, 'reactions' => $reactions->toArray(), 'counts' => $counts, 'comments' => $comments->map(fn ($c) => array_merge($c->toArray(), ['fullname' => $c->author?->fullname, 'profile_photo' => $c->author?->profile_picture]))->all()]);
+        $commentArray = fn ($comment) => array_merge($comment->toArray(), ['fullname' => $comment->author?->fullname, 'profile_photo' => $comment->author?->profile_picture]);
+        $threadedComments = $comments->whereNull('parent_comment_id')->map(function ($comment) use ($commentArray) {
+            return array_merge($commentArray($comment), [
+                'replies' => $comment->replies->sortBy('created_at')->map($commentArray)->values()->all(),
+            ]);
+        })->values()->all();
+
+        return array_merge($post->toArray(), ['post_type' => $type, 'poster' => $post->author?->fullname ?? 'GradConn', 'poster_photo' => $post->author?->profile_picture, 'reactions' => $reactions->toArray(), 'counts' => $counts, 'comments' => $threadedComments, 'comment_count' => $comments->count()]);
     }
 
     private function mentionedUserIds(string $text): Collection
     {
-        preg_match_all('/@([A-Za-z0-9_ .\-]+)/u', $text, $matches);
-        $names = collect($matches[1] ?? [])->map(fn ($n) => mb_strtolower(trim(preg_replace('/\s+/', ' ', $n))))->filter();
-        if ($names->isEmpty()) {
+        if (! str_contains($text, '@')) {
             return collect();
         }
 
-        return User::whereNotNull('fullname')->get(['id', 'fullname'])->filter(function ($user) use ($names) {
-            $full = mb_strtolower(trim(preg_replace('/\s+/', ' ', $user->fullname)));
-
-            return $names->contains(fn ($name) => $full === $name || str_contains($full, $name) || str_contains($name, $full));
-        })->pluck('id');
+        return User::query()->whereNotNull('fullname')->where('fullname', '<>', '')->get(['id', 'fullname'])
+            ->filter(fn ($user) => preg_match('/(?<![\pL\pN_])@'.preg_quote(trim($user->fullname), '/').'(?=$|[\s,.!?;:])/iu', $text) === 1)
+            ->pluck('id')->map(fn ($id) => (int) $id)->values();
     }
 }

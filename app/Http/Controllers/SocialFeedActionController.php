@@ -32,6 +32,7 @@ final class SocialFeedActionController extends Controller
                     'comment' => $comment->comment,
                     'fullname' => $comment->author?->fullname ?? 'User',
                     'profile_photo' => $comment->author?->profile_picture,
+                    'parent_comment_id' => $comment->parent_comment_id,
                     'created_at' => $comment->created_at?->toIso8601String(),
                 ],
                 'comment_count' => PostComment::where(['post_type' => $type, 'post_id' => $post])->count(),

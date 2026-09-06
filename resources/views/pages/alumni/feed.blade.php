@@ -63,7 +63,7 @@
 
                     <div class="feed-engagement">
                         <span class="feed-reaction-total" data-counts><span class="reaction-stack">@foreach(\App\Services\SocialFeedService::REACTIONS as $type => $info)@if(($post['counts'][$type] ?? 0) > 0)<b>{{ $info['emoji'] }}</b>@endif @endforeach</span><span data-count-label>{{ $post['counts']['total'] }} {{ \Illuminate\Support\Str::plural('reaction', $post['counts']['total']) }}</span></span>
-                        <button type="button" class="feed-comment-count" data-comment-toggle="comments-{{ $postKey }}">{{ count($post['comments']) }} {{ \Illuminate\Support\Str::plural('comment', count($post['comments'])) }}</button>
+                        <button type="button" class="feed-comment-count" data-comment-toggle="comments-{{ $postKey }}">{{ $post['comment_count'] }} {{ \Illuminate\Support\Str::plural('comment', $post['comment_count']) }}</button>
                     </div>
 
                     <div class="feed-actions">
@@ -87,9 +87,24 @@
                         </form>
                         <div class="feed-comments__list" id="comments-list-{{ $postKey }}">
                             @forelse($post['comments'] as $comment)
+                                <div class="feed-comment-thread" data-thread-id="{{ $comment['id'] }}">
                                 <div class="feed-comment" data-comment-id="{{ $comment['id'] }}">
                                     <div class="feed-avatar feed-avatar--small">@if($avatar($comment['profile_photo'] ?? null))<img src="{{ $avatar($comment['profile_photo']) }}" alt="">@else{{ $initials($comment['fullname'] ?? 'User') }}@endif</div>
-                                    <div class="feed-comment__content"><div class="feed-comment__bubble"><strong>{{ $comment['fullname'] ?? 'User' }}</strong><p>{{ $comment['comment'] }}</p></div><small>{{ \Carbon\Carbon::parse($comment['created_at'])->diffForHumans() }}</small></div>
+                                    <div class="feed-comment__content"><div class="feed-comment__bubble"><strong>{{ $comment['fullname'] ?? 'User' }}</strong><p>{{ $comment['comment'] }}</p></div><div class="feed-comment__meta"><small>{{ \Carbon\Carbon::parse($comment['created_at'])->diffForHumans() }}</small><button type="button" data-reply-toggle="reply-form-{{ $comment['id'] }}" data-reply-name="{{ $comment['fullname'] ?? 'User' }}">Reply</button></div></div>
+                                </div>
+                                <div class="feed-replies" data-replies-for="{{ $comment['id'] }}">
+                                    @foreach($comment['replies'] as $reply)
+                                        <div class="feed-comment feed-comment--reply" data-comment-id="{{ $reply['id'] }}">
+                                            <div class="feed-avatar feed-avatar--small">@if($avatar($reply['profile_photo'] ?? null))<img src="{{ $avatar($reply['profile_photo']) }}" alt="">@else{{ $initials($reply['fullname'] ?? 'User') }}@endif</div>
+                                            <div class="feed-comment__content"><div class="feed-comment__bubble"><strong>{{ $reply['fullname'] ?? 'User' }}</strong><p>{{ $reply['comment'] }}</p></div><small>{{ \Carbon\Carbon::parse($reply['created_at'])->diffForHumans() }}</small></div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <form method="POST" action="{{ url('/feed/event/'.$post['id'].'/comments') }}" id="reply-form-{{ $comment['id'] }}" class="feed-comment-form feed-reply-form" data-comments-list="comments-list-{{ $postKey }}" data-replies-list="{{ $comment['id'] }}" hidden>
+                                    @csrf<input type="hidden" name="parent_comment_id" value="{{ $comment['id'] }}">
+                                    <div class="feed-avatar feed-avatar--small">@if($avatar($viewer->profile_picture))<img src="{{ $avatar($viewer->profile_picture) }}" alt="">@else{{ $initials($viewer->fullname) }}@endif</div>
+                                    <div class="comment-composer"><input name="comment" maxlength="3000" required autocomplete="off" placeholder="Write a reply…" data-mention-input><button type="submit" aria-label="Post reply"><i class="fas fa-paper-plane"></i></button></div>
+                                </form>
                                 </div>
                             @empty
                                 <p class="no-comments" data-empty-comments>Be the first to comment.</p>

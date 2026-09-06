@@ -99,4 +99,30 @@ final class SocialFeedTest extends TestCase
         DB::disableQueryLog();
         SocialFeedService::forgetEventCache();
     }
+
+    public function test_comments_support_threaded_replies_and_exact_mentions(): void
+    {
+        $officer = $this->user('alumni_officer');
+        $author = $this->user('alumni');
+        $mentioned = $this->user('alumni');
+        $mentioned->forceFill(['fullname' => 'Maria Santos'])->save();
+        $otherMaria = $this->user('alumni');
+        $otherMaria->forceFill(['fullname' => 'Maria Cruz'])->save();
+        $event = Event::forceCreate(['title' => 'Reply test', 'content' => 'Discuss here', 'posted_by' => $officer->id, 'is_archived' => false, 'created_at' => now()]);
+
+        $this->actingAs($author)->postJson(route('feed.comments.store', ['type' => 'event', 'post' => $event->id]), [
+            'comment' => 'Original comment',
+        ])->assertOk();
+        $parent = PostComment::where('post_id', $event->id)->whereNull('parent_comment_id')->firstOrFail();
+
+        $this->actingAs($officer)->postJson(route('feed.comments.store', ['type' => 'event', 'post' => $event->id]), [
+            'parent_comment_id' => $parent->id,
+            'comment' => '@Maria Santos thank you for joining.',
+        ])->assertOk()->assertJsonPath('comment.parent_comment_id', $parent->id)->assertJsonPath('comment_count', 2);
+
+        $this->assertDatabaseHas('post_comments', ['parent_comment_id' => $parent->id, 'user_id' => $officer->id]);
+        $this->assertDatabaseHas('post_notifications', ['recipient_user_id' => $mentioned->id, 'notification_type' => 'mention']);
+        $this->assertDatabaseMissing('post_notifications', ['recipient_user_id' => $otherMaria->id, 'notification_type' => 'mention']);
+        $this->actingAs($author)->get(route('alumni.feed'))->assertOk()->assertSee('Original comment')->assertSee('@Maria Santos thank you for joining.');
+    }
 }
