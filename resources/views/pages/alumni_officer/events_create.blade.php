@@ -238,8 +238,8 @@
 <div class="content">
     <div class="page-header">
         <div>
-            <h3 class="page-title">Post an Event</h3>
-            <div class="page-subtitle">Create an event post and schedule when it will appear in the alumni feed.</div>
+            <h3 class="page-title">Create Community Post</h3>
+            <div class="page-subtitle">Create an community post and schedule when it will appear in the alumni feed.</div>
         </div>
     </div>
 
@@ -266,6 +266,7 @@ if ($error) {
     <div class="form-card">
         <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
 @csrf
+            <div class="form-group"><label class="form-label">Post Type</label><select name="category" class="form-control-custom" required><option value="announcement" @selected(old('category','announcement') === 'announcement')>Announcement</option><option value="news" @selected(old('category') === 'news')>News</option><option value="event" @selected(old('category') === 'event')>Event</option></select></div>
             <div class="form-group">
                 <label class="form-label">Title</label>
                 <input

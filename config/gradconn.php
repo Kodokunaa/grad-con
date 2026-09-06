@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'courses' => ['BSIS', 'BSTM', 'BSHM', 'BSED Math', 'BSED Science', 'BSNED', 'BPA'],
+    'courses' => ['BSIS', 'BLIS', 'BSTM', 'BSHM', 'BSED Math', 'BSED Science', 'BSNED', 'BPA'],
     'admin_seed' => [
         'name' => env('ADMIN_SEED_NAME', 'GradConn Administrator'),
         'username' => env('ADMIN_SEED_USERNAME', 'admin'),

@@ -1,6 +1,6 @@
 
 <div class="content">
-<h3>Forward Resume to Company</h3>
+<h3>Forward Application Letter to Company</h3>
 
 <?php
 if (session('status')) {
@@ -21,6 +21,6 @@ if ($errors->any()) {
     <label>Company Email</label>
     <input class="form-control" type="email" name="company_email" required>
   </div>
-  <button class="btn btn-dark">Send Resume</button>
+  <button class="btn btn-dark">Send Application Letter</button>
 </form>
 </div>

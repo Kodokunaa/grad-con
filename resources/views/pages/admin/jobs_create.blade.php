@@ -360,6 +360,16 @@ echo htmlspecialchars(old('location', request()->input('location')) ?? '');
                 </div>
 
                 <div class="col-12">
+                    <label class="form-label">Target Course</label>
+                    <select class="form-select-custom" name="target_course" required>
+                        <option value="">Select the most relevant course</option>
+                        @foreach(config('gradconn.courses') as $course)
+                            <option value="{{ $course }}" @selected(old('target_course') === $course)>{{ $course }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-12">
                     <label class="form-label">Description</label>
                     <textarea
                         class="form-textarea-custom"
@@ -369,6 +379,11 @@ echo htmlspecialchars(old('location', request()->input('location')) ?? '');
                     ><?php 
 echo htmlspecialchars(old('description', request()->input('description')) ?? '');
 ?></textarea>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Required Competencies and Qualifications</label>
+                    <textarea class="form-textarea-custom" name="requirements" rows="4" required>{{ old('requirements') }}</textarea>
                 </div>
 
                 <div class="col-12">
@@ -397,4 +412,3 @@ echo old('is_open', request()->input('is_open')) !== null || \request()->server-
 
 <?php 
 echo view('partials.footer', \get_defined_vars());
-

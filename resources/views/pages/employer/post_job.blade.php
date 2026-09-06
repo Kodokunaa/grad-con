@@ -333,7 +333,7 @@ echo htmlspecialchars($employer_fullname);
 ?>"
                         readonly
                     >
-                    <div class="helper-text">This is auto generated from the logged-in employer account.</div>
+                    <div class="helper-text">From your About Company profile.</div>
                 </div>
 
                 <div class="form-group">
@@ -346,7 +346,7 @@ echo htmlspecialchars($employer_email);
 ?>"
                         readonly
                     >
-                    <div class="helper-text">This is auto generated from the logged-in employer account.</div>
+                    <div class="helper-text">From your About Company profile.</div>
                 </div>
 
                 <div class="form-group">
@@ -474,6 +474,16 @@ if (! empty($employer_branches)) {
                 </div>
 
                 <div class="form-group full-width">
+                    <label class="form-label">Target Course</label>
+                    <select class="form-select" name="target_course" required>
+                        <option value="">Select the most relevant course</option>
+                        @foreach(config('gradconn.courses') as $course)
+                            <option value="{{ $course }}" @selected(old('target_course') === $course)>{{ $course }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
                     <label class="form-label">Description</label>
                     <textarea
                         class="form-textarea"
@@ -483,6 +493,11 @@ if (! empty($employer_branches)) {
                     ><?php
 echo htmlspecialchars(old('description', request()->input('description')) ?? '');
 ?></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Required Competencies and Qualifications</label>
+                    <textarea class="form-textarea" name="requirements" placeholder="List the competencies, qualifications, and experience required" required>{{ old('requirements') }}</textarea>
                 </div>
 
                 <div class="form-group full-width">

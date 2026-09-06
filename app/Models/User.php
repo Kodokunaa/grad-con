@@ -62,16 +62,6 @@ class User extends Authenticatable
         return $this->hasMany(Event::class, 'posted_by');
     }
 
-    public function receivedOffers()
-    {
-        return $this->hasMany(JobOffer::class, 'alumni_id');
-    }
-
-    public function sentOffers()
-    {
-        return $this->hasMany(JobOffer::class, 'employer_id');
-    }
-
     public function interviews()
     {
         return $this->hasMany(Interview::class, 'alumni_id');

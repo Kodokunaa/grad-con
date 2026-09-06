@@ -629,7 +629,6 @@ echo number_format(count($batchOptions));
     <div class="filter-card">
         <div class="filter-header">
             <h4 class="filter-title">Filter Alumni</h4>
-            <div class="filter-note">Search box is also available in the table.</div>
         </div>
 
         <div class="filter-row">
@@ -673,7 +672,7 @@ foreach ($batchOptions as $batch) {
 
     <div class="table-card">
         <div class="table-header">
-            <h4 class="table-title">Registered Alumni</h4>
+            <h4 class="table-title">Alumni Directory</h4>
         </div>
 
         <table id="alumniTable" class="table table-striped nowrap w-100">

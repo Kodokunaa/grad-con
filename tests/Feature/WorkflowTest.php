@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Mail\AlumniAccountApprovedMail;
 use App\Mail\ApplicantResumeMail;
-use App\Mail\JobOfferMail;
 use App\Mail\JobOpportunityMail;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -150,7 +149,7 @@ final class WorkflowTest extends TestCase
         $this->user('alumni');
         foreach (['admin', 'employer'] as $role) {
             $user = $this->user($role);
-            $data = ['title' => 'Workflow '.$role.' job', 'location' => 'Calapan', 'job_type' => 'Full-time', 'start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d', strtotime('+30 days')), 'description' => 'Test job description', 'is_open' => 1, 'employer_company' => 'Test Company', 'email_address' => $user->email];
+            $data = ['title' => 'Workflow '.$role.' job', 'location' => 'Calapan', 'job_type' => 'Full-time', 'start_date' => date('Y-m-d'), 'end_date' => date('Y-m-d', strtotime('+30 days')), 'description' => 'Test job description', 'requirements' => 'Communication and technical competencies', 'target_course' => 'BSIS', 'is_open' => 1, 'employer_company' => 'Test Company', 'email_address' => $user->email];
             $this->actingAs($user)->post('/jobs', $data)->assertRedirect();
             $this->assertDatabaseHas('jobs', ['title' => $data['title'], 'posted_by' => $user->id, 'is_open' => 1]);
         }
@@ -341,6 +340,7 @@ final class WorkflowTest extends TestCase
         Mail::fake();
         $admin = $this->user('admin');
         $this->actingAs($admin)->post('/events', [
+            'category' => 'announcement',
             'title' => '𝗔𝗡𝗡𝗢𝗨𝗡𝗖𝗘𝗠𝗘𝗡𝗧: Institution-Wide Orientation',
             'content' => 'Orientation begins at 𝟴:𝟯𝟬 AM for all students.',
             'post_start_date' => '',
@@ -376,6 +376,7 @@ final class WorkflowTest extends TestCase
 
         try {
             $this->actingAs($admin)->from(route('admin.events_create'))->post(route('events.store'), [
+                'category' => 'event',
                 'title' => 'Event with unavailable storage',
                 'content' => 'The event must not be partially created.',
                 'post_start_date' => '',
@@ -414,6 +415,7 @@ final class WorkflowTest extends TestCase
         $officer = $this->user('alumni_officer');
 
         $this->actingAs($admin)->post(route('events.store'), [
+            'category' => 'event',
             'title' => 'Invalid scheduled event', 'content' => 'Test',
             'post_start_date' => '2026-10-10 10:00:00',
             'post_end_date' => '2026-10-09 10:00:00',
@@ -424,11 +426,13 @@ final class WorkflowTest extends TestCase
             'title' => 'Admin owned event', 'content' => 'Original', 'posted_by' => $admin->id,
         ]);
         $this->actingAs($officer)->put(route('events.update', $eventId), [
+            'category' => 'announcement',
             'title' => 'Unauthorized update', 'content' => 'Changed',
         ])->assertForbidden();
         $this->assertDatabaseHas('events', ['id' => $eventId, 'title' => 'Admin owned event']);
 
         $this->actingAs($admin)->put(route('events.update', $eventId), [
+            'category' => 'news',
             'title' => 'Updated event', 'content' => 'Changed',
             'post_start_date' => '', 'post_end_date' => '',
         ])->assertRedirect(route('admin.events_edit', ['id' => $eventId]));
@@ -547,48 +551,65 @@ final class WorkflowTest extends TestCase
         ]);
     }
 
-    public function test_offer_tokens_persist_between_requests_and_offers_expire(): void
-    {
-        Mail::fake();
-        $employer = $this->user('employer');
-        $alumni = $this->user('alumni');
-        $this->actingAs($employer)->get('/employer/alumni_list')->assertOk();
-        $this->post('/employer/offers', ['email_alumni_id' => $alumni->id, 'email_subject' => 'Test offer', 'email_message' => 'A test job offer.'])->assertRedirect();
-        $offer = DB::table('job_offers')->where('employer_id', $employer->id)->where('alumni_id', $alumni->id)->first();
-        $this->assertNotNull($offer);
-        Mail::assertQueued(JobOfferMail::class);
-        DB::table('job_offers')->where('id', $offer->id)->update(['expires_at' => date('Y-m-d H:i:s', strtotime('-1 day'))]);
-        $this->actingAs($alumni)->patch('/alumni/offers/'.$offer->offer_token.'/accept')->assertStatus(422);
-        $this->assertDatabaseHas('job_offers', ['id' => $offer->id, 'status' => 'sent']);
-    }
-
-    public function test_offer_email_links_confirm_before_recording_a_response(): void
-    {
-        Mail::fake();
-        $employer = $this->user('employer');
-        $alumni = $this->user('alumni');
-        $token = bin2hex(random_bytes(24));
-        DB::table('job_offers')->insert([
-            'employer_id' => $employer->id, 'alumni_id' => $alumni->id,
-            'offer_token' => $token, 'subject' => 'Test offer', 'message' => 'Test message',
-            'status' => 'sent', 'expires_at' => now()->addDay(),
-        ]);
-
-        $this->actingAs($alumni)
-            ->get(route('offers.response.confirm', ['token' => $token, 'action' => 'decline']))
-            ->assertOk()
-            ->assertSee('Confirm decline');
-        $this->assertDatabaseHas('job_offers', ['offer_token' => $token, 'status' => 'sent']);
-
-        $this->patch(route('offers.response.update', ['token' => $token, 'action' => 'decline']))
-            ->assertRedirect(route('alumni.job_offers'));
-        $this->assertDatabaseHas('job_offers', ['offer_token' => $token, 'status' => 'declined']);
-    }
-
     public function test_employment_history_uses_laravel_transactions(): void
     {
         $alumni = $this->user('alumni');
         $this->actingAs($alumni)->post('/profile/employment', ['add_employment' => 1, 'company_name' => 'Employment Test', 'job_title' => 'Developer', 'start_date' => '2026-01-01', 'end_date' => '', 'employment_type' => 'Full-time', 'location' => 'Calapan', 'job_description' => 'Software development'])->assertRedirect();
         $this->assertDatabaseHas('employment_history', ['user_id' => $alumni->id, 'company_name' => 'Employment Test']);
+    }
+
+    public function test_panelist_course_list_and_removed_offer_workflow_are_enforced(): void
+    {
+        $this->get(route('register'))->assertOk()->assertSee('BLIS');
+
+        $employer = $this->user('employer');
+        $this->actingAs($employer)->get('/employer/alumni_list')->assertRedirect(route('employer.posted_job'), 301);
+        $this->actingAs($employer)->get('/employer/job_offers')->assertRedirect(route('employer.applications'), 301);
+        $this->actingAs($employer)->post('/employer/offers', [])->assertNotFound();
+    }
+
+    public function test_community_post_category_is_saved_and_job_email_opt_out_is_respected(): void
+    {
+        Mail::fake();
+        $admin = $this->user('admin');
+        $subscribed = $this->user('alumni');
+        $unsubscribed = $this->user('alumni');
+        $unsubscribed->forceFill(['receive_update_notifications' => 0])->save();
+
+        $this->actingAs($admin)->post(route('events.store'), [
+            'category' => 'news', 'title' => 'Campus update', 'content' => 'A verified campus update.',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('events', ['title' => 'Campus update', 'category' => 'news']);
+
+        $this->actingAs($admin)->post(route('jobs.store'), [
+            'title' => 'Information Systems Analyst', 'description' => 'Maintain campus information systems.',
+            'requirements' => 'Systems analysis and communication', 'target_course' => 'BSIS',
+            'location' => 'Calapan City', 'job_type' => 'Full-time', 'start_date' => now()->toDateString(),
+            'end_date' => now()->addMonth()->toDateString(), 'is_open' => 1,
+        ])->assertRedirect();
+
+        Mail::assertQueued(JobOpportunityMail::class, fn (JobOpportunityMail $mail) => $mail->recipient->is($subscribed));
+        Mail::assertNotQueued(JobOpportunityMail::class, fn (JobOpportunityMail $mail) => $mail->recipient->is($unsubscribed));
+    }
+
+    public function test_employer_application_view_exposes_only_application_relevant_profile_data(): void
+    {
+        $employer = $this->user('employer');
+        $alumni = $this->user('alumni');
+        $alumni->forceFill(['address' => 'PRIVATE HOME ADDRESS', 'indigenous_tribe' => 'PRIVATE TRIBE', 'special_needs' => 'PRIVATE MEDICAL DATA', 'skills' => 'Laravel, communication'])->save();
+        $jobId = DB::table('jobs')->insertGetId([
+            'title' => 'Privacy Test Job', 'company' => 'Test Company', 'employer_company' => 'Test Company',
+            'description' => 'Test', 'posted_by' => $employer->id, 'employer_id' => $employer->id, 'is_open' => 1,
+        ]);
+        DB::table('applications')->insert([
+            'job_id' => $jobId, 'alumni_id' => $alumni->id, 'status' => 'pending',
+            'applicant_fullname' => $alumni->fullname, 'applicant_email' => $alumni->email,
+            'applicant_course' => $alumni->course, 'applicant_batch_year' => $alumni->batch_year,
+            'applicant_skills' => $alumni->skills,
+        ]);
+
+        $this->actingAs($employer)->get(route('employer.applications'))
+            ->assertOk()->assertSee('Laravel, communication')
+            ->assertDontSee('PRIVATE HOME ADDRESS')->assertDontSee('PRIVATE TRIBE')->assertDontSee('PRIVATE MEDICAL DATA');
     }
 }

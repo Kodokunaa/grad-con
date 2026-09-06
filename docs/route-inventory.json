@@ -1,302 +1,278 @@
 [
-    {
-        "source": "admin/admin_archive.php",
-        "controller": "AdminAdminArchiveController",
-        "view": "pages.admin.admin_archive",
-        "role": "admin"
-    },
-    {
-        "source": "admin/alumni_create.php",
-        "controller": "AdminAlumniCreateController",
-        "view": "pages.admin.alumni_create",
-        "role": "admin"
-    },
-    {
-        "source": "admin/alumni_edit.php",
-        "controller": "AdminAlumniEditController",
-        "view": "pages.admin.alumni_edit",
-        "role": "admin"
-    },
-    {
-        "source": "admin/alumni_list.php",
-        "controller": "AdminAlumniListController",
-        "view": "pages.admin.alumni_list",
-        "role": "admin"
-    },
-    {
-        "source": "admin/alumni_report.php",
-        "controller": "AdminAlumniReportController",
-        "view": "pages.admin.alumni_report",
-        "role": "admin"
-    },
-    {
-        "source": "admin/applications.php",
-        "controller": "AdminApplicationsController",
-        "view": "pages.admin.applications",
-        "role": "admin"
-    },
-    {
-        "source": "admin/create_alumni_officer.php",
-        "controller": "AdminCreateAlumniOfficerController",
-        "view": "pages.admin.create_alumni_officer",
-        "role": "admin"
-    },
-    {
-        "source": "admin/create_employer.php",
-        "controller": "AdminCreateEmployerController",
-        "view": "pages.admin.create_employer",
-        "role": "admin"
-    },
-    {
-        "source": "admin/dashboard.php",
-        "controller": "AdminDashboardController",
-        "view": "pages.admin.dashboard",
-        "role": "admin"
-    },
-    {
-        "source": "admin/events_create.php",
-        "controller": "AdminEventsCreateController",
-        "view": "pages.admin.events_create",
-        "role": "admin"
-    },
-    {
-        "source": "admin/events_delete.php",
-        "controller": "AdminEventsDeleteController",
-        "view": "pages.admin.events_delete",
-        "role": "admin"
-    },
-    {
-        "source": "admin/events_edit.php",
-        "controller": "AdminEventsEditController",
-        "view": "pages.admin.events_edit",
-        "role": "admin"
-    },
-    {
-        "source": "admin/events_list.php",
-        "controller": "AdminEventsListController",
-        "view": "pages.admin.events_list",
-        "role": "admin"
-    },
-    {
-        "source": "admin/forward_to_company.php",
-        "controller": "AdminForwardToCompanyController",
-        "view": "pages.admin.forward_to_company",
-        "role": "admin"
-    },
-    {
-        "source": "admin/graduates_list.php",
-        "controller": "AdminGraduatesListController",
-        "view": "pages.admin.graduates_list",
-        "role": "admin"
-    },
-    {
-        "source": "admin/graduates_report.php",
-        "controller": "AdminGraduatesReportController",
-        "view": "pages.admin.graduates_report",
-        "role": "admin"
-    },
-    {
-        "source": "admin/graduates_stats.php",
-        "controller": "AdminGraduatesStatsController",
-        "view": "pages.admin.graduates_stats",
-        "role": "admin"
-    },
-    {
-        "source": "admin/interview.php",
-        "controller": "AdminInterviewController",
-        "view": "pages.admin.interview",
-        "role": "admin"
-    },
-    {
-        "source": "admin/jobs_create.php",
-        "controller": "AdminJobsCreateController",
-        "view": "pages.admin.jobs_create",
-        "role": "admin"
-    },
-    {
-        "source": "admin/jobs_edit.php",
-        "controller": "AdminJobsEditController",
-        "view": "pages.admin.jobs_edit",
-        "role": "admin"
-    },
-    {
-        "source": "admin/jobs_list.php",
-        "controller": "AdminJobsListController",
-        "view": "pages.admin.jobs_list",
-        "role": "admin"
-    },
-    {
-        "source": "admin/jobs_notify.php",
-        "controller": "AdminJobsNotifyController",
-        "view": "pages.admin.jobs_notify",
-        "role": "admin"
-    },
-    {
-        "source": "admin/offers_history.php",
-        "controller": "AdminOffersHistoryController",
-        "view": "pages.admin.offers_history",
-        "role": "admin"
-    },
-    {
-        "source": "admin/pending_alumni.php",
-        "controller": "AdminPendingAlumniController",
-        "view": "pages.admin.pending_alumni",
-        "role": "admin"
-    },
-    {
-        "source": "admin/reports.php",
-        "controller": "AdminReportsController",
-        "view": "pages.admin.reports",
-        "role": "admin"
-    },
-    {
-        "source": "alumni/add_degree.php",
-        "controller": "AlumniAddDegreeController",
-        "view": "pages.alumni.add_degree",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/apply.php",
-        "controller": "AlumniApplyController",
-        "view": "pages.alumni.apply",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/change_password.php",
-        "controller": "AlumniChangePasswordController",
-        "view": "pages.alumni.change_password",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/edit_profile.php",
-        "controller": "AlumniEditProfileController",
-        "view": "pages.alumni.edit_profile",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/employment_history.php",
-        "controller": "AlumniEmploymentHistoryController",
-        "view": "pages.alumni.employment_history",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/feed.php",
-        "controller": "AlumniFeedController",
-        "view": "pages.alumni.feed",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/job_details.php",
-        "controller": "AlumniJobDetailsController",
-        "view": "pages.alumni.job_details",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/job_offers.php",
-        "controller": "AlumniJobOffersController",
-        "view": "pages.alumni.job_offers",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/jobs.php",
-        "controller": "AlumniJobsController",
-        "view": "pages.alumni.jobs",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni/my_applications.php",
-        "controller": "AlumniMyApplicationsController",
-        "view": "pages.alumni.my_applications",
-        "role": "alumni"
-    },
-    {
-        "source": "alumni_officer/alumni_list.php",
-        "controller": "AlumniOfficerAlumniListController",
-        "view": "pages.alumni_officer.alumni_list",
-        "role": "alumni_officer"
-    },
-    {
-        "source": "alumni_officer/archive.php",
-        "controller": "AlumniOfficerArchiveController",
-        "view": "pages.alumni_officer.archive",
-        "role": "alumni_officer"
-    },
-    {
-        "source": "alumni_officer/dashboard.php",
-        "controller": "AlumniOfficerDashboardController",
-        "view": "pages.alumni_officer.dashboard",
-        "role": "alumni_officer"
-    },
-    {
-        "source": "alumni_officer/events_create.php",
-        "controller": "AlumniOfficerEventsCreateController",
-        "view": "pages.alumni_officer.events_create",
-        "role": "alumni_officer"
-    },
-    {
-        "source": "alumni_officer/events_edit.php",
-        "controller": "AlumniOfficerEventsEditController",
-        "view": "pages.alumni_officer.events_edit",
-        "role": "alumni_officer"
-    },
-    {
-        "source": "alumni_officer/events_list.php",
-        "controller": "AlumniOfficerEventsListController",
-        "view": "pages.alumni_officer.events_list",
-        "role": "alumni_officer"
-    },
-    {
-        "source": "employer/alumni_list.php",
-        "controller": "EmployerAlumniListController",
-        "view": "pages.employer.alumni_list",
-        "role": "employer"
-    },
-    {
-        "source": "employer/applications.php",
-        "controller": "EmployerApplicationsController",
-        "view": "pages.employer.applications",
-        "role": "employer"
-    },
-    {
-        "source": "employer/dashboard.php",
-        "controller": "EmployerDashboardController",
-        "view": "pages.employer.dashboard",
-        "role": "employer"
-    },
-    {
-        "source": "employer/interview.php",
-        "controller": "EmployerInterviewController",
-        "view": "pages.employer.interview",
-        "role": "employer"
-    },
-    {
-        "source": "employer/job_offers.php",
-        "controller": "EmployerJobOffersController",
-        "view": "pages.employer.job_offers",
-        "role": "employer"
-    },
-    {
-        "source": "employer/post_job.php",
-        "controller": "EmployerPostJobController",
-        "view": "pages.employer.post_job",
-        "role": "employer"
-    },
-    {
-        "source": "employer/posted_job.php",
-        "controller": "EmployerPostedJobController",
-        "view": "pages.employer.posted_job",
-        "role": "employer"
-    },
-    {
-        "source": "profile.php",
-        "controller": "ProfileController",
-        "view": "pages.profile",
-        "role": "authenticated"
-    },
-    {
-        "source": "archive.php",
-        "controller": "ArchiveController",
-        "view": "pages.archive",
-        "role": "alumni_officer"
-    }
+  {
+    "source": "admin/admin_archive.php",
+    "controller": "AdminAdminArchiveController",
+    "view": "pages.admin.admin_archive",
+    "role": "admin"
+  },
+  {
+    "source": "admin/alumni_create.php",
+    "controller": "AdminAlumniCreateController",
+    "view": "pages.admin.alumni_create",
+    "role": "admin"
+  },
+  {
+    "source": "admin/alumni_edit.php",
+    "controller": "AdminAlumniEditController",
+    "view": "pages.admin.alumni_edit",
+    "role": "admin"
+  },
+  {
+    "source": "admin/alumni_list.php",
+    "controller": "AdminAlumniListController",
+    "view": "pages.admin.alumni_list",
+    "role": "admin"
+  },
+  {
+    "source": "admin/alumni_report.php",
+    "controller": "AdminAlumniReportController",
+    "view": "pages.admin.alumni_report",
+    "role": "admin"
+  },
+  {
+    "source": "admin/applications.php",
+    "controller": "AdminApplicationsController",
+    "view": "pages.admin.applications",
+    "role": "admin"
+  },
+  {
+    "source": "admin/create_alumni_officer.php",
+    "controller": "AdminCreateAlumniOfficerController",
+    "view": "pages.admin.create_alumni_officer",
+    "role": "admin"
+  },
+  {
+    "source": "admin/create_employer.php",
+    "controller": "AdminCreateEmployerController",
+    "view": "pages.admin.create_employer",
+    "role": "admin"
+  },
+  {
+    "source": "admin/dashboard.php",
+    "controller": "AdminDashboardController",
+    "view": "pages.admin.dashboard",
+    "role": "admin"
+  },
+  {
+    "source": "admin/events_create.php",
+    "controller": "AdminEventsCreateController",
+    "view": "pages.admin.events_create",
+    "role": "admin"
+  },
+  {
+    "source": "admin/events_delete.php",
+    "controller": "AdminEventsDeleteController",
+    "view": "pages.admin.events_delete",
+    "role": "admin"
+  },
+  {
+    "source": "admin/events_edit.php",
+    "controller": "AdminEventsEditController",
+    "view": "pages.admin.events_edit",
+    "role": "admin"
+  },
+  {
+    "source": "admin/events_list.php",
+    "controller": "AdminEventsListController",
+    "view": "pages.admin.events_list",
+    "role": "admin"
+  },
+  {
+    "source": "admin/forward_to_company.php",
+    "controller": "AdminForwardToCompanyController",
+    "view": "pages.admin.forward_to_company",
+    "role": "admin"
+  },
+  {
+    "source": "admin/graduates_list.php",
+    "controller": "AdminGraduatesListController",
+    "view": "pages.admin.graduates_list",
+    "role": "admin"
+  },
+  {
+    "source": "admin/graduates_report.php",
+    "controller": "AdminGraduatesReportController",
+    "view": "pages.admin.graduates_report",
+    "role": "admin"
+  },
+  {
+    "source": "admin/graduates_stats.php",
+    "controller": "AdminGraduatesStatsController",
+    "view": "pages.admin.graduates_stats",
+    "role": "admin"
+  },
+  {
+    "source": "admin/interview.php",
+    "controller": "AdminInterviewController",
+    "view": "pages.admin.interview",
+    "role": "admin"
+  },
+  {
+    "source": "admin/jobs_create.php",
+    "controller": "AdminJobsCreateController",
+    "view": "pages.admin.jobs_create",
+    "role": "admin"
+  },
+  {
+    "source": "admin/jobs_edit.php",
+    "controller": "AdminJobsEditController",
+    "view": "pages.admin.jobs_edit",
+    "role": "admin"
+  },
+  {
+    "source": "admin/jobs_list.php",
+    "controller": "AdminJobsListController",
+    "view": "pages.admin.jobs_list",
+    "role": "admin"
+  },
+  {
+    "source": "admin/jobs_notify.php",
+    "controller": "AdminJobsNotifyController",
+    "view": "pages.admin.jobs_notify",
+    "role": "admin"
+  },
+  {
+    "source": "admin/pending_alumni.php",
+    "controller": "AdminPendingAlumniController",
+    "view": "pages.admin.pending_alumni",
+    "role": "admin"
+  },
+  {
+    "source": "admin/reports.php",
+    "controller": "AdminReportsController",
+    "view": "pages.admin.reports",
+    "role": "admin"
+  },
+  {
+    "source": "alumni/add_degree.php",
+    "controller": "AlumniAddDegreeController",
+    "view": "pages.alumni.add_degree",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni/apply.php",
+    "controller": "AlumniApplyController",
+    "view": "pages.alumni.apply",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni/change_password.php",
+    "controller": "AlumniChangePasswordController",
+    "view": "pages.alumni.change_password",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni/edit_profile.php",
+    "controller": "AlumniEditProfileController",
+    "view": "pages.alumni.edit_profile",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni/employment_history.php",
+    "controller": "AlumniEmploymentHistoryController",
+    "view": "pages.alumni.employment_history",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni/feed.php",
+    "controller": "AlumniFeedController",
+    "view": "pages.alumni.feed",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni/job_details.php",
+    "controller": "AlumniJobDetailsController",
+    "view": "pages.alumni.job_details",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni/jobs.php",
+    "controller": "AlumniJobsController",
+    "view": "pages.alumni.jobs",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni/my_applications.php",
+    "controller": "AlumniMyApplicationsController",
+    "view": "pages.alumni.my_applications",
+    "role": "alumni"
+  },
+  {
+    "source": "alumni_officer/alumni_list.php",
+    "controller": "AlumniOfficerAlumniListController",
+    "view": "pages.alumni_officer.alumni_list",
+    "role": "alumni_officer"
+  },
+  {
+    "source": "alumni_officer/archive.php",
+    "controller": "AlumniOfficerArchiveController",
+    "view": "pages.alumni_officer.archive",
+    "role": "alumni_officer"
+  },
+  {
+    "source": "alumni_officer/dashboard.php",
+    "controller": "AlumniOfficerDashboardController",
+    "view": "pages.alumni_officer.dashboard",
+    "role": "alumni_officer"
+  },
+  {
+    "source": "alumni_officer/events_create.php",
+    "controller": "AlumniOfficerEventsCreateController",
+    "view": "pages.alumni_officer.events_create",
+    "role": "alumni_officer"
+  },
+  {
+    "source": "alumni_officer/events_edit.php",
+    "controller": "AlumniOfficerEventsEditController",
+    "view": "pages.alumni_officer.events_edit",
+    "role": "alumni_officer"
+  },
+  {
+    "source": "alumni_officer/events_list.php",
+    "controller": "AlumniOfficerEventsListController",
+    "view": "pages.alumni_officer.events_list",
+    "role": "alumni_officer"
+  },
+  {
+    "source": "employer/applications.php",
+    "controller": "EmployerApplicationsController",
+    "view": "pages.employer.applications",
+    "role": "employer"
+  },
+  {
+    "source": "employer/dashboard.php",
+    "controller": "EmployerDashboardController",
+    "view": "pages.employer.dashboard",
+    "role": "employer"
+  },
+  {
+    "source": "employer/interview.php",
+    "controller": "EmployerInterviewController",
+    "view": "pages.employer.interview",
+    "role": "employer"
+  },
+  {
+    "source": "employer/post_job.php",
+    "controller": "EmployerPostJobController",
+    "view": "pages.employer.post_job",
+    "role": "employer"
+  },
+  {
+    "source": "employer/posted_job.php",
+    "controller": "EmployerPostedJobController",
+    "view": "pages.employer.posted_job",
+    "role": "employer"
+  },
+  {
+    "source": "profile.php",
+    "controller": "ProfileController",
+    "view": "pages.profile",
+    "role": "authenticated"
+  },
+  {
+    "source": "archive.php",
+    "controller": "ArchiveController",
+    "view": "pages.archive",
+    "role": "alumni_officer"
+  }
 ]

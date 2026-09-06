@@ -285,15 +285,6 @@ echo e($application['employer_company'] ?: $application['company']);
             <input type="hidden" name="application_id" value="<?php
 echo (int) $application_id;
 ?>">
-            <?php
-if ($offer_id > 0) {
-    ?>
-                <input type="hidden" name="offer_id" value="<?php
-    echo (int) $offer_id;
-    ?>">
-            <?php
-}
-?>
 
             <div class="form-group">
                 <label>Interview Date</label>

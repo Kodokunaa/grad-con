@@ -527,7 +527,7 @@ final class MigrationTest extends TestCase
             'admin' => ['/admin/dashboard', 'Admin Panel', 'Pending Accounts'],
             'alumni' => ['/alumni/feed', 'Alumni Panel', 'Community Feed'],
             'employer' => ['/employer/dashboard', 'Employer Panel', 'Posted Jobs'],
-            'alumni_officer' => ['/alumni_officer/dashboard', 'Alumni Officer Panel', 'Events Feed'],
+            'alumni_officer' => ['/alumni_officer/dashboard', 'Alumni Officer Panel', 'Community Posts'],
         ];
 
         foreach ($pages as $role => [$path, $panel, $link]) {

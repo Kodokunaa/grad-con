@@ -7,7 +7,6 @@ use App\Models\Event;
 use App\Models\Interview;
 use App\Models\Job;
 use App\Models\JobApplication;
-use App\Models\JobOffer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -40,23 +39,16 @@ final class AuthorizationTest extends TestCase
         $this->assertFalse(Gate::forUser($other)->allows('view', $application));
     }
 
-    public function test_offer_event_and_private_file_policies_enforce_ownership(): void
+    public function test_event_and_private_file_policies_enforce_ownership(): void
     {
         $admin = $this->user('admin');
-        $employer = $this->user('employer');
-        $otherEmployer = $this->user('employer');
         $alumni = $this->user('alumni');
         $otherAlumni = $this->user('alumni');
         $officer = $this->user('alumni_officer');
         $event = Event::forceCreate(['title' => 'Policy event', 'content' => 'Test', 'posted_by' => $officer->id]);
-        $offer = JobOffer::forceCreate(['employer_id' => $employer->id, 'alumni_id' => $alumni->id, 'offer_token' => uniqid(), 'subject' => 'Offer', 'message' => 'Message', 'status' => 'sent', 'expires_at' => now()->addDay()]);
 
         $this->assertTrue(Gate::forUser($officer)->allows('update', $event));
         $this->assertTrue(Gate::forUser($admin)->allows('delete', $event));
-        $this->assertTrue(Gate::forUser($employer)->allows('update', $offer));
-        $this->assertFalse(Gate::forUser($otherEmployer)->allows('update', $offer));
-        $this->assertTrue(Gate::forUser($alumni)->allows('respond', $offer));
-        $this->assertFalse(Gate::forUser($otherAlumni)->allows('respond', $offer));
         $this->assertTrue(Gate::forUser($alumni)->allows('viewPrivateFile', $alumni));
         $this->assertFalse(Gate::forUser($otherAlumni)->allows('viewPrivateFile', $alumni));
     }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Pages;
 use App\Http\Controllers\PageController;
 use App\Models\Job;
 use App\Models\JobApplication;
-use App\Models\JobOffer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -25,19 +24,12 @@ final class EmployerDashboardController extends PageController
             $acceptedCount = 0;
             $hiredCount = 0;
             $rejectedCount = 0;
-            $offersCount = 0;
-            $offersAcceptedCount = 0;
-            $offersDeclinedCount = 0;
-            $offersPendingCount = 0;
             $latest = [];
-            $latestOffers = [];
             $snapshot = Cache::remember('dashboard.employer.'.$eid.'.v1', config('performance.dashboard_cache_seconds'), function () use ($eid) {
                 $jobs = Job::query()->where('employer_id', $eid);
                 $applications = JobApplication::query()->whereHas('job', fn ($query) => $query->where('employer_id', $eid));
-                $offers = JobOffer::query()->where('employer_id', $eid);
                 $jobStats = (clone $jobs)->selectRaw('COUNT(*) total, SUM(CASE WHEN is_open = 1 AND (start_date IS NULL OR start_date <= ?) AND (end_date IS NULL OR end_date >= ?) THEN 1 ELSE 0 END) open, SUM(CASE WHEN is_open = 0 OR end_date < ? THEN 1 ELSE 0 END) closed', [today(), today(), today()])->first()->toArray();
                 $applicationStats = (clone $applications)->selectRaw("COUNT(*) total, SUM(CASE WHEN applications.status = 'pending' THEN 1 ELSE 0 END) pending, SUM(CASE WHEN applications.status IN ('interview', 'for interview') THEN 1 ELSE 0 END) interviews, SUM(CASE WHEN applications.status = 'accepted' THEN 1 ELSE 0 END) accepted, SUM(CASE WHEN applications.status = 'hired' THEN 1 ELSE 0 END) hired, SUM(CASE WHEN applications.status = 'rejected' THEN 1 ELSE 0 END) rejected")->first()->toArray();
-                $offerStats = (clone $offers)->selectRaw("COUNT(*) total, SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END) accepted, SUM(CASE WHEN status = 'declined' THEN 1 ELSE 0 END) declined, SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) pending")->first()->toArray();
                 $latest = (clone $applications)->with(['alumni', 'job'])->latest('id')->limit(8)->get()->map(function ($application) {
                     $row = $application->toArray();
                     $row['fullname'] = $application->alumni?->fullname;
@@ -47,19 +39,11 @@ final class EmployerDashboardController extends PageController
 
                     return $row;
                 })->all();
-                $latestOffers = (clone $offers)->with('alumni')->latest('id')->limit(5)->get()->map(function ($offer) {
-                    $row = $offer->toArray();
-                    $row['fullname'] = $offer->alumni?->fullname;
-                    $row['email'] = $offer->alumni?->email;
 
-                    return $row;
-                })->all();
-
-                return compact('jobStats', 'applicationStats', 'offerStats', 'latest', 'latestOffers');
+                return compact('jobStats', 'applicationStats', 'latest');
             });
             $jobStats = (object) $snapshot['jobStats'];
             $applicationStats = (object) $snapshot['applicationStats'];
-            $offerStats = (object) $snapshot['offerStats'];
             $jobsCount = (int) $jobStats->total;
             $openJobsCount = (int) $jobStats->open;
             $closedJobsCount = (int) $jobStats->closed;
@@ -69,14 +53,7 @@ final class EmployerDashboardController extends PageController
             $acceptedCount = (int) $applicationStats->accepted;
             $hiredCount = (int) $applicationStats->hired;
             $rejectedCount = (int) $applicationStats->rejected;
-            $offersCount = (int) $offerStats->total;
-            $offersAcceptedCount = (int) $offerStats->accepted;
-            $offersDeclinedCount = (int) $offerStats->declined;
-            $offersPendingCount = (int) $offerStats->pending;
             $latest = $snapshot['latest'];
-            $latestOffers = $snapshot['latestOffers'];
-            echo view('partials.header', \get_defined_vars());
-            echo view('partials.employer_sidebar', \get_defined_vars());
 
             return $this->pageView('pages.employer.dashboard', get_defined_vars());
         });

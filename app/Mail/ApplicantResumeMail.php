@@ -25,7 +25,7 @@ final class ApplicantResumeMail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: 'Applicant Resume - '.$this->application->alumni->fullname);
+        return new Envelope(subject: 'Application Letter - '.$this->application->alumni->fullname);
     }
 
     public function content(): Content

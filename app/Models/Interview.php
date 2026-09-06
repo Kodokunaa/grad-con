@@ -20,11 +20,6 @@ final class Interview extends Model
         return $this->belongsTo(JobApplication::class, 'application_id');
     }
 
-    public function offer()
-    {
-        return $this->belongsTo(JobOffer::class, 'offer_id');
-    }
-
     public function employer()
     {
         return $this->belongsTo(User::class, 'employer_id');

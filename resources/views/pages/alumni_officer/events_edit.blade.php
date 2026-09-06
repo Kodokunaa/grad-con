@@ -310,6 +310,7 @@ if ($error) {
         <form method="POST" action="{{ route('events.update', $id) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+            <div class="form-group"><label class="form-label">Post Type</label><select name="category" class="form-control-custom" required>@foreach(['announcement'=>'Announcement','news'=>'News','event'=>'Event'] as $value=>$label)<option value="{{ $value }}" @selected(old('category', $event['category'] ?? 'announcement') === $value)>{{ $label }}</option>@endforeach</select></div>
             <div class="form-group">
                 <label class="form-label">Title</label>
                 <input type="text" name="title" class="form-control-custom" value="<?php

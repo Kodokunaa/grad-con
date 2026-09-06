@@ -292,6 +292,25 @@ if ($error) {
                 </div>
 
                 <div class="col-md-6">
+                    <label class="form-label">Posting Start Date</label>
+                    <input type="date" name="start_date" class="form-control-custom" value="{{ old('start_date', $job['start_date'] ?? '') }}" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Application Deadline</label>
+                    <input type="date" name="end_date" class="form-control-custom" value="{{ old('end_date', $job['end_date'] ?? '') }}" required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Target Course</label>
+                    <select name="target_course" class="form-select-custom" required>
+                        @foreach(config('gradconn.courses') as $course)
+                            <option value="{{ $course }}" @selected(old('target_course', $job['target_course'] ?? '') === $course)>{{ $course }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-6">
                     <label class="form-label">Location</label>
                     <input
                         type="text"
@@ -326,7 +345,7 @@ if ($error) {
                     ><?php
         echo htmlspecialchars($job['requirements'] ?? '');
         ?></textarea>
-                    <div class="helper-text">Add the qualifications, skills, or experience needed for this job.</div>
+                    <div class="helper-text">Add the qualifications, professional competencies, and experience needed for this job.</div>
                 </div>
 
                 <div class="col-md-6">

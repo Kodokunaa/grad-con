@@ -240,56 +240,6 @@ final class ViewFormatter
         return 'N/A';
     }
 
-    // ==========================
-    // Optional email sender
-    // ==========================
-
-    public static function admin_offers_history_format_activity_date(string $value): string
-    {
-        if (trim($value) === '') {
-            return '';
-        }
-        $timestamp = strtotime($value);
-        if ($timestamp === false) {
-            return e($value);
-        }
-
-        return date('M j, Y g:i A', $timestamp);
-    }
-
-    public static function admin_offers_history_render_activity_details(array $log): string
-    {
-        if (($log['action'] ?? '') === 'SEARCH_ALUMNI') {
-            $filters = ['Course' => $log['course_filter'] ?? 'All courses', 'Batch year' => $log['batch_filter'] ?? 'All years', 'Skills' => $log['skill_search'] ?? 'Any skills', 'Results' => (string) ($log['result_count'] ?? '0')];
-        } else {
-            $details = (string) ($log['details'] ?? '');
-            $status = (string) ($log['offer_status'] ?? '');
-            if ($status !== '') {
-                $statusLabels = ['sent' => 'Pending response', 'accepted' => 'Accepted', 'declined' => 'Declined', 'expired' => 'Expired', 'done' => 'Completed'];
-                $statusText = $statusLabels[$status] ?? ucfirst($status);
-                $statusDate = $status === 'accepted' ? $log['accepted_at'] ?? '' : ($status === 'declined' ? $log['declined_at'] ?? '' : '');
-                if (! empty($statusDate)) {
-                    $statusText .= ' on '.self::admin_offers_history_format_activity_date((string) $statusDate);
-                }
-                $filters['Offer status'] = $statusText;
-            }
-            foreach (['Subject', 'Message', 'Alignment'] as $label) {
-                if (preg_match('/(?:^|\n)'.preg_quote($label, '/').':\s*(.*?)(?=\n(?:Subject|Message|Alignment):|$)/s', $details, $matches)) {
-                    $filters[$label] = trim($matches[1]);
-                }
-            }
-        }
-        if (empty($filters)) {
-            return '&mdash;';
-        }
-        $html = '<div class="detail-list">';
-        foreach ($filters as $label => $value) {
-            $html .= '<div class="detail-item"><span class="detail-label">'.e($label).'</span><span class="detail-value">'.nl2br(e($value)).'</span></div>';
-        }
-
-        return $html.'</div>';
-    }
-
     // Helper: Add security log
 
     public static function alumni_employment_history_format_employment_date(?string $date): string
@@ -819,19 +769,6 @@ final class ViewFormatter
         $last = count($parts) > 1 ? strtoupper(substr($parts[count($parts) - 1], 0, 1)) : '';
 
         return e($first.$last);
-    }
-
-    public static function employer_dashboard_offerStatusBadge($status)
-    {
-        $status = strtolower(trim((string) $status));
-        if ($status === 'accepted') {
-            return '<span class="status-badge status-accepted">Accepted</span>';
-        }
-        if ($status === 'declined') {
-            return '<span class="status-badge status-rejected">Declined</span>';
-        }
-
-        return '<span class="status-badge status-pending">Pending</span>';
     }
 
     public static function employer_dashboard_statusBadge($status)

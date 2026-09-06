@@ -691,7 +691,7 @@
     <div class="page-shell">
     <div class="page-header">
         <div>
-            <h3 class="page-title">My Profile</h3>
+            <h3 class="page-title">{{ $role === 'employer' ? 'About Company' : 'My Profile' }}</h3>
             <p class="page-subtitle">Manage your personal information, certificates, and account security in one place.</p>
         </div>
         <span class="role-badge-custom"><?php
@@ -704,7 +704,7 @@ echo htmlspecialchars($role);
             <button class="nav-link <?php
         echo $active_tab === 'profile' ? 'active' : '';
         ?>" data-bs-toggle="tab" data-bs-target="#tabProfile" type="button">
-                Profile
+                {{ $role === 'employer' ? 'Company' : 'Profile' }}
             </button>
         </li>
         <li class="nav-item">
@@ -863,7 +863,7 @@ if ($role === 'alumni') {
                 </div>
 
                 <div class="section-block wide-section">
-                        <div class="section-title">Edit Profile</div>
+                        <div class="section-title">{{ $role === 'employer' ? 'About Company' : 'Edit Profile' }}</div>
 
                         <?php
 if ($profile_msg) {

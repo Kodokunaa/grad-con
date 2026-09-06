@@ -24,6 +24,11 @@
                     $selected = $post['user_reaction'] ?: 'like';
                     $selectedInfo = \App\Services\SocialFeedService::REACTIONS[$selected];
                     $posterAvatar = $avatar($post['poster_photo'] ?? null);
+                    $category = in_array($post['category'] ?? '', ['announcement','news','event'], true) ? $post['category'] : 'announcement';
+                    $categoryIcon = ['announcement' => 'fa-bullhorn', 'news' => 'fa-newspaper', 'event' => 'fa-calendar-day'][$category];
+                    preg_match('~https?://[^\\s<]+~i', (string) ($post['content'] ?? ''), $postLinks);
+                    $postLink = isset($postLinks[0]) ? rtrim($postLinks[0], '.,);]') : null;
+                    $postLinkHost = $postLink ? parse_url($postLink, PHP_URL_HOST) : null;
                 @endphp
                 <article class="feed-post" id="post-{{ $postKey }}" data-post="{{ $postKey }}">
                     <header class="feed-post__header">
@@ -31,7 +36,7 @@
                             <div class="feed-avatar">@if($posterAvatar)<img src="{{ $posterAvatar }}" alt="{{ $post['poster'] }} profile photo">@else{{ $initials($post['poster']) }}@endif</div>
                             <div><strong>{{ $post['poster'] }}</strong><time datetime="{{ $post['created_at'] }}">{{ optional(\Carbon\Carbon::parse($post['created_at']))->format('F j, Y \\a\\t g:i A') }}</time></div>
                         </div>
-                        <span class="feed-type"><i class="fas fa-calendar-day"></i> Event</span>
+                        <span class="feed-type"><i class="fas {{ $categoryIcon }}"></i> {{ ucfirst($category) }}</span>
                     </header>
 
                     <div class="feed-post__body">
@@ -43,6 +48,13 @@
                             </div>
                         @endif
                         <p>{!! nl2br(e($post['content'] ?? '')) !!}</p>
+                        @if($postLink && $postLinkHost)
+                            <a class="feed-link-preview" href="{{ $postLink }}" target="_blank" rel="noopener noreferrer">
+                                <span><i class="fas fa-link"></i> Shared website</span>
+                                <strong>{{ $postLinkHost }}</strong>
+                                <small>{{ \Illuminate\Support\Str::limit($postLink, 95) }}</small>
+                            </a>
+                        @endif
                     </div>
 
                     @if(!empty($post['image']))

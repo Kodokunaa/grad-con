@@ -320,8 +320,8 @@
         <section class="hero-card">
             <div class="hero-content">
                 <div>
-                    <h1 class="hero-title">Post an Event</h1>
-                    <p class="hero-subtitle">Create polished event announcements with scheduled visibility for alumni users.</p>
+                    <h1 class="hero-title">Create Community Post</h1>
+                    <p class="hero-subtitle">Create polished community posts with scheduled visibility for alumni users.</p>
                 </div>
                 <div class="hero-icon">📅</div>
             </div>
@@ -359,6 +359,7 @@ if ($error) {
             <div class="form-body">
                 <form method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
 @csrf
+                    <div class="form-group"><label class="form-label">Post Type</label><select name="category" class="form-control-custom" required><option value="announcement" @selected(old('category','announcement') === 'announcement')>Announcement</option><option value="news" @selected(old('category') === 'news')>News</option><option value="event" @selected(old('category') === 'event')>Event</option></select></div>
                     <div class="form-group">
                         <label class="form-label">Title</label>
                         <input
@@ -379,7 +380,7 @@ if ($error) {
                             name="content"
                             rows="6"
                             class="form-textarea-custom"
-                            placeholder="Write the event announcement, details, requirements, or reminders..."
+                            placeholder="Write the community post, details, requirements, or reminders..."
                             required
                         ><?php
         echo e(old('content', request()->input('content')) ?? '');
@@ -433,7 +434,7 @@ if ($error) {
                     </div>
 
                     <div class="actions">
-                        <button type="submit" class="btn-orange">📤 Post Event</button>
+                        <button type="submit" class="btn-orange">📤 Publish Post</button>
                         <a class="btn-outline-custom" href="<?php
         echo \url('');
         ?>/admin/events_list">← View Posts</a>

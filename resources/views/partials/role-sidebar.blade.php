@@ -9,7 +9,6 @@
             ['Overview', [
                 ['admin.dashboard', 'fa-chart-line', 'Dashboard'],
                 ['admin.graduates_stats', 'fa-chart-pie', 'Graduate Statistics'],
-                ['admin.offers_history', 'fa-handshake', 'Offers History'],
             ]],
             ['Accounts', [
                 ['admin.alumni_create', 'fa-user-plus', 'Create Alumni'],
@@ -22,8 +21,8 @@
                 ['admin.jobs_list', 'fa-file-signature', 'Jobs & Applications'],
             ]],
             ['Events', [
-                ['admin.events_create', 'fa-calendar-plus', 'Post Event'],
-                ['admin.events_list', 'fa-calendar-days', 'Events Feed'],
+                ['admin.events_create', 'fa-calendar-plus', 'Create Post'],
+                ['admin.events_list', 'fa-calendar-days', 'Community Posts'],
                 ['admin.admin_archive', 'fa-box-archive', 'Archive'],
             ]],
             ['Account', [
@@ -37,7 +36,6 @@
             ]],
             ['Career', [
                 ['alumni.jobs', 'fa-briefcase', 'Browse Jobs'],
-                ['alumni.job_offers', 'fa-gift', 'Job Offers'],
                 ['alumni.my_applications', 'fa-file-signature', 'My Applications'],
                 ['alumni.employment_history', 'fa-clock-rotate-left', 'Employment History'],
             ]],
@@ -52,7 +50,7 @@
                 ['alumni_officer.alumni_list', 'fa-users', 'Alumni List'],
             ]],
             ['Events', [
-                ['alumni_officer.events_list', 'fa-calendar-days', 'Events Feed'],
+                ['alumni_officer.events_list', 'fa-calendar-days', 'Community Posts'],
                 ['alumni_officer.events_create', 'fa-calendar-plus', 'Create Event'],
                 ['alumni_officer.archive', 'fa-box-archive', 'Archive'],
             ]],
@@ -63,13 +61,11 @@
         'employer' => [
             ['Overview', [
                 ['employer.dashboard', 'fa-chart-line', 'Dashboard'],
-                ['employer.alumni_list', 'fa-user-graduate', 'Alumni Directory'],
             ]],
             ['Recruitment', [
                 ['employer.post_job', 'fa-plus-circle', 'Create Job'],
                 ['employer.posted_job', 'fa-briefcase', 'Posted Jobs'],
                 ['employer.applications', 'fa-file-signature', 'Applications'],
-                ['employer.job_offers', 'fa-gift', 'Job Offers'],
             ]],
             ['Account', [
                 ['profile', 'fa-user-circle', 'My Profile'],

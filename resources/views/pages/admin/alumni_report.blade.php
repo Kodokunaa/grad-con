@@ -254,6 +254,14 @@ echo \url('');
     <div class="filter-card no-print">
         <form method="GET" class="filter-form">
             <div class="form-group">
+                <label for="report_type">Report Type</label>
+                <select name="report_type" id="report_type" class="form-control">
+                    @foreach(['all'=>'All Alumni','employed'=>'Employed Alumni','unemployed'=>'Unemployed Alumni','hired'=>'Hired Through GradConn'] as $value=>$label)
+                        <option value="{{ $value }}" @selected($reportType === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="course">Course</label>
                 <select name="course" id="course" class="form-control">
                     <option value="">All Courses</option>
@@ -316,7 +324,7 @@ echo $totalAlumni;
 
     <div class="report-card">
         <div class="report-header">
-            <h2>Alumni Masterlist Report</h2>
+            <h2>{{ $reportTitle }} Report</h2>
             <p>Date Generated: <?php 
 echo date("F d, Y h:i A");
 ?></p>

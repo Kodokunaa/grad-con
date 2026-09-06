@@ -37,6 +37,6 @@ final class StoreEventController extends Controller
 
         $route = $request->user()->role === 'admin' ? 'admin.events_create' : 'alumni_officer.events_create';
 
-        return to_route($route)->with('status', 'Event posted successfully.');
+        return to_route($route)->with('status', 'Community post published successfully.');
     }
 }
